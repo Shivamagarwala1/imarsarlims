@@ -1,0 +1,8 @@
+﻿namespace iMARSARLIMS.Request_Model
+{
+    public class LoginRequestModel
+    {
+        public string userName { get; set; }
+        public string password { get; set; }
+    }
+}
