@@ -71,6 +71,7 @@ namespace iMARSARLIMS.Services
             if (extension != ".pdf" && extension != ".jpg" && extension != ".jpeg" && extension != ".png")
             {
                 return "0#No valid file extension found. Valid file extensions are (.jpg, .pdf, .png)";
+                // testing git 
             }
 
             try
