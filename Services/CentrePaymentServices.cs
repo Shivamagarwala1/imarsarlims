@@ -72,6 +72,7 @@ namespace iMARSARLIMS.Services
             {
                 return "0#No valid file extension found. Valid file extensions are (.jpg, .pdf, .png)";
                 // testing git 
+                // testing git 1 
             }
 
             try
