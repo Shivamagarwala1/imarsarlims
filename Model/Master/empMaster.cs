@@ -16,12 +16,10 @@ namespace iMARSARLIMS.Model.Master
         public string fName { get; set; }
         [Required, MaxLength(50)]
         public string lName { get; set; }
-        [Required, MaxLength(100)]
+        [ MaxLength(100)]
         public string address { get; set; }
-        [Required]
         public int pinCode { get; set; }
         [Required, MaxLength(50)]
-      //  [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Invalid email address.")]
         public string email { get; set; }
         [Required,MaxLength(10)]
         public string mobileNo { get; set; }
@@ -32,7 +30,7 @@ namespace iMARSARLIMS.Model.Master
         public DateTime dob { get; set; }
         [MaxLength(50)]
         public string? qualification { get; set; }
-        [Required, MaxLength(5)]
+        [ MaxLength(5)]
         public string bloodGroup { get; set; }
         [Required]
         public int designationId { get; set; }
@@ -40,17 +38,11 @@ namespace iMARSARLIMS.Model.Master
         public string userName { get; set; }
         [Required, MaxLength(20)]
         public string password { get; set; }
-        [Required]
         public int zone { get; set; }
-        [Required]
         public int state { get; set; }
-        [Required]
         public int city { get; set; }
-        [Required]
         public int area { get; set; }
-        [Required]
         public int defaultcentre { get; set; }
-        [Required]
         public int pro { get; set; }
         [Required]
         public int defaultrole { get; set; }
@@ -64,6 +56,10 @@ namespace iMARSARLIMS.Model.Master
         public byte isDiscountAppRights { get; set; }
         public byte isPwdchange { get; set; }
         public byte isemailotp { get; set; }
+        public string fromIP { get; set; }
+        public string toIP { get; set; }
+        public byte isdeviceAuthentication { get; set; }
+
         [MaxLength(20)]
         public string? adminPassword { get; set; }
 

@@ -11,8 +11,8 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    [Migration("20241130110621_asadfdaf")]
-    partial class asadfdaf
+    [Migration("20241202110301_asdfghj")]
+    partial class asdfghj
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1489,8 +1489,12 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("fileName")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("fromIP")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
@@ -1502,6 +1506,9 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isSalesTeamMember")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte>("isdeviceAuthentication")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isemailotp")
@@ -1547,6 +1554,10 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
+
+                    b.Property<string>("toIP")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");

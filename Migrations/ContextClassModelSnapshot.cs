@@ -1486,8 +1486,12 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("fileName")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("fromIP")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
@@ -1499,6 +1503,9 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isSalesTeamMember")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte>("isdeviceAuthentication")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isemailotp")
@@ -1544,6 +1551,10 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
+
+                    b.Property<string>("toIP")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");

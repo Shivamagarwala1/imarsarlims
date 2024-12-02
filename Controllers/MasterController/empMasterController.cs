@@ -65,6 +65,19 @@ namespace iMARSARLIMS.Controllers.MasterController
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("DownloadImage")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> DownloadImage(int emplpyeeid)
+        {
+            try
+            {
+                var result = await _empMasterServices.DownloadImage(emplpyeeid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     }
 }

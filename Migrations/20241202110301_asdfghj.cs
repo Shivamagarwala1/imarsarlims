@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class asadfdaf : Migration
+    public partial class asdfghj : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -689,7 +689,7 @@ namespace iMARSARLIMS.Migrations
                     pro = table.Column<int>(type: "int", nullable: false),
                     defaultrole = table.Column<int>(type: "int", nullable: false),
                     rate = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    fileName = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true),
+                    fileName = table.Column<string>(type: "longtext", nullable: false),
                     autoCreated = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     centreId = table.Column<int>(type: "int", nullable: false),
                     allowDueReport = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -698,6 +698,9 @@ namespace iMARSARLIMS.Migrations
                     isDiscountAppRights = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isPwdchange = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isemailotp = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    fromIP = table.Column<string>(type: "longtext", nullable: false),
+                    toIP = table.Column<string>(type: "longtext", nullable: false),
+                    isdeviceAuthentication = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     adminPassword = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),

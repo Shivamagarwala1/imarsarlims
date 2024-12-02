@@ -1,20 +1,24 @@
-﻿using iMARSARLIMS.Controllers;
+﻿using Google.Protobuf;
+using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace iMARSARLIMS.Services
 {
     public class empMasterServices : IempMasterServices
     {
         private readonly ContextClass db;
-        public empMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger)
+        private readonly IConfiguration _configuration;
+        public empMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger, IConfiguration configuration)
         {
 
             db = context;
+            this._configuration = configuration;
         }
         async Task<ActionResult<List<LoginResponseModel>>> IempMasterServices.EmpLogin(LoginRequestModel loginRequestModel)
         {
@@ -48,8 +52,23 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
+                    string image = _configuration["FileBase64:profilePic"];
+                    var filename = "";
                     if (empmaster.id == 0)
                     {
+                        if (empmaster.fileName != "")
+                        {
+                            filename = await Uploademployeeimage(empmaster.fileName);
+                            if (filename == "Invalid image data." || filename == "Error uploading image")
+                            {
+                                return new ServiceStatusResponseModel
+                                {
+                                    Success = false,
+                                    Message = filename
+                                };
+                            }
+                        }
+                        empmaster.fileName = filename;
                         var EmployeeRegData = CreateEmployee(empmaster);
                         var EmployeeData = db.empMaster.Add(EmployeeRegData);
                         await db.SaveChangesAsync();
@@ -57,7 +76,8 @@ namespace iMARSARLIMS.Services
                         await SaveEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
-                        var result = db.empMaster.Where(e=> e.id== employeeId).ToList();
+                        var result = db.empMaster.Where(e => e.id == employeeId).ToList();
+                        result.ForEach(e => e.fileName = image);
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -78,6 +98,7 @@ namespace iMARSARLIMS.Services
                         await UpdateEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.id == employeeId).ToList();
+                        result.ForEach(e => e.fileName = image);
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -141,7 +162,10 @@ namespace iMARSARLIMS.Services
                 adminPassword = empmaster.adminPassword,
                 isActive = empmaster.isActive,
                 createdById = empmaster.createdById,
-                createdDateTime = empmaster.createdDateTime
+                createdDateTime = empmaster.createdDateTime,
+                fromIP = empmaster.fromIP,
+                toIP = empmaster.toIP,
+                isdeviceAuthentication = empmaster.isdeviceAuthentication
 
             };
         }
@@ -262,6 +286,9 @@ namespace iMARSARLIMS.Services
             EmpMaster.isActive = empmaster.isActive;
             EmpMaster.updateById = empmaster.updateById;
             EmpMaster.updateDateTime = empmaster.updateDateTime;
+            EmpMaster.fromIP = empmaster.fromIP;
+            EmpMaster.toIP = empmaster.toIP;
+            EmpMaster.isdeviceAuthentication = empmaster.isdeviceAuthentication;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)
@@ -315,7 +342,7 @@ namespace iMARSARLIMS.Services
                         UpdateEmprole(empRoleData, emprole, employeeId);
                         var EmpRoleData = db.empRoleAccess.Update(empRoleData);
                         await db.SaveChangesAsync();
-                     //   var id = empRoleData.Entity.id;
+                        //   var id = empRoleData.Entity.id;
                     }
                 }
                 else
@@ -342,8 +369,57 @@ namespace iMARSARLIMS.Services
             EmpRoleAccess.updateDateTime = emproleaccess.updateDateTime;
         }
 
-      async Task<ServiceStatusResponseModel> IempMasterServices.UploadDocument(IFormFile file)
-      {
+        private async Task<string> Uploademployeeimage(string fileBase64data)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fileBase64data))
+                {
+                    return "Invalid image data.";
+                }
+                string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
+                string mainFolder = _configuration["DocumentPath:EmployeeImage"];
+                if (string.IsNullOrEmpty(primaryFolder) || string.IsNullOrEmpty(mainFolder))
+                {
+                    return "Invalid folder configuration.";
+                }
+                if (!Directory.Exists(mainFolder))
+                {
+                    Directory.CreateDirectory(mainFolder);
+                }
+                string uploadPath = Path.Combine(primaryFolder, mainFolder);
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+                string extension = ".jpg";
+                if (fileBase64data.StartsWith("data:image/png;base64,"))
+                {
+                    extension = ".png";
+                    fileBase64data = fileBase64data.Substring("data:image/png;base64,".Length);  // Remove data URL prefix
+                }
+                else if (fileBase64data.StartsWith("data:image/jpeg;base64,"))
+                {
+                    extension = ".jpeg";
+                    fileBase64data = fileBase64data.Substring("data:image/jpeg;base64,".Length);  // Remove data URL prefix
+                }
+
+                string fileName = Guid.NewGuid().ToString() + extension;
+                string filePath = Path.Combine(uploadPath, fileName);
+                byte[] fileBytes = Convert.FromBase64String(fileBase64data);
+                await File.WriteAllBytesAsync(filePath, fileBytes);
+
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                return "Error uploading image";
+            }
+        }
+
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.UploadDocument(IFormFile file)
+        {
             string extension = Path.GetExtension(file.FileName);
             if (extension != ".pdf" && extension != ".Pdf" && extension != ".PDF")
             {
@@ -355,7 +431,12 @@ namespace iMARSARLIMS.Services
             }
             try
             {
-                string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedDocuments");
+                string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
+                if (!Directory.Exists(primaryFolder))
+                {
+                    Directory.CreateDirectory(primaryFolder);
+                }
+                string uploadPath = Path.Combine(primaryFolder, "UploadedDocuments");
                 if (!Directory.Exists(uploadPath))
                 {
                     Directory.CreateDirectory(uploadPath);
@@ -381,6 +462,44 @@ namespace iMARSARLIMS.Services
                     Message = ex.Message
                 };
             }
-      }
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.DownloadImage(int emplpyeeid)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (emplpyeeid != 0)
+                    {
+                         var imagepath = db.empMaster.Where(e => e.id == emplpyeeid).Select(e => e.fileName).FirstOrDefault();
+                      //  var imagepath = "D:\\UploadDocument\\EmpImage\\f9ed7ffd-efd0-452d-9785-d908e4890853.jpeg";
+                        byte[] imageBytes = File.ReadAllBytes(imagepath);
+                        string image = Convert.ToBase64String(imageBytes);
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = image
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "wrong employee Id"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
     }
 }
