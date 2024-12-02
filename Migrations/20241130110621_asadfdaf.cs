@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class asdfghj : Migration
+    public partial class asadfdaf : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,6 +177,31 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "centreInvoice",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    invoiceNo = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    centreid = table.Column<int>(type: "int", nullable: false),
+                    rate = table.Column<double>(type: "double", nullable: false),
+                    fromDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    toDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    createdBy = table.Column<int>(type: "int", nullable: false),
+                    InvoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    createDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    cancelReason = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true),
+                    cancelByID = table.Column<int>(type: "int", nullable: true),
+                    isCancel = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    cancelDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_centreInvoice", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "centreLedgerRemarks",
                 columns: table => new
                 {
@@ -275,6 +300,36 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_centreMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "CentrePayment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    paymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    paymentMode = table.Column<string>(type: "longtext", nullable: true),
+                    advancePaymentAmt = table.Column<float>(type: "float", nullable: true),
+                    bank = table.Column<string>(type: "longtext", nullable: true),
+                    tnxNo = table.Column<string>(type: "longtext", nullable: true),
+                    tnxDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    remarks = table.Column<string>(type: "longtext", nullable: true),
+                    rejectRemarks = table.Column<string>(type: "longtext", nullable: true),
+                    approved = table.Column<short>(type: "smallint", nullable: false),
+                    createdBy = table.Column<int>(type: "int", nullable: true),
+                    createdDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    updateByID = table.Column<int>(type: "int", nullable: true),
+                    apprvoedByID = table.Column<int>(type: "int", nullable: true),
+                    paymentType = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    documentName = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CentrePayment", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -935,6 +990,24 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_itemSampleTypeMapping", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "labDepartment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    deptCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    deptName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    subDeptName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    abbreviation = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: true),
+                    printSequence = table.Column<byte>(type: "tinyint unsigned", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_labDepartment", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2389,7 +2462,13 @@ namespace iMARSARLIMS.Migrations
                 name: "centreCheckListMapping");
 
             migrationBuilder.DropTable(
+                name: "centreInvoice");
+
+            migrationBuilder.DropTable(
                 name: "centreLedgerRemarks");
+
+            migrationBuilder.DropTable(
+                name: "CentrePayment");
 
             migrationBuilder.DropTable(
                 name: "centreWelcomeEmail");
@@ -2480,6 +2559,9 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "itemSampleTypeMapping");
+
+            migrationBuilder.DropTable(
+                name: "labDepartment");
 
             migrationBuilder.DropTable(
                 name: "labReportHeader");

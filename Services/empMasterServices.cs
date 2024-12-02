@@ -57,7 +57,7 @@ namespace iMARSARLIMS.Services
                         await SaveEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
-                        var result = db.empMaster.ToList();
+                        var result = db.empMaster.Where(e=> e.id== employeeId).ToList();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -77,7 +77,7 @@ namespace iMARSARLIMS.Services
                         await UpdateEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await UpdateEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
-                        var result = db.empMaster.ToList();
+                        var result = db.empMaster.Where(e => e.id == employeeId).ToList();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,

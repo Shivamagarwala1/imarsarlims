@@ -55,8 +55,7 @@ namespace iMARSARLIMS.Model.Master
         [Required]
         public int defaultrole { get; set; }
         public byte rate { get; set; }
-        [MaxLength(150)]
-        public string? fileName { get; set; }
+        public string fileName { get; set; }
         public byte autoCreated { get; set; }
         public int centreId { get; set; }
         public byte allowDueReport { get; set; }

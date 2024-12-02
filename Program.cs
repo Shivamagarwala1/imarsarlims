@@ -16,6 +16,15 @@ namespace iMARSARLIMS
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend",
+                    builder => builder
+                        .WithOrigins("http://lims.imarsar.com:8081")  // Allow the React frontend origin
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
             // Add services to the container.
 
             builder.Services.AddControllers();

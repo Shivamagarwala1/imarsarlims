@@ -19,6 +19,117 @@ namespace iMARSARLIMS.Migrations
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("iMARSARLIMS.Model.Account.CentrePayment", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<float?>("advancePaymentAmt")
+                        .HasColumnType("float");
+
+                    b.Property<short>("approved")
+                        .HasColumnType("smallint");
+
+                    b.Property<int?>("apprvoedByID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("bank")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("centreId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("createdBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("createdDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("documentName")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("paymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("paymentMode")
+                        .HasColumnType("longtext");
+
+                    b.Property<byte?>("paymentType")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<string>("rejectRemarks")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("remarks")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("tnxDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("tnxNo")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("updateByID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("updateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("CentrePayment");
+                });
+
+            modelBuilder.Entity("iMARSARLIMS.Model.Account.centreInvoice", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("cancelByID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("cancelDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("cancelReason")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int>("centreid")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("createDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("createdBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("fromDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("invoiceNo")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<byte?>("isCancel")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<double>("rate")
+                        .HasColumnType("double");
+
+                    b.Property<DateTime>("toDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("centreInvoice");
+                });
+
             modelBuilder.Entity("iMARSARLIMS.Model.Master.Allergy_SubType_Master", b =>
                 {
                     b.Property<int>("id")
@@ -1984,6 +2095,39 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("item_outsourcemaster");
+                });
+
+            modelBuilder.Entity("iMARSARLIMS.Model.Master.labDepartment", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("abbreviation")
+                        .HasMaxLength(5)
+                        .HasColumnType("varchar(5)");
+
+                    b.Property<string>("deptCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("deptName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<byte?>("printSequence")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<string>("subDeptName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("labDepartment");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.labReportHeader", b =>
