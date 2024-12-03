@@ -50,12 +50,13 @@ namespace iMARSARLIMS.Services
                             };
                         }
                     }
+                    var centreId = 0;
                     if (centremaster.id == 0)
                     {
                         var CentreMasterData = CreateCentreDetails(centremaster);
                         var CentreData = await db.centreMaster.AddAsync(CentreMasterData);
                         await db.SaveChangesAsync();
-                        var centreId = CentreData.Entity.id;
+                        centreId = CentreData.Entity.id;
                         if (centremaster.processingLab == 0)
                         {
                             var Centre = await db.centreMaster.FirstOrDefaultAsync(cm => cm.id == centreId);
@@ -112,7 +113,7 @@ namespace iMARSARLIMS.Services
                         }
                         var CentreMasterData = db.centreMaster.Update(CentreMaster);
                         await db.SaveChangesAsync();
-                        var centreId = CentreMasterData.Entity.id;
+                        centreId = CentreMasterData.Entity.id;
                         if (centremaster.centretype == "Franchisee" || centremaster.centretype == "SubFranchisee")
                         {
                             //  var roleId = 0;
@@ -132,7 +133,7 @@ namespace iMARSARLIMS.Services
                     }
                     await transaction.CommitAsync();
 
-                    var result = db.centreMaster.ToList();
+                    var result = db.centreMaster.Where(c=>c.id== centreId).ToList();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -145,7 +146,7 @@ namespace iMARSARLIMS.Services
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
-                        Message = ex.InnerException?.Message ?? "An error occurred."
+                        Message = ex.Message
                     };
                 }
             }
