@@ -10,5 +10,6 @@ namespace iMARSARLIMS.Interface
         Task<ActionResult<List<LoginResponseModel>>> EmpLogin(LoginRequestModel loginRequestModel);
         Task<ActionResult<ServiceStatusResponseModel>> SaveEmployee(empMaster empmaster);
         Task<ServiceStatusResponseModel> UploadDocument(IFormFile Document);
+        Task<ServiceStatusResponseModel> DownloadImage(int emplpyeeid);
     }
 }

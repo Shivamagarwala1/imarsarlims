@@ -14,7 +14,7 @@ namespace iMARSARLIMS.Model.Master
         public string deptCode { get; set; }
         [Required, MaxLength(100)]
         public string deptName { get; set; }
-        [Required, MinLength(100)]
+        [Required, MaxLength(100)]
         public string subDeptName { get; set; }
         [MaxLength(5)]
         public string? abbreviation { get; set; }
