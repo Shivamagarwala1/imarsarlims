@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Reflection.PortableExecutable;
-using HiQPdf;
+﻿using HiQPdf;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
@@ -10,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Text;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {
@@ -103,7 +102,23 @@ namespace iMARSARLIMS.Controllers.MasterController
 
                 // Convert HTML string to PDF
                 string htmlContent = "<h1>Welcome to HiQPdf!</h1><p>This is a sample PDF generated with HiQPdf in .NET Core.</p>";
-                byte[] pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent, null);
+                var dataGenerator = new DummyDataGenerator();
+                var data = dataGenerator.GenerateDummyData(100);
+                StringBuilder sb = new StringBuilder();
+                sb.Append("<table border='1' style='border-collapse: collapse; width: 100%;'>"); // Add border and styles for clarity
+                sb.Append("<tr><th>ID</th><th>Name</th><th>Age</th></tr>"); // Header row
+                foreach (var item in data)
+                {
+                    sb.Append("<tr>");
+                    sb.Append($"<td style='color:red'>{item.Id}</td>");
+                    sb.Append($"<td style='color:green'>{item.Name}</td>");
+                    sb.Append($"<td style='color:blue'>{item.Age}</td>");
+                    sb.Append("</tr>");
+                }
+                sb.Append("</table>");
+                htmlContent = string.Concat(htmlContent, sb.ToString());
+
+                  byte[] pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent, null);
 
                 // Return the PDF as a downloadable file
                 return File(pdfBuffer, "application/pdf", "Sample.pdf");
@@ -127,123 +142,9 @@ namespace iMARSARLIMS.Controllers.MasterController
                     page.PageColor(Colors.White); // Optional, can be omitted if the default white background is fine
                     page.DefaultTextStyle(x => x.FontSize(20));
 
-                    // Header section
                     page.Header()
                         .Text("Hello PDF!")
                         .SemiBold().FontSize(36).FontColor(Colors.Blue.Medium);
-
-                    //// Main content section
-                    //page.Content()
-                    //    .PaddingVertical(1, Unit.Centimetre)
-                    //    .Column(column =>
-                    //    {
-                    //        column.Spacing(20);
-
-                    //        column.Item().Text("dslknlkdsnvlkd  nfdsnvldn lkfnflkdsnl lkdsfnlkdsnflk lksdnflkdsnf"); // Sample text
-                    //        column.Item().Image(Placeholders.Image(200, 100)); // Sample image
-                    //    });
-
-                    //// Footer section
-                    //page.Footer()
-                    //    .AlignCenter()
-                    //    .Text(x =>
-                    //    {
-                    //        x.Span("Page ");
-                    //        x.CurrentPageNumber(); // Display current page number
-                    //    });
-
-                    //page.Header()
-                    //.Row(row =>
-                    //{
-                    //    row.Spacing(25);
-                    //    row.RelativeItem()
-                    //        .Column(column =>
-                    //        {
-                    //            column.Item()
-                    //            .Text("My header")
-                    //            .SemiBold()
-                    //            .FontSize(30)
-                    //            .FontColor(Colors.Blue.Medium);
-
-                    //            column.Item()
-                    //            .Text("Q&A Table")
-                    //            .Underline()
-                    //            .FontSize(20)
-                    //            .FontColor(Colors.Blue.Medium);
-                    //        });
-                    //});
-                    //page.Content()
-                    //.PaddingVertical(25).Table(table =>
-                    //{
-                    //    table.ColumnsDefinition(columns =>
-                    //    {
-                    //        // s.no, question,qtype, weightage, sortorder
-                    //        columns.ConstantColumn(50);
-                    //        columns.RelativeColumn();
-                    //        columns.RelativeColumn();
-                    //        columns.ConstantColumn(60);
-                    //        columns.ConstantColumn(60);
-                    //    });
-                    //    table.Header(header =>
-                    //    {
-                    //        header.Cell().Text("S.No");
-                    //        header.Cell().AlignRight().Text("Question");
-                    //        header.Cell().AlignRight().Text("QType");
-                    //        header.Cell().AlignRight().Text("Weightage");
-                    //        header.Cell().AlignRight().Text("Sortorder");
-                    //    });
-                    //    table.Cell().Text("1");
-                    //    table.Cell().Text("what is the important aspects of IT?");
-                    //    table.Cell().AlignRight().Text("Essay");
-                    //    table.Cell().AlignRight().Text("5");
-                    //    table.Cell().AlignRight().Text("6");
-
-                    //    table.Cell().Text("2");
-                    //    table.Cell().Text("an extension of image file?");
-                    //    table.Cell().AlignRight().Text("Choice");
-                    //    table.Cell().AlignRight().Text("2");
-                    //    table.Cell().AlignRight().Text("1");
-
-                    //    table.Cell().Text("3");
-                    //    table.Cell().Text("What are security controls?");
-                    //    table.Cell().AlignRight().Text("Essay");
-                    //    table.Cell().AlignRight().Text("5");
-                    //    table.Cell().AlignRight().Text("7");
-
-                    //    table.Cell().Text("4");
-                    //    table.Cell().Text("compliance standard?");
-                    //    table.Cell().AlignRight().Text("Choice");
-                    //    table.Cell().AlignRight().Text("2");
-                    //    table.Cell().AlignRight().Text("2");
-
-                    //    table.Cell().Text("5");
-                    //    table.Cell().Text("Risk is the failure in component?");
-                    //    table.Cell().AlignRight().Text("Choice");
-                    //    table.Cell().AlignRight().Text("2");
-                    //    table.Cell().AlignRight().Text("3");
-
-                    //    table.Cell().Text("6");
-                    //    table.Cell().Text("Third party tools in software?");
-                    //    table.Cell().AlignRight().Text("Essay");
-                    //    table.Cell().AlignRight().Text("5");
-                    //    table.Cell().AlignRight().Text("5");
-
-                    //    table.Cell().Text("7");
-                    //    table.Cell().Text("What are cloud based solutions?");
-                    //    table.Cell().AlignRight().Text("Essay");
-                    //    table.Cell().AlignRight().Text("5");
-                    //    table.Cell().AlignRight().Text("4");
-                    //});
-                    //page.Footer()
-                    //.AlignCenter()
-                    //    .Text(text =>
-                    //    {
-                    //        text.DefaultTextStyle(x => x.FontSize(15));
-                    //        text.Span("Page number").FontSize(10);
-                    //        text.CurrentPageNumber();
-                    //        text.Span(" out of ");
-                    //        text.TotalPages();
-                    //    });
 
                     var dataGenerator = new DummyDataGenerator();
                     var data = dataGenerator.GenerateDummyData(100);
@@ -263,9 +164,9 @@ namespace iMARSARLIMS.Controllers.MasterController
 
                             foreach (var item in data)
                             {
-                                table.Cell().Text(item.Id.ToString());
-                                table.Cell().Text(item.Name);
-                                table.Cell().Text(item.Age.ToString());
+                                table.Cell().Text(item.Id.ToString()).Style(TextStyle.Default.FontSize(12));
+                                table.Cell().Text(item.Name).Style(TextStyle.Default.FontSize(16));
+                                table.Cell().Text(item.Age.ToString()).Style(TextStyle.Default.FontSize(20));
                             }
                         });
                     });

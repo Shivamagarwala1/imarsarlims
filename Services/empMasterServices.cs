@@ -1,12 +1,10 @@
-﻿using Google.Protobuf;
-using iMARSARLIMS.Controllers;
+﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace iMARSARLIMS.Services
 {
@@ -174,12 +172,6 @@ namespace iMARSARLIMS.Services
         {
             if (emproleaccess != null)
             {
-                //foreach (var emprole in emproleaccess)
-                //{
-                //    var EmpRoleData = CreateEmpRoleData(emprole, employeeId);
-                //    var EmpRole = db.empRoleAccess.Add(EmpRoleData);
-                //    await db.SaveChangesAsync();
-                //}
                 var empRoleDataList = emproleaccess.Select(emprole => CreateEmpRoleData(emprole, employeeId)).ToList();
                 if (empRoleDataList.Any())
                 {
@@ -212,12 +204,6 @@ namespace iMARSARLIMS.Services
         {
             if (empcentreaccess != null)
             {
-                //foreach (var empcentre in empcentreaccess)
-                //{
-                //    var EmpCentreData = CreateEmpCentreData(empcentre, employeeId);
-                //    var EmpCentre = db.empCenterAccess.Add(EmpCentreData);
-                //    await db.SaveChangesAsync();
-                //}
                 var empCentreDataList = empcentreaccess.Select(empcentre => CreateEmpCentreData(empcentre, employeeId)).ToList();
                 if (empCentreDataList.Any())
                 {
