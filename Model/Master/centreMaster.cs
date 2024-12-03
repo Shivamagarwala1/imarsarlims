@@ -27,7 +27,7 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(100)]
         public string? ownerName { get; set; }
         public int proId { get; set; }
-        [RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
+        
         public string? reportEmail { get; set; }
         public int parentCentreID { get; set; }
         public int processingLab { get; set; }
