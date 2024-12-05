@@ -27,7 +27,7 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(100)]
         public string? ownerName { get; set; }
         public int proId { get; set; }
-        
+
         public string? reportEmail { get; set; }
         public int parentCentreID { get; set; }
         public int processingLab { get; set; }
@@ -90,6 +90,12 @@ namespace iMARSARLIMS.Model.Master
         public int clientRate { get; set; }
         public int isLock { get; set; }
         public int isPrePrintedBarcode { get; set; }
-        public List<centreCheckListMapping>? addCentreCheckListMapping { get; set; }
+        public int ac { get; set; }
+        public string centreAddress1 { get; set; }
+        public int clientmrp { get; set; }
+        public int documentType { get; set; }
+        public int receptionarea { get; set; }
+        public int waitingarea { get; set; }
+        public int watercooler { get; set; }
     }
 }

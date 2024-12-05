@@ -2,17 +2,8 @@
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
-using Microsoft.AspNetCore.Server.IISIntegration;
-using Microsoft.Extensions.Logging;
-using Microsoft.OData.UriParser;
-using Org.BouncyCastle.Asn1.X509;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System;
-using iMARSARLIMS.Model.Transaction;
-using iMARSARLIMS.Request_Model;
-using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace iMARSARLIMS.Services
 {
@@ -133,7 +124,7 @@ namespace iMARSARLIMS.Services
                     }
                     await transaction.CommitAsync();
 
-                    var result = db.centreMaster.Where(c=>c.id== centreId).ToList();
+                    var result = db.centreMaster.Where(c => c.id == centreId).ToList();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -222,7 +213,14 @@ namespace iMARSARLIMS.Services
                 isPrePrintedBarcode = centremaster.isPrePrintedBarcode,
                 isActive = centremaster.isActive,
                 createdById = centremaster.createdById,
-                createdDateTime = centremaster.createdDateTime
+                createdDateTime = centremaster.createdDateTime,
+                ac = centremaster.ac,
+                centreAddress1 = centremaster.centreAddress1,
+                clientmrp = centremaster.clientmrp,
+                documentType = centremaster.documentType,
+                receptionarea = centremaster.receptionarea,
+                waitingarea = centremaster.waitingarea,
+                watercooler = centremaster.waitingarea
             };
         }
 
@@ -242,8 +240,8 @@ namespace iMARSARLIMS.Services
                 userName = centremaster.centrecode,
                 password = centremaster.mobileNo,
                 createdById = centremaster.createdById,
-                bloodGroup= "b+",
-                deptAccess= centremaster.centretype,
+                bloodGroup = "b+",
+                deptAccess = centremaster.centretype,
                 createdDateTime = centremaster.createdDateTime,
                 autoCreated = 1,
                 centreId = centreId,
@@ -302,9 +300,9 @@ namespace iMARSARLIMS.Services
         {
             return new rateTypeTagging
             {
-                id =0,
-                rateTypeId= rateTypeId,
-                centreId= centreId
+                id = 0,
+                rateTypeId = rateTypeId,
+                centreId = centreId
             };
         }
         private static centreMaster UpdateCentreDetails(centreMaster CentreMaster, centreMaster centremaster)
@@ -374,8 +372,15 @@ namespace iMARSARLIMS.Services
             CentreMaster.isLock = centremaster.isLock;
             CentreMaster.isPrePrintedBarcode = centremaster.isPrePrintedBarcode;
             CentreMaster.isActive = centremaster.isActive;
-            CentreMaster.createdById = centremaster.createdById;
-            CentreMaster.createdDateTime = centremaster.createdDateTime;
+            CentreMaster.ac = centremaster.ac;
+            CentreMaster.centreAddress1 = centremaster.centreAddress1;
+            CentreMaster.clientmrp = centremaster.clientmrp;
+            CentreMaster.documentType = centremaster.documentType;
+            CentreMaster.receptionarea = centremaster.receptionarea;
+            CentreMaster.waitingarea = centremaster.waitingarea;
+            CentreMaster.watercooler = centremaster.waitingarea;
+            CentreMaster.updateById = centremaster.updateById;
+            CentreMaster.updateDateTime = centremaster.updateDateTime;
 
             return CentreMaster;
         }

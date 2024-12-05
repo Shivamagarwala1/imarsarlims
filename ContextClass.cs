@@ -47,10 +47,8 @@ namespace iMARSARLIMS
         public DbSet<Allergy_TypeMaster> Allergy_TypeMaster { get; set; }
         public DbSet<barcode_series> barcode_series { get; set; }
         public DbSet<changeCentreLog> changeCentreLog { get; set; }
-        public DbSet<centreCheckList> centreCheckList { get; set; }
         public DbSet<empLoginDetails> empLoginDetails { get; set; }
         public DbSet<discountTypeMaster> discountTypeMaster { get; set; }
-        public DbSet<centreCheckListMapping> centreCheckListMapping { get; set; }
         public DbSet<centreLedgerRemarks> centreLedgerRemarks { get; set; }
         public DbSet<doctorApprovalDepartments> doctorApprovalDepartments { get; set; }
         public DbSet<idMaster> idMaster { get; set; }
@@ -213,18 +211,12 @@ namespace iMARSARLIMS
             
             modelBuilder.Entity<changeCentreLog>().HasKey(x => x.id);
             modelBuilder.Entity<changeCentreLog>().Property(x => x.id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<centreCheckList>().HasKey(x => x.id);
-            modelBuilder.Entity<centreCheckList>().Property(x => x.id).ValueGeneratedOnAdd();
             
             modelBuilder.Entity<empLoginDetails>().HasKey(x => x.id);
             modelBuilder.Entity<empLoginDetails>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<discountTypeMaster>().HasKey(x => x.id);
             modelBuilder.Entity<discountTypeMaster>().Property(x => x.id).ValueGeneratedOnAdd();
-
-            modelBuilder.Entity<centreCheckListMapping>().HasKey(x => x.id);
-            modelBuilder.Entity<centreCheckListMapping>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<centreLedgerRemarks>().HasKey(x => x.id);
             modelBuilder.Entity<centreLedgerRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
