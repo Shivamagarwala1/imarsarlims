@@ -1,10 +1,13 @@
-﻿using HiQPdf;
+﻿
+using HiQPdf;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Crmf;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -18,12 +21,15 @@ namespace iMARSARLIMS.Controllers.MasterController
     {
         private readonly ContextClass db;
         private readonly IempMasterServices _empMasterServices;
+        private readonly ILogger<BaseController<empMaster>> _logger;
+        private readonly OpenAIService _openAIService;
 
-
-        public empMasterController(ContextClass context, ILogger<BaseController<empMaster>> logger, IempMasterServices empMasterServices) : base(context, logger)
+        public empMasterController(ContextClass context, ILogger<BaseController<empMaster>> logger, IempMasterServices empMasterServices, OpenAIService openAIService) : base(context, logger)
         {
             db = context;
             this._empMasterServices = empMasterServices;
+            _logger = logger;
+            _openAIService = openAIService;
         }
         protected override IQueryable<empMaster> DbSet => db.empMaster.AsNoTracking().OrderBy(o => o.id);
 
@@ -201,6 +207,73 @@ namespace iMARSARLIMS.Controllers.MasterController
             public int Id { get; set; }
             public string Name { get; set; }
             public int Age { get; set; }
+        }
+
+        [HttpGet("error")]
+        public IActionResult GenerateError()
+        {
+            try
+            {
+                // Simulate an exception
+                throw new Exception("This is a test error.");
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                _logger.LogError(ex, "An error occurred while processing the request.");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("ask")]
+        public async Task<IActionResult> Ask(String ask)
+        {
+            try
+            {
+                var response = await _openAIService.GetChatResponseAsync(ask);
+                return Ok(new { response });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+        [HttpPost("ask_google")]
+        public async Task<IActionResult> Ask_Google(String ask)
+        {
+            try
+            {
+                // Set the Google Application Credentials (replace with your actual path)
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"shivam-map-api-demo-bc5df779fa02.json");
+
+                // Create a session client
+                var sessionClient = Google.Cloud.Dialogflow.V2.SessionsClient.Create();
+
+                // Define the session name (replace PROJECT_ID and SESSION_ID)
+                string projectId = "shivam-map-api-demo";
+                string sessionId = Guid.NewGuid().ToString(); // Use a unique session ID for each user
+                var sessionName = Google.Cloud.Dialogflow.V2.SessionName.FromProjectSession(projectId, sessionId);
+
+                // Create a query input
+                var queryInput = new Google.Cloud.Dialogflow.V2.QueryInput
+                {
+                    Text = new Google.Cloud.Dialogflow.V2.TextInput
+                    {
+                        Text = ask, // User query
+                        LanguageCode = "en-US" // Language code
+                    }
+                };
+
+                // Detect intent
+                var response = sessionClient.DetectIntent(sessionName, queryInput);
+
+
+                return Ok(new { response.QueryResult.FulfillmentText });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         public class DummyDataGenerator

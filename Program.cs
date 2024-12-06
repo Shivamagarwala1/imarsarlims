@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Services;
+using Serilog;
 namespace iMARSARLIMS
 {
     public class Program
@@ -15,6 +16,26 @@ namespace iMARSARLIMS
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            var logsDirectory = Path.Combine("Error Logs", DateTime.Now.ToString("yyyy-MM-dd"));
+
+            // Ensure the directory exists
+            if (!Directory.Exists(logsDirectory))
+            {
+                Directory.CreateDirectory(logsDirectory);
+            }
+
+            // Configure Serilog
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console() // Optional: Log to the console
+                .WriteTo.File(
+                    path: Path.Combine(logsDirectory, "error-log.txt"), // File inside the daily folder
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error, // Log errors and above
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}" // Custom format
+                )
+                .CreateLogger();
+
+            builder.Host.UseSerilog();
 
             builder.Services.AddCors(options =>
             {
@@ -59,16 +80,24 @@ namespace iMARSARLIMS
             builder.Services.AddScoped<MySql_Procedure_Services, MySql_Procedure_Services>();
             builder.Services.AddScoped<IitemObservationMappingServices, itemObservationMappingServices>();
             builder.Services.AddScoped<IrateTypeWiseRateListServices, rateTypeWiseRateListServices>();
-
+            builder.Services.AddSingleton<OpenAIService>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+           
+            app.Use(async (context, next) =>
             {
-                //app.UseSwagger();
-                //app.UseSwaggerUI();
-            }
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Unhandled exception occurred.");
+                    throw;
+                }
+            });
+
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseCors("AllowFrontend");
