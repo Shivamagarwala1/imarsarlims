@@ -22,7 +22,7 @@ namespace iMARSARLIMS.Services
         {
             var request = new
             {
-                model = "o1-preview", // Use the model you prefer
+                model = "gpt-3.5-turbo", // Use the model you prefer
                 messages = new[]
                 {
                 new { role = "system", content = "You are a helpful assistant." },
