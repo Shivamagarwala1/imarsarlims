@@ -41,7 +41,7 @@ namespace iMARSARLIMS
             {
                 options.AddPolicy("AllowFrontend",
                     builder => builder
-                        .WithOrigins("http://lims.imarsar.com:8081")  // Allow the React frontend origin
+                        .WithOrigins("http://lims.imarsar.com:8083")  // Allow the React frontend origin
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
