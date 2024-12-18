@@ -600,7 +600,8 @@ namespace iMARSARLIMS.Services
             {
                 Success = true,
                 Data = groupedMenuData,
-                Message = ""
+                Message = "",
+                Token= token
             };
         }
     }
