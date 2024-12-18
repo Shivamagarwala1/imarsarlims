@@ -44,12 +44,13 @@ namespace iMARSARLIMS.Services
                     audience: _configuration["JwtSettings:Audience"],
                     expiryMinutes: int.Parse(_configuration["JwtSettings:ExpiryMinutes"])
                     );
-               
+
                 return new ServiceStatusResponseModel
-                { Success = true,
-                  Message="Login SuccessFul",
-                  Data=employee,
-                  Token = token
+                {
+                    Success = true,
+                    Message = "Login SuccessFul",
+                    Data = employee,
+                    Token = token
                 };
             }
             else
@@ -478,8 +479,7 @@ namespace iMARSARLIMS.Services
                 {
                     if (emplpyeeid != 0)
                     {
-                         var imagepath = db.empMaster.Where(e => e.id == emplpyeeid).Select(e => e.fileName).FirstOrDefault();
-                      //  var imagepath = "D:\\UploadDocument\\EmpImage\\f9ed7ffd-efd0-452d-9785-d908e4890853.jpeg";
+                        var imagepath = db.empMaster.Where(e => e.id == emplpyeeid).Select(e => e.fileName).FirstOrDefault();
                         byte[] imageBytes = File.ReadAllBytes(imagepath);
                         string image = Convert.ToBase64String(imageBytes);
                         return new ServiceStatusResponseModel
@@ -506,6 +506,102 @@ namespace iMARSARLIMS.Services
                     };
                 }
             }
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.EmployeeWiseCentre(int EmplyeeId)
+        {
+            var Centres = await (from eca in db.empCenterAccess
+                                 join cm in db.centreMaster on eca.centreId equals cm.id
+                                 where eca.empId == EmplyeeId
+                                 orderby eca.centreId
+                                 select new
+                                 {
+                                     CentreId = cm.id,
+                                     CentreName = cm.companyName
+                                 }).ToListAsync();
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = Centres,
+                Message = ""
+            };
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.EmployeeWiseRole(int EmplyeeId)
+        {
+            var Roles = await (from era in db.empRoleAccess
+                               join rm in db.roleMaster on era.roleId equals rm.id
+                               where era.empId == EmplyeeId
+                               orderby rm.roleName
+                               select new
+                               {
+                                   RoleId = rm.id,
+                                   RoleName = rm.roleName
+                               }).ToListAsync();
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = Roles,
+                Message = ""
+            };
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.EmployeeWiseMenu(string EmplyeeId, string RoleId, string CentreId)
+        {
+            var MenuData = from rma in db.roleMenuAccess
+                           join mm in db.menuMaster on rma.menuId equals mm.id
+                           join mm1 in db.menuMaster on rma.subMenuId equals mm1.id
+                           select new
+                           {
+                               ParentMenuId = mm.id,
+                               ParentMenuName = mm.menuName,
+                               ParentDisplayOrder = mm.displaySequence,
+                               ChildMenuId = mm1.id,
+                               ChildMenuName = mm1.menuName,
+                               NavigationURL = mm1.navigationUrl,
+                               ChildDisplayOrder = mm1.displaySequence
+                           };
+            var groupedMenuData = MenuData
+            .GroupBy(m => new
+            {
+                m.ParentMenuId,
+                m.ParentMenuName,
+                m.ParentDisplayOrder
+            })
+            .Select(group => new
+            {
+                ParentMenuId = group.Key.ParentMenuId,
+                ParentMenuName = group.Key.ParentMenuName,
+                ParentDisplayOrder = group.Key.ParentDisplayOrder,
+                Children = group.Select(child => new
+                {
+                    child.ChildMenuId,
+                    child.ChildMenuName,
+                    child.NavigationURL,
+                    child.ChildDisplayOrder
+                }).OrderBy(child => child.ChildDisplayOrder).ToList()
+            })
+            .OrderBy(parent => parent.ParentDisplayOrder)
+            .ToList();
+
+            var token = JwtTokenGenrator.GenerateToken(
+                userid: EmplyeeId,
+                Role: RoleId,
+                Centreid: CentreId,
+                key: _configuration["JwtSettings:Key"],
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                expiryMinutes: int.Parse(_configuration["JwtSettings:ExpiryMinutes"])
+                );
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = groupedMenuData,
+                Message = ""
+            };
         }
     }
 }

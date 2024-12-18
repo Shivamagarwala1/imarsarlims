@@ -11,5 +11,8 @@ namespace iMARSARLIMS.Interface
         Task<ActionResult<ServiceStatusResponseModel>> SaveEmployee(empMaster empmaster);
         Task<ServiceStatusResponseModel> UploadDocument(IFormFile Document);
         Task<ServiceStatusResponseModel> DownloadImage(int emplpyeeid);
+        Task<ServiceStatusResponseModel> EmployeeWiseCentre(int EmplyeeId);
+        Task<ServiceStatusResponseModel> EmployeeWiseRole(int EmplyeeId);
+        Task<ServiceStatusResponseModel> EmployeeWiseMenu(string EmplyeeId, string RoleId, string CentreId);
     }
 }

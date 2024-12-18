@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers
 {
-   // [Authorize]
+    [Authorize]
 
     public abstract class BaseController<TDBEntity>: ControllerBase where TDBEntity : class
     {

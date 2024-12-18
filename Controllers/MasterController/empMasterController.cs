@@ -35,17 +35,70 @@ namespace iMARSARLIMS.Controllers.MasterController
         protected override IQueryable<empMaster> DbSet => db.empMaster.AsNoTracking().OrderBy(o => o.id);
 
 
-        [HttpPost("Login")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> EmpLogin(LoginRequestModel loginRequestModel)
+        //[HttpPost("Login")]
+        //public async Task<ActionResult<ServiceStatusResponseModel>> EmpLogin(LoginRequestModel loginRequestModel)
+        //{
+        //    try
+        //    {
+        //        var result = await _empMasterServices.EmpLogin(loginRequestModel);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+
+        [HttpGet("EmployeeWiseCentre")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseCentre(int EmplyeeId)
         {
+            if (EmplyeeId == 0)
+                return BadRequest("Invalid Employee ID.");
+
             try
             {
-                var result = await _empMasterServices.EmpLogin(loginRequestModel);
-                return result;
+                var result = await _empMasterServices.EmployeeWiseCentre(EmplyeeId);
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("EmployeeWiseRole")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseRole(int EmplyeeId)
+        {
+            if (EmplyeeId == 0)
+                return BadRequest("Invalid Role ID.");
+
+            try
+            {
+                var result = await _empMasterServices.EmployeeWiseRole(EmplyeeId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("EmployeeWiseMenu")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseMenu(String EmplyeeId,String RoleId,string CentreId)
+        {
+            if (EmplyeeId == "0" || EmplyeeId == "")
+                return BadRequest("Invalid Employee ID.");
+            if (RoleId == "" || RoleId == "0")
+                return BadRequest("Invalid Role ID.");
+            if (CentreId == "0"|| CentreId=="")
+                return BadRequest("Invalid Role ID.");
+
+            try
+            {
+                var result = await _empMasterServices.EmployeeWiseMenu(EmplyeeId, RoleId,CentreId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -110,19 +163,19 @@ namespace iMARSARLIMS.Controllers.MasterController
 
                 // Convert HTML string to PDF
                 string htmlContent = "<h1>Welcome to HiQPdf!</h1><p>This is a sample PDF generated with HiQPdf in .NET Core.</p>";
-                var dataGenerator = new DummyDataGenerator();
-                var data = dataGenerator.GenerateDummyData(100);
+               // var dataGenerator = new DummyDataGenerator();
+               // var data = dataGenerator.GenerateDummyData(100);
                 StringBuilder sb = new StringBuilder();
                 sb.Append("<table border='1' style='border-collapse: collapse; width: 100%;'>"); // Add border and styles for clarity
                 sb.Append("<tr><th>ID</th><th>Name</th><th>Age</th></tr>"); // Header row
-                foreach (var item in data)
-                {
-                    sb.Append("<tr>");
-                    sb.Append($"<td style='color:red'>{item.Id}</td>");
-                    sb.Append($"<td style='color:green'>{item.Name}</td>");
-                    sb.Append($"<td style='color:blue'>{item.Age}</td>");
-                    sb.Append("</tr>");
-                }
+               // foreach (var item in data)
+               // {
+               //     sb.Append("<tr>");
+               //     sb.Append($"<td style='color:red'>{item.Id}</td>");
+               //     sb.Append($"<td style='color:green'>{item.Name}</td>");
+               //     sb.Append($"<td style='color:blue'>{item.Age}</td>");
+               //     sb.Append("</tr>");
+               // }
                 sb.Append("</table>");
                 htmlContent = string.Concat(htmlContent, sb.ToString());
 
@@ -135,80 +188,6 @@ namespace iMARSARLIMS.Controllers.MasterController
             {
                 return BadRequest($"Error generating PDF: {ex.Message}");
             }
-        }
-        [HttpGet("generate-quest")]
-        public FileStreamResult GetPDF()
-        {
-            QuestPDF.Settings.License = LicenseType.Community;
-            // Create the PDF document using QuestPDF
-            Document document = Document.Create(container =>
-            {
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.PageColor(Colors.White); // Optional, can be omitted if the default white background is fine
-                    page.DefaultTextStyle(x => x.FontSize(20));
-
-                    page.Header()
-                        .Text("Hello PDF!")
-                        .SemiBold().FontSize(36).FontColor(Colors.Blue.Medium);
-
-                    var dataGenerator = new DummyDataGenerator();
-                    var data = dataGenerator.GenerateDummyData(100);
-
-                    page.Content().Column(column =>
-                    {
-                        column.Spacing(10);
-
-                        column.Item().Table(table =>
-                        {
-                            table.ColumnsDefinition(columns =>
-                            {
-                                columns.ConstantColumn(50);  // Column for ID
-                                columns.RelativeColumn();    // Column for Name
-                                columns.RelativeColumn();    // Column for Age
-                            });
-
-                            foreach (var item in data)
-                            {
-                                table.Cell().Text(item.Id.ToString()).Style(TextStyle.Default.FontSize(12));
-                                table.Cell().Text(item.Name).Style(TextStyle.Default.FontSize(16));
-                                table.Cell().Text(item.Age.ToString()).Style(TextStyle.Default.FontSize(20));
-                            }
-                        });
-                    });
-                    page.Footer()
-                    .AlignCenter()
-                        .Text(text =>
-                        {
-                            text.DefaultTextStyle(x => x.FontSize(15));
-                            text.Span("Page number").FontSize(10);
-                            text.CurrentPageNumber();
-                            text.Span(" out of ");
-                            text.TotalPages();
-                        });
-                });
-            });
-
-            // Generate the PDF as a byte array
-            byte[] pdfBytes = document.GeneratePdf();
-
-            // Create a MemoryStream from the PDF bytes
-            MemoryStream ms = new MemoryStream(pdfBytes);
-
-            // Return the PDF as a FileStreamResult with MIME type for PDF
-            return new FileStreamResult(ms, "application/pdf")
-            {
-                FileDownloadName = "GeneratedDocument.pdf" // Optional: Name for the downloaded file
-            };
-        }
-
-        public class Person
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int Age { get; set; }
         }
 
         [HttpGet("error")]
@@ -275,31 +254,6 @@ namespace iMARSARLIMS.Controllers.MasterController
             catch (Exception ex)
             {
                 return StatusCode(500, new { error = ex.Message });
-            }
-        }
-
-        public class DummyDataGenerator
-        {
-            public List<Person> GenerateDummyData(int count)
-            {
-                var random = new Random();
-                var names = new List<string> { "John", "Jane", "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank" };
-
-                var dummyData = new List<Person>();
-
-                for (int i = 0; i < count; i++)
-                {
-                    var person = new Person
-                    {
-                        Id = i + 1,
-                        Name = names[random.Next(names.Count)], // Random name from list
-                        Age = random.Next(18, 70) // Random age between 18 and 70
-                    };
-
-                    dummyData.Add(person);
-                }
-
-                return dummyData;
             }
         }
 
