@@ -10,11 +10,7 @@ namespace iMARSARLIMS.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@" INSERT INTO MiscMaster ( misc_name, type, is_active, created_by, created_datetime)
-            VALUES
-            ('Mr.', 'Title',  1, 1, GETDATE()),
-            ('Mrs.', 'Title',  1, 1, GETDATE()),
-            ('Dr.', 'Title', 1, 1, GETDATE());");
+            
         }
 
         /// <inheritdoc />

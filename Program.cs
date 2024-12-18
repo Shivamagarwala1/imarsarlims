@@ -1,19 +1,18 @@
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using iMARSARLIMS;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.NewtonsoftJson;
-using System.Text;
-
-using Microsoft.OpenApi.Models;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.NewtonsoftJson;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Serilog;
+using System.Text;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
