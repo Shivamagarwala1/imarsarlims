@@ -1,6 +1,0 @@
-@iMARSARLIMS_HostAddress = http://localhost:5268
-
-GET {{iMARSARLIMS_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

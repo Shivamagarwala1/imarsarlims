@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers
 {
-    
+   // [Authorize]
 
     public abstract class BaseController<TDBEntity>: ControllerBase where TDBEntity : class
     {

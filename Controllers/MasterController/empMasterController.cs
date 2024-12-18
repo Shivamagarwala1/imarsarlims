@@ -5,6 +5,7 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Crmf;
@@ -35,7 +36,7 @@ namespace iMARSARLIMS.Controllers.MasterController
 
 
         [HttpPost("Login")]
-        public async Task<ActionResult<List<LoginResponseModel>>> EmpLogin(LoginRequestModel loginRequestModel)
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmpLogin(LoginRequestModel loginRequestModel)
         {
             try
             {
@@ -64,6 +65,7 @@ namespace iMARSARLIMS.Controllers.MasterController
 
 
         [HttpPost("UploadDocument")]
+        
         public async Task<ActionResult<ServiceStatusResponseModel>> UploadDocument(IFormFile Document)
         {
             try

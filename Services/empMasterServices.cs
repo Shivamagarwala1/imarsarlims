@@ -3,6 +3,7 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,28 +19,47 @@ namespace iMARSARLIMS.Services
             db = context;
             this._configuration = configuration;
         }
-        async Task<ActionResult<List<LoginResponseModel>>> IempMasterServices.EmpLogin(LoginRequestModel loginRequestModel)
+        async Task<ServiceStatusResponseModel> IempMasterServices.EmpLogin(LoginRequestModel loginRequestModel)
         {
             var employee = await (from em in db.empMaster
                                   join emr in db.empRoleAccess on em.id equals emr.empId
                                   join emc in db.empCenterAccess on em.id equals emc.empId
-                                  where em.userName == loginRequestModel.userName && em.password == loginRequestModel.password
+                                  where em.userName == loginRequestModel.userName && em.password == loginRequestModel.password && em.defaultcentre == emc.centreId
                                   select new LoginResponseModel
                                   {
-                                      employeeId = em.id,
+                                      employeeId = em.id.ToString(),
                                       Name = string.Concat(em.fName, ' ', em.lName),
-                                      DefaultRole = em.defaultrole,
-                                      DefaultCenter = em.defaultcentre,
-                                      Centres = emc.centreId,
-                                      Roles = emr.roleId
-                                  }).ToListAsync();
+                                      DefaultRole = em.defaultrole.ToString(),
+                                      DefaultCenter = em.defaultcentre.ToString(),
+                                  }).FirstOrDefaultAsync();
 
             if (employee != null)
             {
-                return employee;
+                var token = JwtTokenGenrator.GenerateToken(
+                    userid: employee.employeeId,
+                    Role: employee.DefaultRole,
+                    Centreid: employee.DefaultCenter,
+                    key: _configuration["JwtSettings:Key"],
+                    issuer: _configuration["JwtSettings:Issuer"],
+                    audience: _configuration["JwtSettings:Audience"],
+                    expiryMinutes: int.Parse(_configuration["JwtSettings:ExpiryMinutes"])
+                    );
+               
+                return new ServiceStatusResponseModel
+                { Success = true,
+                  Message="Login SuccessFul",
+                  Data=employee,
+                  Token = token
+                };
             }
-
-            return new ActionResult<List<LoginResponseModel>>(new List<LoginResponseModel>()); // Return an empty model for invalid login
+            else
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "Invalid UserName Or Password"
+                };
+            }
 
         }
 

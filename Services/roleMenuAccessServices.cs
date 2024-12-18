@@ -25,7 +25,7 @@ namespace iMARSARLIMS.Services
             var employee = await (from rma in db.roleMenuAccess
                                   join mm in db.menuMaster on rma.menuId equals mm.id
                                   join mm1 in db.menuMaster on rma.subMenuId equals mm1.id
-                                  where rma.employeeId == 1 && rma.roleId == 1
+                                  where rma.employeeId == MenuAccess.employeeId && rma.roleId == MenuAccess.roleId
                                   orderby mm1.displaySequence
                                   select new
                                   {

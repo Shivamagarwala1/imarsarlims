@@ -7,7 +7,7 @@ namespace iMARSARLIMS.Interface
 {
     public interface IempMasterServices
     {
-        Task<ActionResult<List<LoginResponseModel>>> EmpLogin(LoginRequestModel loginRequestModel);
+        Task<ServiceStatusResponseModel> EmpLogin(LoginRequestModel loginRequestModel);
         Task<ActionResult<ServiceStatusResponseModel>> SaveEmployee(empMaster empmaster);
         Task<ServiceStatusResponseModel> UploadDocument(IFormFile Document);
         Task<ServiceStatusResponseModel> DownloadImage(int emplpyeeid);
