@@ -81,15 +81,18 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-builder.Services.AddCors(options =>
+builder.Services.AddCors(opttions =>
 {
-    options.AddPolicy("AllowFrontend",
-        builder => builder
-            .WithOrigins("http://lims.imarsar.com:8083")  // Allow the React frontend origin
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials());
+    opttions.AddPolicy("AllowAllOrgiins", builder =>
+    {
+        builder
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+    });
 });
+
+//.WithOrigins("http://lims.imarsar.com:8083")
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -152,7 +155,7 @@ app.UseSwaggerUI(option =>
     option.SwaggerEndpoint("/swagger/v1/swagger.json", "LIMS BE API");
     option.RoutePrefix = "swagger";
 });
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAllOrgiins");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

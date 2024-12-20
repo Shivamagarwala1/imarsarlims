@@ -11,6 +11,7 @@ namespace iMARSARLIMS.Model.Master
         public string menuColor { get; set; }
         public string subMenuColor { get; set; }
         public string textColor { get; set; }
+        public string blockColor { get; set; }
         public int isdefault { get; set; }
     }
 }
