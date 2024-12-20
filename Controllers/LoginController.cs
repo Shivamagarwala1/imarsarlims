@@ -39,6 +39,28 @@ namespace iMARSARLIMS.Controllers
             }
         }
 
-        
+        [HttpPost("forgetPassword")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> forgetPassword(string Username)
+        {
+            if (Username=="")
+                return BadRequest("Please Enter Username");
+
+            try
+            {
+                var result = await _empMasterServices.forgetPassword(Username);
+
+                if (result == null)
+                    return Unauthorized("Invalid username");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if logging is set up in your project)
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
     }
 }

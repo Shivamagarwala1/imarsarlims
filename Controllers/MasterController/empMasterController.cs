@@ -35,19 +35,19 @@ namespace iMARSARLIMS.Controllers.MasterController
         protected override IQueryable<empMaster> DbSet => db.empMaster.AsNoTracking().OrderBy(o => o.id);
 
 
-        //[HttpPost("Login")]
-        //public async Task<ActionResult<ServiceStatusResponseModel>> EmpLogin(LoginRequestModel loginRequestModel)
-        //{
-        //    try
-        //    {
-        //        var result = await _empMasterServices.EmpLogin(loginRequestModel);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.Message);
-        //    }
-        //}
+        [HttpPost("UpdatePassword")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> UpdatePassword(int Employeeid, string Password)
+        {
+            try
+            {
+                var result = await _empMasterServices.UpdatePassword(Employeeid, Password);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("EmployeeWiseCentre")]
         public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseCentre(int EmplyeeId)

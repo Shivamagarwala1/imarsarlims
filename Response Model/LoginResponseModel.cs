@@ -6,5 +6,6 @@
         public string Name { get; set; }
         public string DefaultRole { get; set; }
         public string DefaultCenter { get; set; }
-           }
+        public string tempPassword { get; set; }
+    }
 }

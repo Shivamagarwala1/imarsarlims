@@ -6,6 +6,8 @@ using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using System.Reflection;
 
 namespace iMARSARLIMS.Services
 {
@@ -13,28 +15,39 @@ namespace iMARSARLIMS.Services
     {
         private readonly ContextClass db;
         private readonly IConfiguration _configuration;
-        public empMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger, IConfiguration configuration)
+        private readonly HttpClient _httpClient;
+        public empMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger, IConfiguration configuration, HttpClient httpClient)
         {
 
             db = context;
             this._configuration = configuration;
+            this._httpClient = httpClient;
         }
         async Task<ServiceStatusResponseModel> IempMasterServices.EmpLogin(LoginRequestModel loginRequestModel)
         {
             var employee = await (from em in db.empMaster
-                                  join emr in db.empRoleAccess on em.id equals emr.empId
-                                  join emc in db.empCenterAccess on em.id equals emc.empId
-                                  where em.userName == loginRequestModel.userName && em.password == loginRequestModel.password && em.defaultcentre == emc.centreId
-                                  select new LoginResponseModel
-                                  {
-                                      employeeId = em.id.ToString(),
-                                      Name = string.Concat(em.fName, ' ', em.lName),
-                                      DefaultRole = em.defaultrole.ToString(),
-                                      DefaultCenter = em.defaultcentre.ToString(),
-                                  }).FirstOrDefaultAsync();
+                      join emr in db.empRoleAccess on em.id equals emr.empId
+                      join emc in db.empCenterAccess on em.id equals emc.empId
+                      where em.userName == loginRequestModel.userName 
+                            && (em.password == loginRequestModel.password || em.tempPassword == loginRequestModel.password) 
+                            && em.defaultcentre == emc.centreId
+                      select new LoginResponseModel
+                      {
+                          employeeId = em.id.ToString(),
+                          Name = string.Concat(em.fName, " ", em.lName),
+                          DefaultRole = em.defaultrole.ToString(),
+                          DefaultCenter = em.defaultcentre.ToString(),
+                          tempPassword = em.tempPassword // Optional: remove if unnecessary
+                      }).FirstOrDefaultAsync();
 
             if (employee != null)
             {
+                var massage = "Login Successful#0";
+               if (loginRequestModel.password== employee.tempPassword)
+                {
+                    massage = "Login Successful#1";
+                }
+
                 var token = JwtTokenGenrator.GenerateToken(
                     userid: employee.employeeId,
                     Role: employee.DefaultRole,
@@ -48,7 +61,7 @@ namespace iMARSARLIMS.Services
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
-                    Message = "Login SuccessFul",
+                    Message = massage,
                     Data = employee,
                     Token = token
                 };
@@ -86,6 +99,15 @@ namespace iMARSARLIMS.Services
                                     Message = filename
                                 };
                             }
+                        }
+                        var count= db.empMaster.Where(e=>e.userName == empmaster.userName).Count();
+                        if (count > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "User Name Already Exist, Please Enter Unique Name"
+                            };
                         }
                         empmaster.fileName = filename;
                         var EmployeeRegData = CreateEmployee(empmaster);
@@ -603,6 +625,102 @@ namespace iMARSARLIMS.Services
                 Message = "",
                 Token= token
             };
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.forgetPassword(string Username)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                var empdata = await db.empMaster.Where(e => e.userName == Username).FirstOrDefaultAsync();
+
+                if (empdata == null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "User not found."
+                    };
+                }
+
+                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                var random = new Random();
+                var TempPassword = new string(Enumerable.Repeat(chars, 10).Select(s => s[random.Next(s.Length)]).ToArray());
+                if (empdata != null)
+                {
+                    empdata.tempPassword = TempPassword;
+                }
+                var SmsText = _configuration["SMSText:ForGetPassword"].Replace("{User}", empdata.fName).Replace("{TempPassword}", TempPassword);
+
+                var apiUrl = _configuration["SMSText:ApiUrl"];
+                var finalUrl = apiUrl.Replace("{MobileNo}", empdata.mobileNo);
+                finalUrl = finalUrl.Replace("{Msg}", SmsText);
+                finalUrl = finalUrl.Replace("{Sender}", "Testing");
+                try
+                {
+                    var response = await _httpClient.GetAsync(finalUrl);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        db.empMaster.Update(empdata);
+                        await db.SaveChangesAsync();
+                       await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "SMS sent successfully."
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = $"Failed to send SMS. Status code: {response.StatusCode}"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = $"An error occurred: {ex.Message}"
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.UpdatePassword(int Employeeid, string Password)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var empdata =await  db.empMaster.Where(e => e.id == Employeeid).FirstOrDefaultAsync();
+                    empdata.password = Password;
+                    empdata.tempPassword = "";
+                    db.empMaster.Update(empdata);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Password Reset Successful"
+
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+
+                    };
+
+                }
+            }
+
         }
     }
 }

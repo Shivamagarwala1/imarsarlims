@@ -129,7 +129,7 @@ builder.Services.AddScoped<IitemObservationMappingServices, itemObservationMappi
 builder.Services.AddScoped<IrateTypeWiseRateListServices, rateTypeWiseRateListServices>();
 builder.Services.AddSingleton<OpenAIService>();
 builder.Services.AddSingleton<JwtTokenGenrator>();
-
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 
