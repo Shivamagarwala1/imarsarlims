@@ -100,6 +100,7 @@ namespace iMARSARLIMS
         public DbSet<centreInvoice> centreInvoice { get; set; }
         public DbSet<CentrePayment> CentrePayment { get; set; }
         public DbSet<ThemeColour> ThemeColour { get; set; }
+        public DbSet<menuIconMaster> menuIconMaster { get; set; }
 
 
         public ContextClass(DbContextOptions<ContextClass> options) : base(options) { }
@@ -362,8 +363,13 @@ namespace iMARSARLIMS
          
             modelBuilder.Entity<CentrePayment>().HasKey(x => x.id);
             modelBuilder.Entity<CentrePayment>().Property(x => x.id).ValueGeneratedOnAdd();
+
             modelBuilder.Entity<ThemeColour>().HasKey(x => x.id);
             modelBuilder.Entity<ThemeColour>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<menuIconMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<menuIconMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            
 
 
 

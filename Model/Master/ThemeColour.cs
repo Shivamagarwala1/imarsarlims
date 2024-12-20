@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic.FileIO;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
@@ -6,12 +7,18 @@ namespace iMARSARLIMS.Model.Master
     [Table(nameof(ThemeColour))]
     public class ThemeColour
     {
-        public int id { get; set; } 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int id { get; set; }
+        [MaxLength(20)]
         public string headerColor { get; set; }
+        [MaxLength(20)]
         public string menuColor { get; set; }
+        [MaxLength(20)]
         public string subMenuColor { get; set; }
+        [MaxLength(20)]
         public string textColor { get; set; }
+        [MaxLength(20)]
         public string blockColor { get; set; }
-        public int isdefault { get; set; }
+        public byte isdefault { get; set; }
     }
 }

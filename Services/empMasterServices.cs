@@ -570,62 +570,89 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<ServiceStatusResponseModel> IempMasterServices.EmployeeWiseMenu(string EmplyeeId, string RoleId, string CentreId)
+        public async Task<ServiceStatusResponseModel> EmployeeWiseMenu(string employeeId, string roleId, string centreId)
         {
-            var MenuData = from rma in db.roleMenuAccess
+            // Fetch menu data
+            var menuData = from rma in db.roleMenuAccess
                            join mm in db.menuMaster on rma.menuId equals mm.id
                            join mm1 in db.menuMaster on rma.subMenuId equals mm1.id
+                           join mi in db.menuIconMaster on mm.iconId equals mi.id into parentIcons
+                           from parentIcon in parentIcons.DefaultIfEmpty()
+                           join mi1 in db.menuIconMaster on mm1.iconId equals mi1.id into childIcons
+                           from childIcon in childIcons.DefaultIfEmpty()
+                           where employeeId == rma.employeeId.ToString() && roleId == rma.roleId.ToString()
                            select new
                            {
                                ParentMenuId = mm.id,
                                ParentMenuName = mm.menuName,
                                ParentDisplayOrder = mm.displaySequence,
+                               ParentIcon = parentIcon,
                                ChildMenuId = mm1.id,
                                ChildMenuName = mm1.menuName,
                                NavigationURL = mm1.navigationUrl,
-                               ChildDisplayOrder = mm1.displaySequence
+                               ChildDisplayOrder = mm1.displaySequence,
+                               ChildIcon = childIcon
                            };
-            var groupedMenuData = MenuData
-            .GroupBy(m => new
-            {
-                m.ParentMenuId,
-                m.ParentMenuName,
-                m.ParentDisplayOrder
-            })
-            .Select(group => new
-            {
-                ParentMenuId = group.Key.ParentMenuId,
-                ParentMenuName = group.Key.ParentMenuName,
-                ParentDisplayOrder = group.Key.ParentDisplayOrder,
-                Children = group.Select(child => new
-                {
-                    child.ChildMenuId,
-                    child.ChildMenuName,
-                    child.NavigationURL,
-                    child.ChildDisplayOrder
-                }).OrderBy(child => child.ChildDisplayOrder).ToList()
-            })
-            .OrderBy(parent => parent.ParentDisplayOrder)
-            .ToList();
 
+            // Materialize data to allow client-side operations
+            var menuDataList = await menuData.ToListAsync();
+
+            // Perform string formatting on the client side
+            var groupedMenuData = menuDataList
+                .GroupBy(m => new
+                {
+                    m.ParentMenuId,
+                    m.ParentMenuName,
+                    m.ParentDisplayOrder,
+                    m.ParentIcon
+                })
+                .Select(group => new
+                {
+                    ParentMenuId = group.Key.ParentMenuId,
+                    ParentMenuName = group.Key.ParentMenuName,
+                    ParentDisplayOrder = group.Key.ParentDisplayOrder,
+                    ParentIcon = group.Key.ParentIcon != null
+                        ? $"import {{ {group.Key.ParentIcon.icon} }} from \"{group.Key.ParentIcon.reactLibrery}\";"
+                        : null,
+                    Children = group
+                        .Where(child => child.ChildMenuId != null)
+                        .Select(child => new
+                        {
+                            ChildMenuId = child.ChildMenuId,
+                            ChildMenuName = child.ChildMenuName,
+                            NavigationURL = child.NavigationURL,
+                            ChildDisplayOrder = child.ChildDisplayOrder,
+                            ChildIcon = child.ChildIcon != null
+                                ? $"import {{ {child.ChildIcon.icon} }} from \"{child.ChildIcon.reactLibrery}\";"
+                                : null
+                        })
+                        .OrderBy(child => child.ChildDisplayOrder)
+                        .ToList()
+                })
+                .OrderBy(parent => parent.ParentDisplayOrder)
+                .ToList();
+
+            // Generate JWT token
             var token = JwtTokenGenrator.GenerateToken(
-                userid: EmplyeeId,
-                Role: RoleId,
-                Centreid: CentreId,
+                userid: employeeId,
+                Role: roleId,
+                Centreid: centreId,
                 key: _configuration["JwtSettings:Key"],
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
                 expiryMinutes: int.Parse(_configuration["JwtSettings:ExpiryMinutes"])
-                );
+            );
 
+            // Return response
             return new ServiceStatusResponseModel
             {
                 Success = true,
                 Data = groupedMenuData,
-                Message = "",
-                Token= token
+                Message = "Menu retrieved successfully.",
+                Token = token
             };
         }
+
 
         async Task<ServiceStatusResponseModel> IempMasterServices.forgetPassword(string Username)
         {
