@@ -18,20 +18,20 @@ namespace iMARSARLIMS.Model.Master
         public string lName { get; set; }
         [ MaxLength(100)]
         public string address { get; set; }
-        public int pinCode { get; set; }
+        public int? pinCode { get; set; }
         [Required, MaxLength(50)]
         public string email { get; set; }
         [Required,MaxLength(10)]
         public string mobileNo { get; set; }
-        [Required, MaxLength(15)]
-        public string landline { get; set; }
+        [MaxLength(15)]
+        public string? landline { get; set; }
         [Required, MaxLength(30)]
         public string deptAccess { get; set; }
         public DateTime dob { get; set; }
         [MaxLength(50)]
         public string? qualification { get; set; }
         [ MaxLength(5)]
-        public string bloodGroup { get; set; }
+        public string? bloodGroup { get; set; }
         [Required]
         public int designationId { get; set; }
         [Required, MaxLength(20)]
@@ -42,8 +42,9 @@ namespace iMARSARLIMS.Model.Master
         public int state { get; set; }
         public int city { get; set; }
         public int area { get; set; }
+        [Required]
         public int defaultcentre { get; set; }
-        public int pro { get; set; }
+        public int? pro { get; set; }
         [Required]
         public int defaultrole { get; set; }
         public byte rate { get; set; }
@@ -56,8 +57,10 @@ namespace iMARSARLIMS.Model.Master
         public byte isDiscountAppRights { get; set; }
         public byte isPwdchange { get; set; }
         public byte isemailotp { get; set; }
-        public string fromIP { get; set; }
-        public string toIP { get; set; }
+        [MaxLength(20)]
+        public string? fromIP { get; set; }
+        [MaxLength(20)]
+        public string? toIP { get; set; }
         public byte isdeviceAuthentication { get; set; }
 
         [MaxLength(20)]

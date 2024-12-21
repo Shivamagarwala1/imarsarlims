@@ -9,9 +9,9 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         [Required]
-        public int? empId { get; set; }
+        public int empId { get; set; }
         [Required]
-        public int? centreId { get; set; }
+        public int centreId { get; set; }
         [Required, MaxLength(20)]
         public string? ipAddress { get; set; }
         [Required, MaxLength(20)]
@@ -21,13 +21,13 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(20)]
         public string? hostName { get; set; }
         [Required,MaxLength(20)]
-        public string? userName { get; set; }
+        public string userName { get; set; }
         [Required, MaxLength(50)]
-        public string? empName { get; set; }
+        public string empName { get; set; }
         [Required]
         public int? roleId { get; set; }
         [Required]
-        public DateTime? logindatetime { get; set; }
+        public DateTime logindatetime { get; set; }
         [Required]
         public DateTime? logoutdatetime { get; set; }
         public DateTime? creadteddate { get; set; }

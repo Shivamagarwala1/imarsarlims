@@ -37,7 +37,9 @@ namespace iMARSARLIMS.Services
                           Name = string.Concat(em.fName, " ", em.lName),
                           DefaultRole = em.defaultrole.ToString(),
                           DefaultCenter = em.defaultcentre.ToString(),
-                          tempPassword = em.tempPassword // Optional: remove if unnecessary
+                          tempPassword = string.IsNullOrEmpty(em.tempPassword) ? "" : em.tempPassword,
+                          image = string.IsNullOrEmpty(em.fileName) ? _configuration["FileBase64:profilePic"] : em.fileName
+                          // Optional: remove if unnecessary
                       }).FirstOrDefaultAsync();
 
             if (employee != null)
@@ -84,22 +86,9 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    string image = _configuration["FileBase64:profilePic"];
-                    var filename = "";
                     if (empmaster.id == 0)
                     {
-                        if (empmaster.fileName != "")
-                        {
-                            filename = await Uploademployeeimage(empmaster.fileName);
-                            if (filename == "Invalid image data." || filename == "Error uploading image")
-                            {
-                                return new ServiceStatusResponseModel
-                                {
-                                    Success = false,
-                                    Message = filename
-                                };
-                            }
-                        }
+                        
                         var count= db.empMaster.Where(e=>e.userName == empmaster.userName).Count();
                         if (count > 0)
                         {
@@ -109,7 +98,6 @@ namespace iMARSARLIMS.Services
                                 Message = "User Name Already Exist, Please Enter Unique Name"
                             };
                         }
-                        empmaster.fileName = filename;
                         var EmployeeRegData = CreateEmployee(empmaster);
                         var EmployeeData = db.empMaster.Add(EmployeeRegData);
                         await db.SaveChangesAsync();
@@ -118,7 +106,6 @@ namespace iMARSARLIMS.Services
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.id == employeeId).ToList();
-                        result.ForEach(e => e.fileName = image);
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -139,7 +126,6 @@ namespace iMARSARLIMS.Services
                         await UpdateEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.id == employeeId).ToList();
-                        result.ForEach(e => e.fileName = image);
                         return new ServiceStatusResponseModel
                         {
                             Success = true,

@@ -19,6 +19,9 @@ namespace iMARSARLIMS.Model.Master
         public string textColor { get; set; }
         [MaxLength(20)]
         public string blockColor { get; set; }
+        [MaxLength(20)]
+        public string color { get; set; }
+        public int order { get; set; }
         public byte isdefault { get; set; }
     }
 }

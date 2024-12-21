@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20241221053704_211224")]
+    partial class _211224
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1342,13 +1345,15 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
 
-                    b.Property<int>("centreId")
+                    b.Property<int?>("centreId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("creadteddate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("empId")
+                    b.Property<int?>("empId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("empName")
@@ -1366,7 +1371,8 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
-                    b.Property<DateTime>("logindatetime")
+                    b.Property<DateTime?>("logindatetime")
+                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("logoutdatetime")
@@ -1417,6 +1423,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("bloodGroup")
+                        .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("varchar(5)");
 
@@ -1472,8 +1479,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("fromIP")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
@@ -1499,6 +1506,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("landline")
+                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
 
@@ -1512,10 +1520,10 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
-                    b.Property<int?>("pinCode")
+                    b.Property<int>("pinCode")
                         .HasColumnType("int");
 
-                    b.Property<int?>("pro")
+                    b.Property<int>("pro")
                         .HasColumnType("int");
 
                     b.Property<string>("qualification")
@@ -1538,8 +1546,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("varchar(10)");
 
                     b.Property<string>("toIP")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");

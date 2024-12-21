@@ -7,5 +7,6 @@
         public string DefaultRole { get; set; }
         public string DefaultCenter { get; set; }
         public string tempPassword { get; set; }
+        public string image { get; set; }
     }
 }
