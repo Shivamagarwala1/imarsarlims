@@ -63,7 +63,7 @@ namespace iMARSARLIMS.Model.Master
         [MaxLength(20)]
         public string? adminPassword { get; set; }
         [MaxLength(20)]
-        public string tempPassword { get; set; }
+        public string? tempPassword { get; set; }
 
         public List<empCenterAccess>? addEmpCentreAccess { get; set; }
         public List<empRoleAccess>? addEmpRoleAccess { get; set; }

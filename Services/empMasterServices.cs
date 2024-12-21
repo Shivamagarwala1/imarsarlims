@@ -206,7 +206,8 @@ namespace iMARSARLIMS.Services
                 createdDateTime = empmaster.createdDateTime,
                 fromIP = empmaster.fromIP,
                 toIP = empmaster.toIP,
-                isdeviceAuthentication = empmaster.isdeviceAuthentication
+                isdeviceAuthentication = empmaster.isdeviceAuthentication,
+                tempPassword = empmaster.tempPassword,
 
             };
         }
@@ -318,6 +319,7 @@ namespace iMARSARLIMS.Services
             EmpMaster.fromIP = empmaster.fromIP;
             EmpMaster.toIP = empmaster.toIP;
             EmpMaster.isdeviceAuthentication = empmaster.isdeviceAuthentication;
+            EmpMaster.tempPassword = empmaster.tempPassword;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)

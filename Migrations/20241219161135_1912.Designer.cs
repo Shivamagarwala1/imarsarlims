@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20241219161135_1912")]
+    partial class _1912
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,31 +276,26 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("blockColor")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("headerColor")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
-                    b.Property<byte>("isdefault")
-                        .HasColumnType("tinyint unsigned");
+                    b.Property<int>("isdefault")
+                        .HasColumnType("int");
 
                     b.Property<string>("menuColor")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("subMenuColor")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("textColor")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("id");
 
@@ -1525,11 +1523,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("state")
                         .HasColumnType("int");
 
-                    b.Property<string>("tempPassword")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
                     b.Property<string>("title")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -2376,27 +2369,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("machine_result");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.menuIconMaster", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("icon")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
-
-                    b.Property<string>("reactLibrery")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("menuIconMaster");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.menuMaster", b =>
