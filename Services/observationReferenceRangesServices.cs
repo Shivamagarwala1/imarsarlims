@@ -2,8 +2,6 @@
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
-using System.Reflection.PortableExecutable;
-using System.Reflection;
 
 namespace iMARSARLIMS.Services
 {

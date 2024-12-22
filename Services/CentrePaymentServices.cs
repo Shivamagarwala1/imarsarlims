@@ -3,9 +3,6 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Mysqlx.Crud;
-using System.Reflection.Metadata;
 
 namespace iMARSARLIMS.Services
 {

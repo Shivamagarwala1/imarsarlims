@@ -1,12 +1,7 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
 
 namespace iMARSARLIMS.Services
 {

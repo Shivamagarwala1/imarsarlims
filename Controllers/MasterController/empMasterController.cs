@@ -2,16 +2,10 @@
 using HiQPdf;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Crmf;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using System.Text;
 
 namespace iMARSARLIMS.Controllers.MasterController

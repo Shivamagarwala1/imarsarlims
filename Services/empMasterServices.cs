@@ -3,11 +3,8 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using System.Reflection;
 
 namespace iMARSARLIMS.Services
 {
@@ -386,53 +383,53 @@ namespace iMARSARLIMS.Services
             EmpRoleAccess.updateDateTime = emproleaccess.updateDateTime;
         }
 
-        private async Task<string> Uploademployeeimage(string fileBase64data)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(fileBase64data))
-                {
-                    return "Invalid image data.";
-                }
-                string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
-                string mainFolder = _configuration["DocumentPath:EmployeeImage"];
-                if (string.IsNullOrEmpty(primaryFolder) || string.IsNullOrEmpty(mainFolder))
-                {
-                    return "Invalid folder configuration.";
-                }
-                if (!Directory.Exists(mainFolder))
-                {
-                    Directory.CreateDirectory(mainFolder);
-                }
-                string uploadPath = Path.Combine(primaryFolder, mainFolder);
-                if (!Directory.Exists(uploadPath))
-                {
-                    Directory.CreateDirectory(uploadPath);
-                }
-                string extension = ".jpg";
-                if (fileBase64data.StartsWith("data:image/png;base64,"))
-                {
-                    extension = ".png";
-                    fileBase64data = fileBase64data.Substring("data:image/png;base64,".Length);  // Remove data URL prefix
-                }
-                else if (fileBase64data.StartsWith("data:image/jpeg;base64,"))
-                {
-                    extension = ".jpeg";
-                    fileBase64data = fileBase64data.Substring("data:image/jpeg;base64,".Length);  // Remove data URL prefix
-                }
+        //private async Task<string> Uploademployeeimage(string fileBase64data)
+        //{
+        //    try
+        //    {
+        //        if (string.IsNullOrEmpty(fileBase64data))
+        //        {
+        //            return "Invalid image data.";
+        //        }
+        //        string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
+        //        string mainFolder = _configuration["DocumentPath:EmployeeImage"];
+        //        if (string.IsNullOrEmpty(primaryFolder) || string.IsNullOrEmpty(mainFolder))
+        //        {
+        //            return "Invalid folder configuration.";
+        //        }
+        //        if (!Directory.Exists(mainFolder))
+        //        {
+        //            Directory.CreateDirectory(mainFolder);
+        //        }
+        //        string uploadPath = Path.Combine(primaryFolder, mainFolder);
+        //        if (!Directory.Exists(uploadPath))
+        //        {
+        //            Directory.CreateDirectory(uploadPath);
+        //        }
+        //        string extension = ".jpg";
+        //        if (fileBase64data.StartsWith("data:image/png;base64,"))
+        //        {
+        //            extension = ".png";
+        //            fileBase64data = fileBase64data.Substring("data:image/png;base64,".Length);  // Remove data URL prefix
+        //        }
+        //        else if (fileBase64data.StartsWith("data:image/jpeg;base64,"))
+        //        {
+        //            extension = ".jpeg";
+        //            fileBase64data = fileBase64data.Substring("data:image/jpeg;base64,".Length);  // Remove data URL prefix
+        //        }
 
-                string fileName = Guid.NewGuid().ToString() + extension;
-                string filePath = Path.Combine(uploadPath, fileName);
-                byte[] fileBytes = Convert.FromBase64String(fileBase64data);
-                await File.WriteAllBytesAsync(filePath, fileBytes);
+        //        string fileName = Guid.NewGuid().ToString() + extension;
+        //        string filePath = Path.Combine(uploadPath, fileName);
+        //        byte[] fileBytes = Convert.FromBase64String(fileBase64data);
+        //        await File.WriteAllBytesAsync(filePath, fileBytes);
 
-                return filePath;
-            }
-            catch (Exception ex)
-            {
-                return "Error uploading image";
-            }
-        }
+        //        return filePath;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return "Error uploading image";
+        //    }
+        //}
 
 
         async Task<ServiceStatusResponseModel> IempMasterServices.UploadDocument(IFormFile file)

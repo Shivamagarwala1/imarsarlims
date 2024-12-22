@@ -1,5 +1,4 @@
-﻿using iMARSARLIMS.Model.Account;
-using iMARSARLIMS.Request_Model;
+﻿using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 
 namespace iMARSARLIMS.Interface

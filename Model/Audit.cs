@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace iMARSARLIMS.Model
+﻿namespace iMARSARLIMS.Model
 {
     public class Audit
     {

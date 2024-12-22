@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography;
 
 namespace iMARSARLIMS.Model.Transaction
 {

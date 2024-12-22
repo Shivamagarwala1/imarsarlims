@@ -1,6 +1,5 @@
 ﻿using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

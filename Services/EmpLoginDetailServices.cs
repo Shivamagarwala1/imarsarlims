@@ -2,7 +2,6 @@
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
-using System.Net.Mail;
 
 namespace iMARSARLIMS.Services
 {

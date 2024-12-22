@@ -1,8 +1,6 @@
 ﻿using iMARSARLIMS.Model.Master;
 using Microsoft.AspNetCore.Mvc;
-using iMARSARLIMS.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {

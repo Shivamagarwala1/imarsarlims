@@ -1,16 +1,6 @@
-﻿using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Model.Transaction;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using iMARSARLIMS.Model.Transaction;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OData.UriParser;
-using Org.BouncyCastle.Asn1.Crmf;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Ocsp;
-using System.ComponentModel.Design;
-using System.Diagnostics.Metrics;
-using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace iMARSARLIMS.Controllers.transactionController
 {

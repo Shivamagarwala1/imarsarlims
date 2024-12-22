@@ -1,14 +1,8 @@
-﻿using iMARSARLIMS.Interface;
+﻿using iMARSARLIMS.Controllers;
+using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Reflection;
-using iMARSARLIMS.Request_Model;
-using Microsoft.AspNetCore.Server.IISIntegration;
-using iMARSARLIMS.Controllers;
-using Org.BouncyCastle.Crypto;
-using System.Security.Cryptography.X509Certificates;
 
 namespace iMARSARLIMS.Services
 {

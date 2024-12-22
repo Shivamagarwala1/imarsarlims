@@ -1,11 +1,8 @@
-﻿using iMARSARLIMS.Model.Master;
-using Microsoft.AspNetCore.Mvc;
-using iMARSARLIMS.Model;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using iMARSARLIMS.Request_Model;
+﻿using iMARSARLIMS.Interface;
+using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
-using iMARSARLIMS.Interface;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {

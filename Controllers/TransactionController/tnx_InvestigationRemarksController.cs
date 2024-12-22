@@ -1,5 +1,4 @@
-﻿using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Model.Transaction;
+﻿using iMARSARLIMS.Model.Transaction;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class machineObservationMappingController : BaseController<machineObservationMapping>
     {
         private readonly ContextClass db;
