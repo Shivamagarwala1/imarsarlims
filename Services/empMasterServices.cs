@@ -5,6 +5,7 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Google.Cloud.Dialogflow.V2.MessageEntry.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -593,28 +594,28 @@ namespace iMARSARLIMS.Services
                 })
                 .Select(group => new
                 {
-                    ParentMenuId = group.Key.ParentMenuId,
-                    ParentMenuName = group.Key.ParentMenuName,
-                    ParentDisplayOrder = group.Key.ParentDisplayOrder,
-                    ParentIcon = group.Key.ParentIcon != null
-                        ? $"import {{ {group.Key.ParentIcon.icon} }} from \"{group.Key.ParentIcon.reactLibrery}\";"
+                    parentMenuId = group.Key.ParentMenuId,
+                    parentMenuName = group.Key.ParentMenuName,
+                    parentDisplayOrder= group.Key.ParentDisplayOrder,
+                    parentIcons = group.Key.ParentIcon != null
+                        ? string.Concat(group.Key.ParentIcon.icon , " ", group.Key.ParentIcon.reactLibrery)
                         : null,
-                    Children = group
+                    children = group
                         .Where(child => child.ChildMenuId != null)
                         .Select(child => new
                         {
-                            ChildMenuId = child.ChildMenuId,
-                            ChildMenuName = child.ChildMenuName,
-                            NavigationURL = child.NavigationURL,
-                            ChildDisplayOrder = child.ChildDisplayOrder,
-                            ChildIcon = child.ChildIcon != null
-                                ? $"import {{ {child.ChildIcon.icon} }} from \"{child.ChildIcon.reactLibrery}\";"
+                            childMenuId = child.ChildMenuId,
+                            childMenuName = child.ChildMenuName,
+                            navigationURL = child.NavigationURL,
+                            childDisplayOrder= child.ChildDisplayOrder,
+                            childIcons = child.ChildIcon != null
+                                ? string.Concat(child.ChildIcon.icon," ",child.ChildIcon.reactLibrery)
                                 : null
                         })
-                        .OrderBy(child => child.ChildDisplayOrder)
+                        .OrderBy(child => child.childDisplayOrder)
                         .ToList()
                 })
-                .OrderBy(parent => parent.ParentDisplayOrder)
+                .OrderBy(parent => parent.parentDisplayOrder)
                 .ToList();
 
             // Generate JWT token
@@ -733,6 +734,18 @@ namespace iMARSARLIMS.Services
                 }
             }
 
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.GetAllMenu()
+        {
+            var menunevigationUrl=  await db.menuMaster.Where(m=>m.parentId!=0).Select(m=> m.navigationUrl).Distinct().ToListAsync();
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = menunevigationUrl,
+                Message = "Menu retrieved successfully.",
+                
+            };
         }
     }
 }

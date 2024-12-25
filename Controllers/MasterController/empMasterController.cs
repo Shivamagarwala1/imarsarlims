@@ -96,6 +96,21 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+
+        [HttpGet("GetAllMenu")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> GetAllMenu()
+        {
+            try
+            {
+                var result = await _empMasterServices.GetAllMenu();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost("SaveEmployee")]
         public async Task<ActionResult<ServiceStatusResponseModel>> SaveEmployee(empMaster empmaster)
         {

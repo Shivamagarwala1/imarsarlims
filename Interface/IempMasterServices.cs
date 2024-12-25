@@ -14,6 +14,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> EmployeeWiseCentre(int EmplyeeId);
         Task<ServiceStatusResponseModel> EmployeeWiseRole(int EmplyeeId);
         Task<ServiceStatusResponseModel> EmployeeWiseMenu(string EmplyeeId, string RoleId, string CentreId);
+        Task<ServiceStatusResponseModel> GetAllMenu();
         Task<ServiceStatusResponseModel> forgetPassword(string Username);
         Task<ServiceStatusResponseModel> UpdatePassword(int Employeeid, string Password);
     }
