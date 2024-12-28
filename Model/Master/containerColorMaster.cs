@@ -8,7 +8,7 @@ namespace iMARSARLIMS.Model.Master
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
-        [Required,MaxLength(10)]
+        [Required,MaxLength(20)]
         public string colorName { get; set; }
     }
 }

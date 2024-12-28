@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
 {
@@ -7,11 +8,14 @@ namespace iMARSARLIMS.Model.Master
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
+        [MaxLength(150)]
         public string? menuName { get; set; }
+        [MaxLength(150)]
         public string? dispalyName { get; set; }
+        [MaxLength(200)]
         public string? navigationUrl { get; set; }
         public int? displaySequence { get; set; }
         public int? parentId { get; set; }
-        public long iconId { get; set; }
+        public int iconId { get; set; }
     }
 }

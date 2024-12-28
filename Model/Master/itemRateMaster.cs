@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
 {
@@ -10,6 +11,7 @@ namespace iMARSARLIMS.Model.Master
         public int id { get; set; }
         public int itemId { get; set; }
         public int? rateTypeId { get; set; }
+        [MaxLength(20)]
         public string? itemCode { get; set; }
     }
 }

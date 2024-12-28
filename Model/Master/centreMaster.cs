@@ -18,6 +18,7 @@ namespace iMARSARLIMS.Model.Master
         public string? mobileNo { get; set; }
         [MaxLength(15)]
         public string? landline { get; set; }
+        [MaxLength(200)]
         public string? address { get; set; }
 
         public int pinCode { get; set; }
@@ -25,7 +26,7 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(100)]
         public string? ownerName { get; set; }
         public int proId { get; set; }
-
+        [MaxLength(50)]
         public string? reportEmail { get; set; }
         public int parentCentreID { get; set; }
         public int processingLab { get; set; }
@@ -72,7 +73,7 @@ namespace iMARSARLIMS.Model.Master
         public int? isDefault { get; set; }
         public int? isLab { get; set; }
         public int minBookingAmt { get; set; }
-        public string? lockedBy { get; set; }
+        public int? lockedBy { get; set; }
         public DateTime? LockDate { get; set; }
         public string? unlockBy { get; set; }
         public DateTime? unlockDate { get; set; }
@@ -89,6 +90,7 @@ namespace iMARSARLIMS.Model.Master
         public int isLock { get; set; }
         public int isPrePrintedBarcode { get; set; }
         public int ac { get; set; }
+        [MaxLength(100)]
         public string centreAddress1 { get; set; }
         public int clientmrp { get; set; }
         public int documentType { get; set; }

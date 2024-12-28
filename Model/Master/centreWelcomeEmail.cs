@@ -14,7 +14,7 @@ namespace iMARSARLIMS.Model.Master
         public string? centreCode { get; set; }
         [Required, MaxLength(50)]
         public string? emailId { get; set; }
-        [Required, MaxLength(500)]
+        [Required]
         public string? emailBody { get; set; }
         [Required, MaxLength(50)]
         public string? subject { get; set; }

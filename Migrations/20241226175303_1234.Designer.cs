@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20241226175303_1234")]
+    partial class _1234
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,41 +146,34 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("defultReading")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("descrition")
                         .HasColumnType("longtext");
 
                     b.Property<string>("firstRange")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("imagePath")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("secondRange")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("sub_TypeName")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("thirdRange")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("typeId")
                         .HasColumnType("int");
 
                     b.Property<string>("unit")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");
@@ -197,8 +193,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("allergyType")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
@@ -230,8 +225,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("formula")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<byte?>("isBold")
                         .HasColumnType("tinyint unsigned");
@@ -320,47 +314,44 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("blockColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("color")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("headerColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("iconColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<byte>("isdefault")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("menuColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<int>("order")
                         .HasColumnType("int");
 
                     b.Property<string>("subMenuColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("textColor")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("id");
 
@@ -445,8 +436,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("suffix")
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("id");
 
@@ -586,8 +576,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("address")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("adharNo")
                         .HasMaxLength(16)
@@ -618,8 +607,7 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("centreAddress1")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("centrecode")
                         .IsRequired()
@@ -701,8 +689,8 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
 
-                    b.Property<int?>("lockedBy")
-                        .HasColumnType("int");
+                    b.Property<string>("lockedBy")
+                        .HasColumnType("longtext");
 
                     b.Property<int>("minBookingAmt")
                         .HasColumnType("int");
@@ -763,8 +751,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("reportEmail")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("reportHeader")
                         .HasColumnType("longtext");
@@ -837,7 +824,8 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("emailBody")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("emailId")
                         .IsRequired()
@@ -890,7 +878,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<int?>("oldBookingCentre")
                         .IsRequired()
-                        .HasMaxLength(20)
                         .HasColumnType("int");
 
                     b.Property<int?>("oldCompanyId")
@@ -937,8 +924,8 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("colorName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
 
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
@@ -1005,8 +992,8 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("designationName")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
@@ -1688,8 +1675,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("helpName")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("itemId")
                         .HasColumnType("int");
@@ -1698,8 +1684,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("mappedName")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("longtext");
 
                     b.HasKey("id");
 
@@ -1732,15 +1717,13 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("fYear")
-                        .HasMaxLength(4)
-                        .HasColumnType("varchar(4)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("maxID")
                         .HasColumnType("int");
 
                     b.Property<string>("type")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("typeId")
                         .HasColumnType("int");
@@ -2062,8 +2045,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("itemCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("itemId")
                         .HasColumnType("int");
@@ -2478,25 +2460,22 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("dispalyName")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("displaySequence")
                         .HasColumnType("int");
 
-                    b.Property<int>("iconId")
-                        .HasColumnType("int");
+                    b.Property<long>("iconId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("menuName")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("navigationUrl")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("parentId")
                         .HasColumnType("int");

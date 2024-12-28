@@ -9,7 +9,7 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 
         public int id { get; set; }
-        [Required,MaxLength(20)]
+        [Required,MaxLength(30)]
         public string designationName { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace iMARSARLIMS.Model.Master
         public int id { get; set; }
         [Required]
         public string? workOrderId { get; set; }
-        [Required]
+        [Required,MaxLength(20)]
         public int? oldBookingCentre { get; set; }
         [Required]
         public int? newBookingCentre { get; set; }

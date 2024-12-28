@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
 {
@@ -13,6 +14,7 @@ namespace iMARSARLIMS.Model.Master
         public byte? isProfile { get; set; }
         public byte? isPackage { get; set; }
         public short itemType { get; set; }
+        [MaxLength(200)]
         public string? formula { get; set; }
         public byte? dlcCheck { get; set; }
         public byte? showInReport { get; set; }
