@@ -11,8 +11,6 @@ namespace iMARSARLIMS.Model.Master
         [MaxLength(30)]
 
         public string icon { get; set; }
-        [MaxLength(30)]
-        public string reactLibrery { get; set; } 
 
     }
 }

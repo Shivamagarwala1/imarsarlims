@@ -598,8 +598,7 @@ namespace iMARSARLIMS.Services
                     parentMenuName = group.Key.ParentMenuName,
                     parentDisplayOrder= group.Key.ParentDisplayOrder,
                     parentIcons = group.Key.ParentIcon != null
-                        ? string.Concat(group.Key.ParentIcon.icon , " ", group.Key.ParentIcon.reactLibrery)
-                        : null,
+                        ? group.Key.ParentIcon.icon : null,
                     children = group
                         .Where(child => child.ChildMenuId != null)
                         .Select(child => new
@@ -609,8 +608,7 @@ namespace iMARSARLIMS.Services
                             navigationURL = child.NavigationURL,
                             childDisplayOrder= child.ChildDisplayOrder,
                             childIcons = child.ChildIcon != null
-                                ? string.Concat(child.ChildIcon.icon," ",child.ChildIcon.reactLibrery)
-                                : null
+                                ? child.ChildIcon.icon  : null
                         })
                         .OrderBy(child => child.childDisplayOrder)
                         .ToList()
