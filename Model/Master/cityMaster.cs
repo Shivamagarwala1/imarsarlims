@@ -11,6 +11,6 @@ namespace iMARSARLIMS.Model.Master
         [Required,MaxLength(50)]
         public string cityName { get; set; }
         [Required]
-        public int stateID { get; set; }
+        public int districtid { get; set; }
     }
 }

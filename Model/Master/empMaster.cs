@@ -23,8 +23,6 @@ namespace iMARSARLIMS.Model.Master
         public string email { get; set; }
         [Required,MaxLength(10)]
         public string mobileNo { get; set; }
-        [MaxLength(15)]
-        public string? landline { get; set; }
         [Required, MaxLength(30)]
         public string deptAccess { get; set; }
         public DateTime dob { get; set; }

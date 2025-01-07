@@ -37,6 +37,60 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpPost("UpdateCentreStatus")]
+        public async Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, bool status, int UserId)
+        {
+            try
+            {
+                var result = await _centreMasterServices.UpdateCentreStatus(CentreId, status, UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
+        [HttpGet("GetParentCentre")]
+        public async Task<ServiceStatusResponseModel> GetParentCentre()
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetParentCentre();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
+        [HttpGet("GetRateType")]
+        public async Task<ServiceStatusResponseModel> GetRateType()
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetRateType();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
 
     }
 }

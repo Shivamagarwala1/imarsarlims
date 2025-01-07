@@ -5,6 +5,7 @@ using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -19,31 +20,93 @@ namespace iMARSARLIMS.Services
             db = context;
         }
 
-        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.GetMenuList(menuAccess MenuAccess)
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.EmpPageAccessRemove(int Id)
         {
-            var employee = await (from rma in db.roleMenuAccess
-                                  join mm in db.menuMaster on rma.menuId equals mm.id
-                                  join mm1 in db.menuMaster on rma.subMenuId equals mm1.id
-                                  where rma.employeeId == MenuAccess.employeeId && rma.roleId == MenuAccess.roleId
-                                  orderby mm1.displaySequence
-                                  select new
-                                  {
-                                      rma.roleId,
-                                      MainMenu = mm.dispalyName,
-                                      SubMenu = mm1.dispalyName,
-                                      mm1.navigationUrl
-                                  }).ToListAsync();
-
-            if (employee != null)
+            using (var transaction = await db.Database.BeginTransactionAsync())
             {
+                try
+                {
+                    var menuAccess = await db.roleMenuAccess.Where(r => r.id == Id).FirstOrDefaultAsync();
+                    if (menuAccess == null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Menu access not found"
+                        };
+                    }
+
+                    db.roleMenuAccess.Remove(menuAccess);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Access Removed Successfully"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync(); 
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = $"Error: {ex.Message}"
+                    };
+                }
+            }
+        }
+
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.GetAllRoleMenuAcess(ODataQueryOptions<roleMenuAccess> queryOptions)
+        {
+            try
+            {
+                var rawData = db.roleMenuAccess.AsQueryable();
+
+                var filteredData = (IQueryable<roleMenuAccess>)queryOptions.Filter
+                    .ApplyTo(rawData, new ODataQuerySettings
+                    {
+                        HandleNullPropagation = HandleNullPropagationOption.False
+                    });
+
+                var totalCount = await filteredData.CountAsync();
+
+                var paginatedData = queryOptions.ApplyTo(filteredData, new ODataQuerySettings
+                {
+                    HandleNullPropagation = HandleNullPropagationOption.False
+                }).Cast<roleMenuAccess>();
+
+                var AccessData = await (from pd in paginatedData
+                                        join em in db.empMaster on pd.employeeId equals em.id
+                                        join mm in db.menuMaster on pd.menuId equals mm.id
+                                        join mm1 in db.menuMaster on pd.subMenuId equals mm1.id
+                                        join rm in db.roleMaster on pd.roleId equals rm.id
+                                        select new
+                                        {
+                                            pd.id,
+                                            Name = em.fName + " " + em.lName,
+                                            MenuMame = mm.menuName,
+                                            SubMenuName = mm1.menuName,
+                                            rm.roleName
+                                        }).ToListAsync();
+
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
-                    Data = employee
+                    Data = AccessData,
+                    Count = totalCount
                 };
             }
-
-            return new ServiceStatusResponseModel();
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
         }
 
         async Task<ServiceStatusResponseModel> IroleMenuAccessServices.SaveRoleMenuAccess(RoleMenuAccessRequestModel roleMenu)

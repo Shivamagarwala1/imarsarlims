@@ -147,10 +147,10 @@ namespace iMARSARLIMS.Services
             {
                 id = centremaster.id,
                 centretype = centremaster.centretype,
+                centretypeid= centremaster.centretypeid,
                 centrecode = centremaster.centrecode,
                 companyName = centremaster.companyName,
                 mobileNo = centremaster.mobileNo,
-                landline = centremaster.landline,
                 address = centremaster.address,
                 pinCode = centremaster.pinCode,
                 email = centremaster.email,
@@ -164,8 +164,6 @@ namespace iMARSARLIMS.Services
                 reportLock = centremaster.reportLock,
                 bookingLock = centremaster.bookingLock,
                 unlockTime = centremaster.unlockTime,
-                smsAllow = centremaster.smsAllow,
-                emailAllow = centremaster.emailAllow,
                 paymentMode = centremaster.paymentMode,
                 paymentModeId = centremaster.paymentModeId,
                 reportHeader = centremaster.reportHeader,
@@ -214,9 +212,9 @@ namespace iMARSARLIMS.Services
                 createdById = centremaster.createdById,
                 createdDateTime = centremaster.createdDateTime,
                 ac = centremaster.ac,
-                centreAddress1 = centremaster.centreAddress1,
                 clientmrp = centremaster.clientmrp,
                 documentType = centremaster.documentType,
+                Document = centremaster.Document,
                 receptionarea = centremaster.receptionarea,
                 waitingarea = centremaster.waitingarea,
                 watercooler = centremaster.waitingarea
@@ -235,7 +233,6 @@ namespace iMARSARLIMS.Services
                 pinCode = centremaster.pinCode,
                 email = centremaster.email,
                 mobileNo = centremaster.mobileNo,
-                landline = centremaster.landline,
                 userName = centremaster.centrecode,
                 password = centremaster.mobileNo,
                 createdById = centremaster.createdById,
@@ -306,11 +303,9 @@ namespace iMARSARLIMS.Services
         }
         private static centreMaster UpdateCentreDetails(centreMaster CentreMaster, centreMaster centremaster)
         {
-            CentreMaster.centretype = centremaster.centretype;
             CentreMaster.centrecode = centremaster.centrecode;
             CentreMaster.companyName = centremaster.companyName;
             CentreMaster.mobileNo = centremaster.mobileNo;
-            CentreMaster.landline = centremaster.landline;
             CentreMaster.address = centremaster.address;
             CentreMaster.pinCode = centremaster.pinCode;
             CentreMaster.email = centremaster.email;
@@ -321,13 +316,6 @@ namespace iMARSARLIMS.Services
             CentreMaster.processingLab = centremaster.processingLab;
             CentreMaster.creditLimt = centremaster.creditLimt;
             CentreMaster.allowDueReport = centremaster.allowDueReport;
-            CentreMaster.reportLock = centremaster.reportLock;
-            CentreMaster.bookingLock = centremaster.bookingLock;
-            CentreMaster.unlockTime = centremaster.unlockTime;
-            CentreMaster.smsAllow = centremaster.smsAllow;
-            CentreMaster.emailAllow = centremaster.emailAllow;
-            CentreMaster.paymentMode = centremaster.paymentMode;
-            CentreMaster.paymentModeId = centremaster.paymentModeId;
             CentreMaster.reportHeader = centremaster.reportHeader;
             CentreMaster.reciptHeader = centremaster.reciptHeader;
             CentreMaster.reciptFooter = centremaster.reciptFooter;
@@ -372,9 +360,9 @@ namespace iMARSARLIMS.Services
             CentreMaster.isPrePrintedBarcode = centremaster.isPrePrintedBarcode;
             CentreMaster.isActive = centremaster.isActive;
             CentreMaster.ac = centremaster.ac;
-            CentreMaster.centreAddress1 = centremaster.centreAddress1;
             CentreMaster.clientmrp = centremaster.clientmrp;
             CentreMaster.documentType = centremaster.documentType;
+            CentreMaster.Document = centremaster.Document;
             CentreMaster.receptionarea = centremaster.receptionarea;
             CentreMaster.waitingarea = centremaster.waitingarea;
             CentreMaster.watercooler = centremaster.waitingarea;
@@ -382,6 +370,112 @@ namespace iMARSARLIMS.Services
             CentreMaster.updateDateTime = centremaster.updateDateTime;
 
             return CentreMaster;
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.UpdateCentreStatus(int CentreId, bool status, int UserId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var CentreData = await db.centreMaster.Where(c => c.id == CentreId).FirstOrDefaultAsync();
+                    if (CentreData != null)
+                    {
+                        CentreData.isActive = status;
+                        CentreData.updateById = UserId;
+                        CentreData.updateDateTime = DateTime.Now;
+
+                        db.centreMaster.UpdateRange(CentreData);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = " Updated Successful"
+                        };
+                    }
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Centre Not found on this Id"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetParentCentre()
+        {
+            try
+            {
+                var ParentCentre = await db.centreMaster
+                    .Where(c => c.isActive == true)
+                    .Select(c => new
+                    {
+                        c.companyName,
+                        c.id
+                    })
+                    .ToListAsync();
+
+                ParentCentre.Add(new { companyName = "Self", id = 0 });
+                ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = ParentCentre
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Data = null,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetRateType()
+        {
+            try
+            {
+                var ParentCentre = await db.centreMaster
+                    .Where(c => c.isActive == true)
+                    .Select(c => new
+                    {
+                        c.companyName,
+                        c.id
+                    })
+                    .ToListAsync();
+
+                ParentCentre.Add(new { companyName = "Self", id = 0 });
+                ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = ParentCentre
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Data = null,
+                    Message = ex.Message
+                };
+            }
         }
     }
 }

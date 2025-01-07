@@ -9,5 +9,6 @@ namespace iMARSARLIMS.Response_Model
         public object? Data { get; set; }
         public string? Message { get; set; }
         public string? Token { get; set; }
+        public int? Count { get; set; }
     }
 }

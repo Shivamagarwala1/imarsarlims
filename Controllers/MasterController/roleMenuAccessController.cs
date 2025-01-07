@@ -2,7 +2,9 @@
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers.MasterController
@@ -39,21 +41,39 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
-        [HttpPost("GetMenuList")]
-        public async Task<ServiceStatusResponseModel> GetMenuList(menuAccess MenuAccess)
+        [HttpGet("GetAllRoleMenuAcess")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> GetAllRoleMenuAcess(ODataQueryOptions<roleMenuAccess> queryOptions)
         {
             try
             {
-                var result = await _roleMenuAccessServices.GetMenuList(MenuAccess);
-                return result;
+                var result = await _roleMenuAccessServices.GetAllRoleMenuAcess(queryOptions);
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return new ServiceStatusResponseModel
+                return BadRequest(new ServiceStatusResponseModel
                 {
                     Success = false,
-                    Message = ex.InnerException?.Message ?? "An error occurred."
-                };
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("EmpPageAccessRemove")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmpPageAccessRemove(int Id)
+        {
+            try
+            {
+                var result = await _roleMenuAccessServices.EmpPageAccessRemove(Id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
             }
         }
 

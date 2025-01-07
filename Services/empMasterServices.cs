@@ -159,7 +159,6 @@ namespace iMARSARLIMS.Services
                 pinCode = empmaster.pinCode,
                 email = empmaster.email,
                 mobileNo = empmaster.mobileNo,
-                landline = empmaster.landline,
                 deptAccess = empmaster.deptAccess,
                 dob = empmaster.dob,
                 qualification = empmaster.qualification,
@@ -271,7 +270,6 @@ namespace iMARSARLIMS.Services
             EmpMaster.pinCode = empmaster.pinCode;
             EmpMaster.email = empmaster.email;
             EmpMaster.mobileNo = empmaster.mobileNo;
-            EmpMaster.landline = empmaster.landline;
             EmpMaster.deptAccess = empmaster.deptAccess;
             EmpMaster.dob = empmaster.dob;
             EmpMaster.qualification = empmaster.qualification;
@@ -357,7 +355,6 @@ namespace iMARSARLIMS.Services
                         UpdateEmprole(empRoleData, emprole, employeeId);
                         var EmpRoleData = db.empRoleAccess.Update(empRoleData);
                         await db.SaveChangesAsync();
-                        //   var id = empRoleData.Entity.id;
                     }
                 }
                 else
@@ -562,9 +559,9 @@ namespace iMARSARLIMS.Services
             var menuData = from rma in db.roleMenuAccess
                            join mm in db.menuMaster on rma.menuId equals mm.id
                            join mm1 in db.menuMaster on rma.subMenuId equals mm1.id
-                           join mi in db.menuIconMaster on mm.iconId equals mi.id into parentIcons
+                           join mi in db.menuIconMaster on 1 equals mi.id into parentIcons
                            from parentIcon in parentIcons.DefaultIfEmpty()
-                           join mi1 in db.menuIconMaster on mm1.iconId equals mi1.id into childIcons
+                           join mi1 in db.menuIconMaster on 4 equals mi1.id into childIcons
                            from childIcon in childIcons.DefaultIfEmpty()
                            where employeeId == rma.employeeId.ToString() && roleId == rma.roleId.ToString()
                            select new

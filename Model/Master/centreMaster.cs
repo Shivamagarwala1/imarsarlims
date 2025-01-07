@@ -9,18 +9,16 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         [Required, MaxLength(50)]
-        public string? centretype { get; set; }
+        public string centretype { get; set; }
+        public int centretypeid { get; set; }
         [Required, MaxLength(20)]
         public string centrecode { get; set; }
         [Required, MaxLength(50)]
         public string companyName { get; set; }
         [Required, MaxLength(10)]
         public string? mobileNo { get; set; }
-        [MaxLength(15)]
-        public string? landline { get; set; }
         [MaxLength(200)]
         public string? address { get; set; }
-
         public int pinCode { get; set; }
         public string? email { get; set; }
         [Required, MaxLength(100)]
@@ -35,8 +33,6 @@ namespace iMARSARLIMS.Model.Master
         public int reportLock { get; set; }
         public int bookingLock { get; set; }
         public DateTime? unlockTime { get; set; }
-        public int smsAllow { get; set; }
-        public int emailAllow { get; set; }
         [Required, MaxLength(10)]
         public string paymentMode { get; set; }
         public int paymentModeId { get; set; }
@@ -90,10 +86,9 @@ namespace iMARSARLIMS.Model.Master
         public int isLock { get; set; }
         public int isPrePrintedBarcode { get; set; }
         public int ac { get; set; }
-        [MaxLength(100)]
-        public string centreAddress1 { get; set; }
         public int clientmrp { get; set; }
         public int documentType { get; set; }
+        public string Document { get; set; }
         public int receptionarea { get; set; }
         public int waitingarea { get; set; }
         public int watercooler { get; set; }

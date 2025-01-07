@@ -127,6 +127,7 @@ builder.Services.AddScoped<IitemMasterServices, itemMasterServices>();
 builder.Services.AddScoped<MySql_Procedure_Services, MySql_Procedure_Services>();
 builder.Services.AddScoped<IitemObservationMappingServices, itemObservationMappingServices>();
 builder.Services.AddScoped<IrateTypeWiseRateListServices, rateTypeWiseRateListServices>();
+builder.Services.AddScoped<IMenuMasterServices, MenuMasterServices>();
 builder.Services.AddSingleton<OpenAIService>();
 builder.Services.AddSingleton<JwtTokenGenrator>();
 builder.Services.AddHttpClient();

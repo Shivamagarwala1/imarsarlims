@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250101100657_menu")]
+    partial class menu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -559,10 +562,6 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Document")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("IFSCCode")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
@@ -620,6 +619,11 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("bookingLock")
                         .HasColumnType("int");
 
+                    b.Property<string>("centreAddress1")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<string>("centrecode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -629,9 +633,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
-
-                    b.Property<int>("centretypeid")
-                        .HasColumnType("int");
 
                     b.Property<int>("chequeAmount")
                         .HasColumnType("int");
@@ -672,6 +673,9 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("email")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("emailAllow")
+                        .HasColumnType("int");
+
                     b.Property<int?>("footerHeight")
                         .HasColumnType("int");
 
@@ -695,6 +699,10 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<int?>("isQRheader")
                         .HasColumnType("int");
+
+                    b.Property<string>("landline")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
 
                     b.Property<int?>("lockedBy")
                         .HasColumnType("int");
@@ -777,6 +785,9 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("showISO")
+                        .HasColumnType("int");
+
+                    b.Property<int>("smsAllow")
                         .HasColumnType("int");
 
                     b.Property<int>("state")
@@ -913,7 +924,7 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int>("districtid")
+                    b.Property<int>("stateID")
                         .HasColumnType("int");
 
                     b.HasKey("id");
@@ -1548,6 +1559,10 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("landline")
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
 
                     b.Property<string>("mobileNo")
                         .IsRequired()
@@ -2463,10 +2478,10 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int?>("displaySequence")
                         .HasColumnType("int");
 
-                    b.Property<bool?>("isActive")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<int>("iconId")
+                        .HasColumnType("int");
 
-                    b.Property<bool>("isHide")
+                    b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("menuName")
