@@ -801,39 +801,31 @@ namespace iMARSARLIMS.Services
 
         }
 
-        public byte[] GetPatientReceipt(string workorderid)
+        byte[] Itnx_BookingPatientServices.GetPatientReceipt(string workorderid)
         {
             QuestPDF.Settings.License = LicenseType.Community;
             var image1 = _configuration["FileBase64:CompanyLogo1"];
             var image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
-            var image2 = _configuration["FileBase64:CompanyLogo2"];
-            var image2Bytes = Convert.FromBase64String(image2.Split(',')[1]);
-
             var document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.MarginTop(1.5f, Unit.Centimetre);
-                    page.Margin(1, Unit.Centimetre);
+                    
+                    page.MarginTop(0.5f, Unit.Centimetre);
+                    page.Margin(0.5f, Unit.Centimetre);
+                    
                     page.PageColor(Colors.White);
                     page.DefaultTextStyle(x => x.FontFamily("Arial"));
                     page.DefaultTextStyle(x => x.FontSize(20));
 
                     var data = "";
 
-                    page.Content()
+                    page.Header()
                     .Column(column =>
                     {
                         // Header row with GST, Company Name, and Mobile No.
-                        column.Item()
-                            .Row(row =>
-                            {
-                                row.RelativeItem(0.25f).Text("GST NO: 234567823456789").FontSize(10);
-                                row.RelativeItem(0.5f).AlignCenter().Text("Company Name").FontSize(14).Bold();
-                                row.RelativeItem(0.25f).AlignRight().Text("MobileNo").FontSize(10);
-                            });
-                        column.Item()
+                       column.Item()
                             .Table(table =>
                             {
                                 table.ColumnsDefinition(columns =>
@@ -843,16 +835,15 @@ namespace iMARSARLIMS.Services
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
+                                    columns.RelativeColumn();
                                 });
-                                table.Cell().ColumnSpan(5).Text("");
-                                table.Cell().RowSpan(5).AlignBottom().Image(image1Bytes);
-                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().RowSpan(5).AlignBottom().Image(image1Bytes);
-                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(3).AlignCenter().Text("8989898989").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(3).AlignCenter().Text("8989898989").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(5).AlignCenter().Text("Payment Voucher").Style(TextStyle.Default.FontSize(16).Bold().Underline());
+                                table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                table.Cell().ColumnSpan(2).AlignCenter().Text("GSTIN").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).AlignCenter().Text("123456789123456789").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(6).AlignCenter().Text("MONEY RECEIPT / BILL").Style(TextStyle.Default.FontSize(10).Bold().Underline());
+                                table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
                             });
 
                         // Product table header
@@ -864,23 +855,118 @@ namespace iMARSARLIMS.Services
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
                                 });
-                                table.Cell().ColumnSpan(3).Text("");
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("1").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().RowSpan(2).Border(0.5f, Unit.Point).Text("a").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("a1").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("2").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("b2").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("3").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("c3").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("5").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("e3").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("6").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("f3").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("7").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("f7").Style(TextStyle.Default.FontSize(10));
-                                table.Cell().ColumnSpan(3).Border(0.5f, Unit.Point).Text("");
+                                
+                                table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Shubham Tiwari").Style(TextStyle.Default.FontSize(10)); 
+                                table.Cell().Text("Age/Gender").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("10 Y 1 M 0 D / Male").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Address").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Noida, Gaziabad, Uttar pradesh").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Email Id").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Mobile").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("8953659306").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Centre").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar infoTech Pvt. Ltd.").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Panel").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar testing 1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Visit No").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("UHID").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Registration Date").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("08-jan-2025 11:34 AM").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Barcode No").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("12345678").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
                             });
+                        column.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(1.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(8.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(4.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f, Unit.Centimetre);
+                                });
+
+
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("Service Name").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("DepartMent").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("Rate").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f,Unit.Point).BorderTop(0.8f,Unit.Point).Text("Total").Style(TextStyle.Default.FontSize(10).Bold());
+                                for (int i = 1; i <= 10; i++)
+                                {
+                                    table.Cell().Text("" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Service Name" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("DepartMent" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Rate" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Discount" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Total" + i).Style(TextStyle.Default.FontSize(10));
+                                }
+
+                               // table.Cell().ColumnSpan(4).BorderTop(0.8f,Unit.Point).BorderBottom(0.8f, Unit.Point).Text("Settelment Table").Style(TextStyle.Default.FontSize(10));
+                               table.Cell().ColumnSpan(3).Element(innerTable =>
+                                {
+                                    innerTable.Table(subTable =>
+                                    {
+                                        subTable.ColumnsDefinition(columns =>
+                                        {
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                        });
+
+                                        // Header for the new embedded table
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Settelment").Style(TextStyle.Default.FontSize(10).Bold());
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Payment").Style(TextStyle.Default.FontSize(10).Bold());
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Reciept No.").Style(TextStyle.Default.FontSize(10).Bold());
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Mode").Style(TextStyle.Default.FontSize(10).Bold());
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Amount").Style(TextStyle.Default.FontSize(10).Bold());
+                                        subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Received By").Style(TextStyle.Default.FontSize(10).Bold());
+
+                                        // Example data rows
+                                        for (int i = 0; i < 3; i++) // Loop for adding rows
+                                        {
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                            subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
+                                        }
+                                    });
+                                });
+
+                                table.Cell().ColumnSpan(3).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).BorderTop(0.8f, Unit.Point).Text("Gross Amount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+
+                                table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Discount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Net Amount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).BorderBottom(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).BorderBottom(0.8f, Unit.Point).Text("Due Amount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+
+
+
+
+                            });
+
                     });
                     page.Footer()
                        .Column(column =>
@@ -900,6 +986,190 @@ namespace iMARSARLIMS.Services
             });
             byte[] pdfBytes = document.GeneratePdf();
             return pdfBytes;
+        }
+
+        public byte[] GetPatientMRPBill(string workorderid)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+            var image1 = _configuration["FileBase64:CompanyLogo1"];
+            var image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+
+                    page.MarginTop(0.5f, Unit.Centimetre);
+                    page.Margin(0.5f, Unit.Centimetre);
+
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
+                    page.DefaultTextStyle(x => x.FontSize(20));
+
+                    var data = "";
+
+                    page.Header()
+                    .Column(column =>
+                    {
+                        // Header row with GST, Company Name, and Mobile No.
+                        column.Item()
+                             .Table(table =>
+                             {
+                                 table.ColumnsDefinition(columns =>
+                                 {
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                 });
+                                 table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text("GSTIN").Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text("123456789123456789").Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().ColumnSpan(6).AlignCenter().Text("MONEY RECEIPT / BILL").Style(TextStyle.Default.FontSize(10).Bold().Underline());
+                                 table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
+                             });
+
+                        // Product table header
+                        column.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                });
+                                table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Shubham Tiwari").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Age/Gender").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("10 Y 1 M 0 D / Male").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Address").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Noida, Gaziabad, Uttar pradesh").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Email Id").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Mobile").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("8953659306").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Centre").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar infoTech Pvt. Ltd.").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Panel").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar testing 1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Visit No").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Imarsar1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("UHID").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Registration Date").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("08-jan-2025 11:34 AM").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("Barcode No").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("12345678").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
+                            });
+                        column.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(1.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(8.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(4.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f, Unit.Centimetre);
+                                });
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Service Name").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("DepartMent").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Rate").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Total").Style(TextStyle.Default.FontSize(10).Bold());
+                                for (int i = 1; i <= 10; i++)
+                                {
+                                    table.Cell().Text("" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Service Name" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("DepartMent" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Rate" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Discount" + i).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text("Total" + i).Style(TextStyle.Default.FontSize(10));
+                                }
+                                table.Cell().ColumnSpan(4).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).BorderTop(0.8f, Unit.Point).Text("Gross Amount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Text("Net Amount: 1111").AlignRight().Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(6));
+                                table.Cell().ColumnSpan(6).Text("Recieved with Thanks: "+ AmountToWord(1111).ToString()).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(6).Text("#Report delivery time on delivery date: Evening 07:00 PM to 07:45 PM. and 04:00 PM to 05:00 PM Sundays").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().ColumnSpan(6).Text("This is a computer generated documnent,does not require any signature.").Style(TextStyle.Default.FontSize(10));
+                            });
+
+                    });
+                    page.Footer()
+                       .Column(column =>
+                       {
+                           column.Item()
+                               .AlignCenter()
+                               .Text(text =>
+                               {
+                                   text.DefaultTextStyle(x => x.FontSize(8));
+                                   text.CurrentPageNumber();
+                                   text.Span(" of ");
+                                   text.TotalPages();
+                               });
+                       });
+
+                });
+            });
+            byte[] pdfBytes = document.GeneratePdf();
+            return pdfBytes;
+        }
+
+
+
+        private static readonly string[] ones = new string[] { "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
+        private static readonly string[] tens = new string[] { "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };
+        private static readonly string[] thousands = new string[] { "", "Thousand", "Million", "Billion" };
+
+        // Converts a numeric value to words
+        public static string AmountToWord(decimal number)
+        {
+            if (number == 0)
+                return "Zero only";
+
+            string words = "";
+            int partCounter = 0;
+            while (number > 0)
+            {
+                int part = (int)(number % 1000);
+                if (part > 0)
+                {
+                    string partWords = ConvertPart(part);
+                    words = partWords + (thousands[partCounter] != "" ? " " + thousands[partCounter] : "") + " " + words;
+                }
+                number /= 1000;
+                partCounter++;
+            }
+
+            return words.Trim() + " only";
+        }
+
+        // Helper method to convert each part (less than 1000) to words
+        private static string ConvertPart(int number)
+        {
+            if (number == 0) return "";
+
+            if (number < 20)
+                return ones[number];
+
+            if (number < 100)
+                return tens[number / 10] + (number % 10 != 0 ? " " + ones[number % 10] : "");
+
+            return ones[number / 100] + " Hundred" + (number % 100 != 0 ? " " + ConvertPart(number % 100) : "");
         }
     }
 }

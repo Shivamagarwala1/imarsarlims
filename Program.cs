@@ -130,6 +130,7 @@ builder.Services.AddScoped<IrateTypeWiseRateListServices, rateTypeWiseRateListSe
 builder.Services.AddScoped<IMenuMasterServices, MenuMasterServices>();
 builder.Services.AddSingleton<OpenAIService>();
 builder.Services.AddSingleton<JwtTokenGenrator>();
+builder.Services.AddScoped<IPatientReportServices, PatientReportServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

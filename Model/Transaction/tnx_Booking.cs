@@ -18,7 +18,7 @@ namespace iMARSARLIMS.Model.Transaction
         [ForeignKey("tnx_BookingPatient")]
         public int patientId { get; set; }
         [Required, MaxLength(10)]
-        public string title { get; set; }
+        public int title_id { get; set; }
         [Required, MaxLength(100)]
         public string name { get; set; }
         [Required, MaxLength(6)]
@@ -56,34 +56,30 @@ namespace iMARSARLIMS.Model.Transaction
         public string paymentMode { get; set; }
         [Required, MaxLength(50)]
         public string source { get; set; }
-        [Required]
-        public int? discountType { get; set; }
+        public int discountType { get; set; }
         public int? discountid { get; set; } = 0;
         public string? discountReason { get; set; } = "";
-        public int discountApproved { get; set; } = 0;
-        public int? isDisCountApproved { get; set; } = 0;
+        public int discountApproved { get; set; } 
+        public int isDisCountApproved { get; set; }
         [MaxLength(100)]
-        public string? patientRemarks { get; set; }
+        public string? patientRemarks { get; set; } = "";
         [MaxLength(100)]
-        public string? labRemarks { get; set; }
+        public string? labRemarks { get; set; } = "";
         [MaxLength(100)]
         public string? otherLabRefer { get; set; } = "";
         public int? OtherLabReferID { get; set; } = 0;
         [Required, MaxLength(100)]
-        public string? RefDoctor1 { get; set; }
+        public string? RefDoctor1 { get; set; } = "";
         public int? refID1 { get; set; } = 0;
         [MaxLength(100)]
         public string? refDoctor2 { get; set; } = "";
         public int? refID2 { get; set; } = 0;
         public int? tempDOCID { get; set; } = 0;
         [MaxLength(100)]
-        public string? tempDoctroName { get; set; }
-        [MaxLength(150)]
+        public string? tempDoctroName { get; set; } = "";
         public string? uploadDocument { get; set; } = "";
-        [MaxLength(100)]
-        public string? captureImg { get; set; } = "";        
         [MaxLength(30)]
-        public string invoiceNo { get; set; }
+        public string? invoiceNo { get; set; } = "";
         public int? salesExecutiveID { get; set; }
 
         [ForeignKey(nameof(transactionId))]

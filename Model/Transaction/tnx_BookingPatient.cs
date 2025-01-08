@@ -28,23 +28,15 @@ namespace iMARSARLIMS.Model.Transaction
         public string? emailId { get; set; }
         [MaxLength(10)]
         public string? mobileNo { get; set; }
-        [MaxLength(15)]
-        public string? landLineNo { get; set; }
-        [Required,MaxLength(100)]
+        [MaxLength(100)]
         public string address { get; set; }
-        public int? pinCode { get; set; }
-        [MaxLength(50)]
-        public string? cityName { get; set; }
+        public int pinCode { get; set; }
         public int cityId { get; set; } 
         public int centreId { get; set; }
-        [MaxLength(50)]
-        public string? area { get; set; }
-        public short areaId { get; set; }
-        [MaxLength(30)]
-        public string? state { get; set; }
-        public int? district { get; set; }
-        [MaxLength(30)]
-        public string? country { get; set; } = "";
+        public int areaId { get; set; }
+        public int stateId { get; set; }
+        public int districtId { get; set; }
+        public int countryId { get; set; } 
         public int visitCount { get; set; } = 0;
         [MaxLength(100)]
         public string? remarks { get; set; } = "";

@@ -23,13 +23,13 @@ namespace iMARSARLIMS.Model.Transaction
         [MaxLength(12)]
         public string? barcodeNo { get; set; }
         [Required, MaxLength(30)]
-        public string departmentName { get; set; } = "";
+        public string departmentName { get; set; } 
         [Required, MaxLength(100)]
-        public string investigationName { get; set; } = "";
+        public string investigationName { get; set; } 
         [Required]
         public int isPackage { get; set; }
         [MaxLength(100)]
-        public string packageName { get; set; } = "";
+        public string packageName { get; set; } 
         [Required]
         public int itemType { get; set; }
         [Range(0.000000, 999999999999.000000)]
@@ -54,9 +54,9 @@ namespace iMARSARLIMS.Model.Transaction
         public int centreId { get; set; }
         [Required]
         public int sessionCentreid { get; set; }
-        public byte isSra { get; set; } = 0;
-        public byte isMachineOrder { get; set; } = 0;
-        public byte isEmailsent { get; set; } = 0;
+        public byte isSra { get; set; } 
+        public byte isMachineOrder { get; set; } 
+        public byte isEmailsent { get; set; } 
         [Required]
         public int sampleTypeId { get; set; }
         [Required, MaxLength(50)]

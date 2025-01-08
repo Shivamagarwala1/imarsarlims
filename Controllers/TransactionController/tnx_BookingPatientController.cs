@@ -45,7 +45,7 @@ namespace iMARSARLIMS.Controllers.TransactionController
                     result = "Validation Failed";
                 }
 
-               return result;
+                return result;
             }
             catch (Exception ex)
             {
@@ -77,7 +77,28 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
                 return new FileStreamResult(ms, "application/pdf")
                 {
-                    FileDownloadName = "Peceipt_" + workorderid + ".pdf"
+                    FileDownloadName = "Receipt_" + workorderid + ".pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
+
+        [HttpGet("GetPatientMRPBill")]
+        public IActionResult GetPatientMRPBill(string workorderid)
+        {
+            try
+            {
+                var result = _tnx_BookingPatientServices.GetPatientMRPBill(workorderid);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "MrpReceipt_" + workorderid + ".pdf"
                 };
             }
             catch (Exception ex)
@@ -88,3 +109,4 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
         }
     }
+}
