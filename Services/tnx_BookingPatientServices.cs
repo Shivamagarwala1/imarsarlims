@@ -118,7 +118,7 @@ namespace iMARSARLIMS.Services
             return new tnx_BookingPatient
             {
                 patientId = tnxBookingPatient.patientId,
-                title = tnxBookingPatient.title,
+                title_id = tnxBookingPatient.title_id,
                 name = tnxBookingPatient.name,
                 gender = tnxBookingPatient.gender,
                 ageTotal = tnxBookingPatient.ageTotal,
@@ -129,17 +129,14 @@ namespace iMARSARLIMS.Services
                 isActualDOB = tnxBookingPatient.isActualDOB,
                 emailId = tnxBookingPatient.emailId,
                 mobileNo = tnxBookingPatient.mobileNo,
-                landLineNo = tnxBookingPatient.landLineNo,
                 address = tnxBookingPatient.address,
                 pinCode = tnxBookingPatient.pinCode,
-                cityName = tnxBookingPatient.cityName,
                 cityId = tnxBookingPatient.cityId,
                 centreId = tnxBookingPatient.centreId,
-                area = tnxBookingPatient.area,
                 areaId = tnxBookingPatient.areaId,
-                state = tnxBookingPatient.state,
-                district = tnxBookingPatient.district,
-                country = tnxBookingPatient.country,
+                stateId = tnxBookingPatient.stateId,
+                districtId = tnxBookingPatient.districtId,
+                countryId = tnxBookingPatient.countryId,
                 visitCount = tnxBookingPatient.visitCount,
                 remarks = tnxBookingPatient.remarks,
                 documentId = tnxBookingPatient.documentId,
@@ -174,7 +171,7 @@ namespace iMARSARLIMS.Services
                 patientId = patientId,
 
                 billNo = bookingData.billNo,
-                title = bookingData.title,
+                title_id = bookingData.title_id,
                 name = bookingData.name,
                 gender = bookingData.gender,
                 dob = bookingData.dob,
@@ -214,7 +211,6 @@ namespace iMARSARLIMS.Services
                 updateById = bookingData.updateById,
                 updateDateTime = bookingData.updateDateTime,
                 uploadDocument = bookingData.uploadDocument,
-                captureImg = bookingData.captureImg,
                 invoiceNo = bookingData.invoiceNo,
                 createdById = bookingData.createdById,
                 salesExecutiveID = bookingData.salesExecutiveID,
@@ -497,7 +493,7 @@ namespace iMARSARLIMS.Services
         }
         private void UpdateBookingPatient(tnx_BookingPatient tnxBookingPatients, tnx_BookingPatient tnxBookingPatient)
         {
-            tnxBookingPatients.title = tnxBookingPatient.title;
+            tnxBookingPatients.title_id = tnxBookingPatient.title_id;
             tnxBookingPatients.name = tnxBookingPatient.name;
             tnxBookingPatients.gender = tnxBookingPatient.gender;
             tnxBookingPatients.ageTotal = tnxBookingPatient.ageTotal;
@@ -508,17 +504,14 @@ namespace iMARSARLIMS.Services
             tnxBookingPatients.isActualDOB = tnxBookingPatient.isActualDOB;
             tnxBookingPatients.emailId = tnxBookingPatient.emailId;
             tnxBookingPatients.mobileNo = tnxBookingPatient.mobileNo;
-            tnxBookingPatients.landLineNo = tnxBookingPatient.landLineNo;
             tnxBookingPatients.address = tnxBookingPatient.address;
             tnxBookingPatients.pinCode = tnxBookingPatient.pinCode;
-            tnxBookingPatients.cityName = tnxBookingPatient.cityName;
             tnxBookingPatients.cityId = tnxBookingPatient.cityId;
             tnxBookingPatients.centreId = tnxBookingPatient.centreId;
-            tnxBookingPatients.area = tnxBookingPatient.area;
             tnxBookingPatients.areaId = tnxBookingPatient.areaId;
-            tnxBookingPatients.state = tnxBookingPatient.state;
-            tnxBookingPatients.district = tnxBookingPatient.district;
-            tnxBookingPatients.country = tnxBookingPatient.country;
+            tnxBookingPatients.stateId = tnxBookingPatient.stateId;
+            tnxBookingPatients.districtId = tnxBookingPatient.districtId;
+            tnxBookingPatients.countryId = tnxBookingPatient.countryId;
             tnxBookingPatients.visitCount = tnxBookingPatient.visitCount;
             tnxBookingPatients.remarks = tnxBookingPatient.remarks;
             tnxBookingPatients.documentId = tnxBookingPatient.documentId;
@@ -561,7 +554,7 @@ namespace iMARSARLIMS.Services
         }
         private void UpdateBookingDetail(tnx_Booking tnxBooking, tnx_Booking bookingData)
         {
-            tnxBooking.title = bookingData.title;
+            tnxBooking.title_id = bookingData.title_id;
             tnxBooking.name = bookingData.name;
             tnxBooking.gender = bookingData.gender;
             tnxBooking.dob = bookingData.dob;
@@ -600,7 +593,6 @@ namespace iMARSARLIMS.Services
             tnxBooking.updateById = bookingData.updateById;
             tnxBooking.updateDateTime = bookingData.updateDateTime;
             tnxBooking.uploadDocument = bookingData.uploadDocument;
-            tnxBooking.captureImg = bookingData.captureImg;
             tnxBooking.invoiceNo = bookingData.invoiceNo;
             tnxBooking.salesExecutiveID = bookingData.salesExecutiveID;
         }
