@@ -67,5 +67,24 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
         }
 
+        [HttpGet("GetPatientReceipt")]
+        public IActionResult GetPatientReceipt(string workorderid)
+        {
+            try
+            {
+                var result = _tnx_BookingPatientServices.GetPatientReceipt(workorderid);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "Peceipt_" + workorderid + ".pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
     }
-}

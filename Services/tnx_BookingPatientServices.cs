@@ -3,23 +3,28 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace iMARSARLIMS.Services
 {
     public class tnx_BookingPatientServices : Itnx_BookingPatientServices
     {
         private readonly ContextClass db;
+        private readonly IConfiguration _configuration;
         private readonly MySql_Function_Services _MySql_Function_Services;
         private readonly MySql_Procedure_Services _MySql_Procedure_Services;
 
         public int transactionId;
 
-        public tnx_BookingPatientServices(ContextClass context, ILogger<BaseController<tnx_BookingPatient>> logger, MySql_Function_Services MySql_Function_Services, MySql_Procedure_Services mySql_Procedure_Services = null)
+        public tnx_BookingPatientServices(ContextClass context, ILogger<BaseController<tnx_BookingPatient>> logger, MySql_Function_Services MySql_Function_Services, MySql_Procedure_Services mySql_Procedure_Services, IConfiguration configuration)
         {
 
             db = context;
             this._MySql_Function_Services = MySql_Function_Services;
             this._MySql_Procedure_Services = mySql_Procedure_Services;
+            this._configuration = configuration;
         }
 
         public async Task<string> Getworkorderid(int centreId, string type)
@@ -796,6 +801,105 @@ namespace iMARSARLIMS.Services
 
         }
 
+        public byte[] GetPatientReceipt(string workorderid)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+            var image1 = _configuration["FileBase64:CompanyLogo1"];
+            var image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+            var image2 = _configuration["FileBase64:CompanyLogo2"];
+            var image2Bytes = Convert.FromBase64String(image2.Split(',')[1]);
 
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.MarginTop(1.5f, Unit.Centimetre);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
+                    page.DefaultTextStyle(x => x.FontSize(20));
+
+                    var data = "";
+
+                    page.Content()
+                    .Column(column =>
+                    {
+                        // Header row with GST, Company Name, and Mobile No.
+                        column.Item()
+                            .Row(row =>
+                            {
+                                row.RelativeItem(0.25f).Text("GST NO: 234567823456789").FontSize(10);
+                                row.RelativeItem(0.5f).AlignCenter().Text("Company Name").FontSize(14).Bold();
+                                row.RelativeItem(0.25f).AlignRight().Text("MobileNo").FontSize(10);
+                            });
+                        column.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                });
+                                table.Cell().ColumnSpan(5).Text("");
+                                table.Cell().RowSpan(5).AlignBottom().Image(image1Bytes);
+                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().RowSpan(5).AlignBottom().Image(image1Bytes);
+                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(3).AlignCenter().Text("Shubham Shubham Shubham ShubhamShubhamShubham Shubham").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(3).AlignCenter().Text("8989898989").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(3).AlignCenter().Text("8989898989").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(5).AlignCenter().Text("Payment Voucher").Style(TextStyle.Default.FontSize(16).Bold().Underline());
+                            });
+
+                        // Product table header
+                        column.Item()
+                            .Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                    columns.RelativeColumn();
+                                });
+                                table.Cell().ColumnSpan(3).Text("");
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().RowSpan(2).Border(0.5f, Unit.Point).Text("a").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("a1").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("2").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("b2").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("3").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("c3").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("5").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("e3").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("6").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("f3").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("7").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.8f, Unit.Centimetre).Border(0.5f, Unit.Point).Text("f7").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(3).Border(0.5f, Unit.Point).Text("");
+                            });
+                    });
+                    page.Footer()
+                       .Column(column =>
+                       {
+                           column.Item()
+                               .AlignCenter()
+                               .Text(text =>
+                               {
+                                   text.DefaultTextStyle(x => x.FontSize(8));
+                                   text.CurrentPageNumber();
+                                   text.Span(" of ");
+                                   text.TotalPages();
+                               });
+                       });
+
+                });
+            });
+            byte[] pdfBytes = document.GeneratePdf();
+            return pdfBytes;
+        }
     }
 }
