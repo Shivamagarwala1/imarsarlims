@@ -17,7 +17,7 @@ namespace iMARSARLIMS.Model.Transaction
         public string clientCode { get; set; }
         [ForeignKey("tnx_BookingPatient")]
         public int patientId { get; set; }
-        [Required, MaxLength(10)]
+        [Required]
         public int title_id { get; set; }
         [Required, MaxLength(100)]
         public string name { get; set; }

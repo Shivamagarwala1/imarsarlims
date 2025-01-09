@@ -73,19 +73,20 @@ namespace iMARSARLIMS.Controllers.TransactionController
             try
             {
                 var result = _tnx_BookingPatientServices.GetPatientReceipt(workorderid);
+                if (result == null || result.Length == 0)
+                {
+                    return NotFound($"WorkOrder ID '{workorderid}' not found or no receipt data available.");
+                }
                 MemoryStream ms = new MemoryStream(result);
-
                 return new FileStreamResult(ms, "application/pdf")
                 {
-                    FileDownloadName = "Receipt_" + workorderid + ".pdf"
+                    FileDownloadName = $"Receipt_{workorderid}.pdf"
                 };
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, $"An error occurred while processing the request: {ex.Message}");
             }
-
-
         }
 
         [HttpGet("GetPatientMRPBill")]
