@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class asdfghj : Migration
+    public partial class LimsStart : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,14 +22,14 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     typeId = table.Column<int>(type: "int", nullable: true),
-                    sub_TypeName = table.Column<string>(type: "longtext", nullable: true),
-                    firstRange = table.Column<string>(type: "longtext", nullable: true),
-                    secondRange = table.Column<string>(type: "longtext", nullable: true),
-                    thirdRange = table.Column<string>(type: "longtext", nullable: true),
-                    imagePath = table.Column<string>(type: "longtext", nullable: true),
+                    sub_TypeName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    firstRange = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    secondRange = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    thirdRange = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    imagePath = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     descrition = table.Column<string>(type: "longtext", nullable: true),
-                    defultReading = table.Column<string>(type: "longtext", nullable: true),
-                    unit = table.Column<string>(type: "longtext", nullable: true),
+                    defultReading = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    unit = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -48,7 +48,7 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    allergyType = table.Column<string>(type: "longtext", nullable: true),
+                    allergyType = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -108,7 +108,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     barcodeNo = table.Column<int>(type: "int", nullable: true),
-                    suffix = table.Column<string>(type: "longtext", nullable: true)
+                    suffix = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -152,27 +152,6 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_centerTypeMaster", x => x.id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "centreCheckList",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    companyID = table.Column<int>(type: "int", nullable: false),
-                    checklistID = table.Column<int>(type: "int", nullable: false),
-                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    createdById = table.Column<int>(type: "int", nullable: true),
-                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updateById = table.Column<int>(type: "int", nullable: true),
-                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_centreCheckList", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -228,25 +207,23 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     centretype = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    centretypeid = table.Column<int>(type: "int", nullable: false),
                     centrecode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     companyName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
-                    landline = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true),
-                    address = table.Column<string>(type: "longtext", nullable: true),
+                    address = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     pinCode = table.Column<int>(type: "int", nullable: false),
                     email = table.Column<string>(type: "longtext", nullable: true),
                     ownerName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     proId = table.Column<int>(type: "int", nullable: false),
-                    reportEmail = table.Column<int>(type: "int", nullable: false),
+                    reportEmail = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     parentCentreID = table.Column<int>(type: "int", nullable: false),
                     processingLab = table.Column<int>(type: "int", nullable: false),
                     creditLimt = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     allowDueReport = table.Column<int>(type: "int", nullable: false),
                     reportLock = table.Column<int>(type: "int", nullable: false),
                     bookingLock = table.Column<int>(type: "int", nullable: false),
-                    unlockTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    smsAllow = table.Column<int>(type: "int", nullable: false),
-                    emailAllow = table.Column<int>(type: "int", nullable: false),
+                    unlockTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     paymentMode = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
                     paymentModeId = table.Column<int>(type: "int", nullable: false),
                     reportHeader = table.Column<string>(type: "longtext", nullable: true),
@@ -255,32 +232,32 @@ namespace iMARSARLIMS.Migrations
                     showISO = table.Column<int>(type: "int", nullable: false),
                     showBackcover = table.Column<int>(type: "int", nullable: false),
                     reportBackImage = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    reporrtHeaderHeightY = table.Column<int>(type: "int", nullable: false),
-                    patientYHeader = table.Column<int>(type: "int", nullable: false),
-                    barcodeXPosition = table.Column<int>(type: "int", nullable: false),
-                    barcodeYPosition = table.Column<int>(type: "int", nullable: false),
-                    QRCodeXPosition = table.Column<int>(type: "int", nullable: false),
-                    QRCodeYPosition = table.Column<int>(type: "int", nullable: false),
-                    isQRheader = table.Column<int>(type: "int", nullable: false),
-                    isBarcodeHeader = table.Column<int>(type: "int", nullable: false),
-                    footerHeight = table.Column<int>(type: "int", nullable: false),
-                    NABLxPosition = table.Column<int>(type: "int", nullable: false),
-                    NABLyPosition = table.Column<int>(type: "int", nullable: false),
-                    docSignYPosition = table.Column<int>(type: "int", nullable: false),
-                    receiptHeaderY = table.Column<int>(type: "int", nullable: false),
+                    reporrtHeaderHeightY = table.Column<int>(type: "int", nullable: true),
+                    patientYHeader = table.Column<int>(type: "int", nullable: true),
+                    barcodeXPosition = table.Column<int>(type: "int", nullable: true),
+                    barcodeYPosition = table.Column<int>(type: "int", nullable: true),
+                    QRCodeXPosition = table.Column<int>(type: "int", nullable: true),
+                    QRCodeYPosition = table.Column<int>(type: "int", nullable: true),
+                    isQRheader = table.Column<int>(type: "int", nullable: true),
+                    isBarcodeHeader = table.Column<int>(type: "int", nullable: true),
+                    footerHeight = table.Column<int>(type: "int", nullable: true),
+                    NABLxPosition = table.Column<int>(type: "int", nullable: true),
+                    NABLyPosition = table.Column<int>(type: "int", nullable: true),
+                    docSignYPosition = table.Column<int>(type: "int", nullable: true),
+                    receiptHeaderY = table.Column<int>(type: "int", nullable: true),
                     PAN = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     adharNo = table.Column<string>(type: "varchar(16)", maxLength: 16, nullable: true),
                     bankAccount = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     IFSCCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     bankID = table.Column<int>(type: "int", nullable: false),
                     salesExecutiveID = table.Column<int>(type: "int", nullable: false),
-                    isDefault = table.Column<int>(type: "int", nullable: false),
-                    isLab = table.Column<int>(type: "int", nullable: false),
+                    isDefault = table.Column<int>(type: "int", nullable: true),
+                    isLab = table.Column<int>(type: "int", nullable: true),
                     minBookingAmt = table.Column<int>(type: "int", nullable: false),
-                    lockedBy = table.Column<string>(type: "longtext", nullable: true),
-                    LockDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    lockedBy = table.Column<int>(type: "int", nullable: true),
+                    LockDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     unlockBy = table.Column<string>(type: "longtext", nullable: true),
-                    unlockDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    unlockDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     state = table.Column<int>(type: "int", nullable: false),
                     chequeNo = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     bankName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
@@ -291,6 +268,13 @@ namespace iMARSARLIMS.Migrations
                     clientRate = table.Column<int>(type: "int", nullable: false),
                     isLock = table.Column<int>(type: "int", nullable: false),
                     isPrePrintedBarcode = table.Column<int>(type: "int", nullable: false),
+                    ac = table.Column<int>(type: "int", nullable: false),
+                    clientmrp = table.Column<int>(type: "int", nullable: false),
+                    documentType = table.Column<int>(type: "int", nullable: false),
+                    Document = table.Column<string>(type: "longtext", nullable: false),
+                    receptionarea = table.Column<int>(type: "int", nullable: false),
+                    waitingarea = table.Column<int>(type: "int", nullable: false),
+                    watercooler = table.Column<int>(type: "int", nullable: false),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -342,7 +326,7 @@ namespace iMARSARLIMS.Migrations
                     centreId = table.Column<int>(type: "int", nullable: false),
                     centreCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     emailId = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    emailBody = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
+                    emailBody = table.Column<string>(type: "longtext", nullable: false),
                     subject = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     isSent = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     sendDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -362,7 +346,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     workOrderId = table.Column<string>(type: "longtext", nullable: false),
-                    oldBookingCentre = table.Column<int>(type: "int", nullable: false),
+                    oldBookingCentre = table.Column<int>(type: "int", maxLength: 20, nullable: false),
                     newBookingCentre = table.Column<int>(type: "int", nullable: false),
                     oldCompanyId = table.Column<int>(type: "int", nullable: false),
                     newCompanyId = table.Column<int>(type: "int", nullable: false),
@@ -384,7 +368,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     cityName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    stateID = table.Column<int>(type: "int", nullable: false)
+                    districtid = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -398,7 +382,7 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    colorName = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    colorName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -436,7 +420,7 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    designationName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    designationName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -670,14 +654,13 @@ namespace iMARSARLIMS.Migrations
                     fName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     lName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     address = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    pinCode = table.Column<int>(type: "int", nullable: false),
+                    pinCode = table.Column<int>(type: "int", nullable: true),
                     email = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
-                    landline = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false),
                     deptAccess = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     qualification = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
-                    bloodGroup = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: false),
+                    bloodGroup = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: true),
                     designationId = table.Column<int>(type: "int", nullable: false),
                     userName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     password = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
@@ -686,7 +669,7 @@ namespace iMARSARLIMS.Migrations
                     city = table.Column<int>(type: "int", nullable: false),
                     area = table.Column<int>(type: "int", nullable: false),
                     defaultcentre = table.Column<int>(type: "int", nullable: false),
-                    pro = table.Column<int>(type: "int", nullable: false),
+                    pro = table.Column<int>(type: "int", nullable: true),
                     defaultrole = table.Column<int>(type: "int", nullable: false),
                     rate = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     fileName = table.Column<string>(type: "longtext", nullable: false),
@@ -698,10 +681,11 @@ namespace iMARSARLIMS.Migrations
                     isDiscountAppRights = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isPwdchange = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isemailotp = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    fromIP = table.Column<string>(type: "longtext", nullable: false),
-                    toIP = table.Column<string>(type: "longtext", nullable: false),
+                    fromIP = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    toIP = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     isdeviceAuthentication = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     adminPassword = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    tempPassword = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -739,8 +723,8 @@ namespace iMARSARLIMS.Migrations
                     helpId = table.Column<int>(type: "int", nullable: true),
                     labTestId = table.Column<int>(type: "int", nullable: true),
                     itemId = table.Column<int>(type: "int", nullable: true),
-                    mappedName = table.Column<string>(type: "longtext", nullable: true),
-                    helpName = table.Column<string>(type: "longtext", nullable: true)
+                    mappedName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    helpName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -770,9 +754,9 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     centreId = table.Column<int>(type: "int", nullable: true),
                     maxID = table.Column<int>(type: "int", nullable: true),
-                    fYear = table.Column<string>(type: "longtext", nullable: true),
+                    fYear = table.Column<string>(type: "varchar(4)", maxLength: 4, nullable: true),
                     typeId = table.Column<int>(type: "int", nullable: true),
-                    type = table.Column<string>(type: "longtext", nullable: true)
+                    type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -908,7 +892,7 @@ namespace iMARSARLIMS.Migrations
                     isProfile = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isPackage = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     itemType = table.Column<short>(type: "smallint", nullable: false),
-                    formula = table.Column<string>(type: "longtext", nullable: true),
+                    formula = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     dlcCheck = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     showInReport = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isHeader = table.Column<byte>(type: "tinyint unsigned", nullable: true),
@@ -962,7 +946,7 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     itemId = table.Column<int>(type: "int", nullable: false),
                     rateTypeId = table.Column<int>(type: "int", nullable: true),
-                    itemCode = table.Column<string>(type: "longtext", nullable: true),
+                    itemCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1142,17 +1126,30 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "menuIconMaster",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    icon = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_menuIconMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "menuMaster",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    menuName = table.Column<string>(type: "longtext", nullable: true),
-                    dispalyName = table.Column<string>(type: "longtext", nullable: true),
-                    navigationUrl = table.Column<string>(type: "longtext", nullable: true),
+                    menuName = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true),
+                    navigationUrl = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
                     displaySequence = table.Column<int>(type: "int", nullable: true),
                     parentId = table.Column<int>(type: "int", nullable: true),
-                    iconId = table.Column<long>(type: "bigint", nullable: false),
+                    isHide = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1576,6 +1573,27 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Testing",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    titleId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false),
+                    DOB = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Department = table.Column<string>(type: "longtext", nullable: false),
+                    DesignationId = table.Column<int>(type: "int", nullable: false),
+                    isactive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    EmpTypeId = table.Column<int>(type: "int", nullable: false),
+                    Image = table.Column<string>(type: "longtext", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Testing", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "testInterpretation",
                 columns: table => new
                 {
@@ -1618,6 +1636,29 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_testInterpretationLog", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ThemeColour",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    headerColor = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    menuColor = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    subMenuColor = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    textColor = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    blockColor = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    color = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
+                    iconColor = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    order = table.Column<int>(type: "int", nullable: false),
+                    isdefault = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ThemeColour", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1678,7 +1719,7 @@ namespace iMARSARLIMS.Migrations
                 {
                     patientId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    title = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
+                    title_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     gender = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
                     ageTotal = table.Column<int>(type: "int", nullable: false),
@@ -1689,17 +1730,14 @@ namespace iMARSARLIMS.Migrations
                     isActualDOB = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     emailId = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true),
-                    landLineNo = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true),
                     address = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    pinCode = table.Column<int>(type: "int", nullable: true),
-                    cityName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    pinCode = table.Column<int>(type: "int", nullable: false),
                     cityId = table.Column<int>(type: "int", nullable: false),
                     centreId = table.Column<int>(type: "int", nullable: false),
-                    area = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
-                    areaId = table.Column<short>(type: "smallint", nullable: false),
-                    state = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true),
-                    district = table.Column<int>(type: "int", nullable: true),
-                    country = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true),
+                    areaId = table.Column<int>(type: "int", nullable: false),
+                    stateId = table.Column<int>(type: "int", nullable: false),
+                    districtId = table.Column<int>(type: "int", nullable: false),
+                    countryId = table.Column<int>(type: "int", nullable: false),
                     visitCount = table.Column<int>(type: "int", nullable: false),
                     remarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     documentId = table.Column<int>(type: "int", nullable: true),
@@ -2124,33 +2162,6 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "centreCheckListMapping",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    companyID = table.Column<int>(type: "int", nullable: false),
-                    checkListID = table.Column<int>(type: "int", nullable: false),
-                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    centreMasterid = table.Column<int>(type: "int", nullable: true),
-                    isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    createdById = table.Column<int>(type: "int", nullable: true),
-                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updateById = table.Column<int>(type: "int", nullable: true),
-                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_centreCheckListMapping", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_centreCheckListMapping_centreMaster_centreMasterid",
-                        column: x => x.centreMasterid,
-                        principalTable: "centreMaster",
-                        principalColumn: "id");
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "empCenterAccess",
                 columns: table => new
                 {
@@ -2213,7 +2224,7 @@ namespace iMARSARLIMS.Migrations
                     bookingDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     clientCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     patientId = table.Column<int>(type: "int", nullable: false),
-                    title = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    title_id = table.Column<int>(type: "int", maxLength: 10, nullable: false),
                     name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     gender = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
                     dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2237,7 +2248,7 @@ namespace iMARSARLIMS.Migrations
                     discountid = table.Column<int>(type: "int", nullable: true),
                     discountReason = table.Column<string>(type: "longtext", nullable: true),
                     discountApproved = table.Column<int>(type: "int", nullable: false),
-                    isDisCountApproved = table.Column<int>(type: "int", nullable: true),
+                    isDisCountApproved = table.Column<int>(type: "int", nullable: false),
                     patientRemarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     labRemarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     otherLabRefer = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
@@ -2248,9 +2259,8 @@ namespace iMARSARLIMS.Migrations
                     refID2 = table.Column<int>(type: "int", nullable: true),
                     tempDOCID = table.Column<int>(type: "int", nullable: true),
                     tempDoctroName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    uploadDocument = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true),
-                    captureImg = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    invoiceNo = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    uploadDocument = table.Column<string>(type: "longtext", nullable: true),
+                    invoiceNo = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true),
                     salesExecutiveID = table.Column<int>(type: "int", nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
@@ -2404,11 +2414,6 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_centreCheckListMapping_centreMasterid",
-                table: "centreCheckListMapping",
-                column: "centreMasterid");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_empCenterAccess_empMasterid",
                 table: "empCenterAccess",
                 column: "empMasterid");
@@ -2459,16 +2464,13 @@ namespace iMARSARLIMS.Migrations
                 name: "centerTypeMaster");
 
             migrationBuilder.DropTable(
-                name: "centreCheckList");
-
-            migrationBuilder.DropTable(
-                name: "centreCheckListMapping");
-
-            migrationBuilder.DropTable(
                 name: "centreInvoice");
 
             migrationBuilder.DropTable(
                 name: "centreLedgerRemarks");
+
+            migrationBuilder.DropTable(
+                name: "centreMaster");
 
             migrationBuilder.DropTable(
                 name: "CentrePayment");
@@ -2582,6 +2584,9 @@ namespace iMARSARLIMS.Migrations
                 name: "machineObservationMapping");
 
             migrationBuilder.DropTable(
+                name: "menuIconMaster");
+
+            migrationBuilder.DropTable(
                 name: "menuMaster");
 
             migrationBuilder.DropTable(
@@ -2639,10 +2644,16 @@ namespace iMARSARLIMS.Migrations
                 name: "stateMaster");
 
             migrationBuilder.DropTable(
+                name: "Testing");
+
+            migrationBuilder.DropTable(
                 name: "testInterpretation");
 
             migrationBuilder.DropTable(
                 name: "testInterpretationLog");
+
+            migrationBuilder.DropTable(
+                name: "ThemeColour");
 
             migrationBuilder.DropTable(
                 name: "titleMaster");
@@ -2694,9 +2705,6 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "zoneMaster");
-
-            migrationBuilder.DropTable(
-                name: "centreMaster");
 
             migrationBuilder.DropTable(
                 name: "empMaster");

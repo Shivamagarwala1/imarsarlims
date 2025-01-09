@@ -3507,10 +3507,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime>("bookingDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("captureImg")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
                     b.Property<int>("centreId")
                         .HasColumnType("int");
 
@@ -3534,8 +3530,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("discountReason")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("discountType")
-                        .IsRequired()
+                    b.Property<int>("discountType")
                         .HasColumnType("int");
 
                     b.Property<int?>("discountid")
@@ -3553,7 +3548,6 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("double");
 
                     b.Property<string>("invoiceNo")
-                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
 
@@ -3563,7 +3557,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte>("isCredit")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int?>("isDisCountApproved")
+                    b.Property<int>("isDisCountApproved")
                         .HasColumnType("int");
 
                     b.Property<string>("labRemarks")
@@ -3636,10 +3630,9 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("title")
-                        .IsRequired()
+                    b.Property<int>("title_id")
                         .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                        .HasColumnType("int");
 
                     b.Property<int>("totalAge")
                         .HasColumnType("int");
@@ -3651,8 +3644,7 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("uploadDocument")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("workOrderId")
                         .IsRequired()
@@ -3991,12 +3983,8 @@ namespace iMARSARLIMS.Migrations
                     b.Property<short>("ageYear")
                         .HasColumnType("smallint");
 
-                    b.Property<string>("area")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<short>("areaId")
-                        .HasColumnType("smallint");
+                    b.Property<int>("areaId")
+                        .HasColumnType("int");
 
                     b.Property<int>("centreId")
                         .HasColumnType("int");
@@ -4004,13 +3992,8 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("cityId")
                         .HasColumnType("int");
 
-                    b.Property<string>("cityName")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("country")
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                    b.Property<int>("countryId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
@@ -4018,7 +4001,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime>("createdDateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("district")
+                    b.Property<int>("districtId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("dob")
@@ -4046,10 +4029,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte?>("isActualDOB")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<string>("landLineNo")
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
                     b.Property<string>("mobileNo")
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
@@ -4063,21 +4042,18 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("varchar(15)");
 
-                    b.Property<int?>("pinCode")
+                    b.Property<int>("pinCode")
                         .HasColumnType("int");
 
                     b.Property<string>("remarks")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("state")
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                    b.Property<int>("stateId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("title")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("varchar(6)");
+                    b.Property<int>("title_id")
+                        .HasColumnType("int");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");

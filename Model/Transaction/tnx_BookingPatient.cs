@@ -8,8 +8,7 @@ namespace iMARSARLIMS.Model.Transaction
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int patientId { get; set; }
-        [Required, MaxLength(6)]
-        public string title_id { get; set; }
+        public int title_id { get; set; }
         [Required, MaxLength(100)]
         public string name { get; set; }
         [Required, MaxLength(6)]
