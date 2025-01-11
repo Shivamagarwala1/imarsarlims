@@ -9,5 +9,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, bool status, int UserId);
         Task<ServiceStatusResponseModel> GetParentCentre();
         Task<ServiceStatusResponseModel> GetRateType();
+        Task<ServiceStatusResponseModel> GetCentreData(int centreId);
     }
 }

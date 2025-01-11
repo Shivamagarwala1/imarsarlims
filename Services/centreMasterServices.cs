@@ -514,5 +514,33 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
+
+        public async Task<ServiceStatusResponseModel> GetCentreData(int centreId)
+        {
+            var centreMasterData = await db.centreMaster.Where(c => c.centreId == centreId).FirstOrDefaultAsync();
+
+            if (centreMasterData == null)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "Centre not found."
+                };
+            }
+            var centreEmpAccess = await db.empCenterAccess.Where(ec => ec.centreId == centreId).Select(ec => ec.empId).ToListAsync();
+
+            var result = new
+            {
+                CentreData = centreMasterData,
+                EmployeeAccess = centreEmpAccess
+            };
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = result
+            };
+        }
+
     }
 }

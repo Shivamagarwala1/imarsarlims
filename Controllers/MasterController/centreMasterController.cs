@@ -90,6 +90,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpGet("GetCentreData")]
+        public async Task<ServiceStatusResponseModel> GetCentreData(int centreId)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetCentreData(centreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
 
     }

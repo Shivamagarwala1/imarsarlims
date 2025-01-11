@@ -23,7 +23,7 @@ namespace iMARSARLIMS.Model.Master
         public string email { get; set; }
         [Required,MaxLength(10)]
         public string mobileNo { get; set; }
-        [Required, MaxLength(30)]
+        [Required]
         public DateTime dob { get; set; }
         [MaxLength(50)]
         public string? qualification { get; set; }
