@@ -29,9 +29,9 @@ namespace iMARSARLIMS.Controllers.TransactionController
                 var roleId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpContext.Request.Headers["roleId"])));
                 var CentreId = Convert.ToInt32(Encoding.UTF8.GetString(Convert.FromBase64String(HttpContext.Request.Headers["centreId"])));
                 var employeeCount = await (from em in db.empMaster
-                                           join emr in db.empRoleAccess on em.id equals emr.empId
-                                           join emc in db.empCenterAccess on em.id equals emc.empId
-                                           where em.id == empId && emr.roleId == roleId && emc.centreId == CentreId
+                                           join emr in db.empRoleAccess on em.empId equals emr.empId
+                                           join emc in db.empCenterAccess on em.empId equals emc.empId
+                                           where em.empId == empId && emr.roleId == roleId && emc.centreId == CentreId
                                            select em).CountAsync();
 
                 var result = "";

@@ -107,8 +107,8 @@ namespace iMARSARLIMS
             modelBuilder.Entity<area_master>().HasKey(x => x.id);
             modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<centreMaster>().HasKey(x => x.id);
-            modelBuilder.Entity<centreMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<centreMaster>().HasKey(x => x.centreId);
+            modelBuilder.Entity<centreMaster>().Property(x => x.centreId).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_Booking>().HasKey(x => x.transactionId);
             modelBuilder.Entity<tnx_Booking>().Property(x => x.transactionId).ValueGeneratedOnAdd();
@@ -188,8 +188,8 @@ namespace iMARSARLIMS
             modelBuilder.Entity<empCenterAccess>().HasKey(x => x.id);
             modelBuilder.Entity<empCenterAccess>().Property(x => x.id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<empMaster>().HasKey(x => x.id);
-            modelBuilder.Entity<empMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<empMaster>().HasKey(x => x.empId);
+            modelBuilder.Entity<empMaster>().Property(x => x.empId).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<empDepartmentAccess>().HasKey(x => x.id);
             modelBuilder.Entity<empDepartmentAccess>().Property(x => x.id).ValueGeneratedOnAdd();

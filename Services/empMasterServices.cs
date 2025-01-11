@@ -24,14 +24,14 @@ namespace iMARSARLIMS.Services
         async Task<ServiceStatusResponseModel> IempMasterServices.EmpLogin(LoginRequestModel loginRequestModel)
         {
             var employee = await (from em in db.empMaster
-                      join emr in db.empRoleAccess on em.id equals emr.empId
-                      join emc in db.empCenterAccess on em.id equals emc.empId
+                      join emr in db.empRoleAccess on em.empId equals emr.empId
+                      join emc in db.empCenterAccess on em.empId equals emc.empId
                       where em.userName == loginRequestModel.userName 
                             && (em.password == loginRequestModel.password || em.tempPassword == loginRequestModel.password) 
                             && em.defaultcentre == emc.centreId
                       select new LoginResponseModel
                       {
-                          employeeId = em.id.ToString(),
+                          employeeId = em.empId.ToString(),
                           Name = string.Concat(em.fName, " ", em.lName),
                           DefaultRole = em.defaultrole.ToString(),
                           DefaultCenter = em.defaultcentre.ToString(),
@@ -84,7 +84,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    if (empmaster.id == 0)
+                    if (empmaster.empId == 0)
                     {
                         
                         var count= db.empMaster.Where(e=>e.userName == empmaster.userName).Count();
@@ -99,11 +99,11 @@ namespace iMARSARLIMS.Services
                         var EmployeeRegData = CreateEmployee(empmaster);
                         var EmployeeData = db.empMaster.Add(EmployeeRegData);
                         await db.SaveChangesAsync();
-                        var employeeId = EmployeeData.Entity.id;
+                        var employeeId = EmployeeData.Entity.empId;
                         await SaveEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
-                        var result = db.empMaster.Where(e => e.id == employeeId).ToList();
+                        var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -112,18 +112,18 @@ namespace iMARSARLIMS.Services
                     }
                     else
                     {
-                        var EmpMaster = db.empMaster.FirstOrDefault(em => em.id == empmaster.id);
+                        var EmpMaster = db.empMaster.FirstOrDefault(em => em.empId == empmaster.empId);
                         if (EmpMaster != null)
                         {
                             UpdateEmployee(EmpMaster, empmaster);
                         }
                         var EmployeeMaster = db.empMaster.Update(EmpMaster);
                         await db.SaveChangesAsync();
-                        var employeeId = EmployeeMaster.Entity.id;
+                        var employeeId = EmployeeMaster.Entity.empId;
                         await UpdateEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await UpdateEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await transaction.CommitAsync();
-                        var result = db.empMaster.Where(e => e.id == employeeId).ToList();
+                        var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -150,7 +150,7 @@ namespace iMARSARLIMS.Services
         {
             return new empMaster
             {
-                id = empmaster.id,
+                empId = empmaster.empId,
                 empCode = empmaster.empCode,
                 title = empmaster.title,
                 fName = empmaster.fName,
@@ -159,7 +159,6 @@ namespace iMARSARLIMS.Services
                 pinCode = empmaster.pinCode,
                 email = empmaster.email,
                 mobileNo = empmaster.mobileNo,
-                deptAccess = empmaster.deptAccess,
                 dob = empmaster.dob,
                 qualification = empmaster.qualification,
                 bloodGroup = empmaster.bloodGroup,
@@ -270,7 +269,6 @@ namespace iMARSARLIMS.Services
             EmpMaster.pinCode = empmaster.pinCode;
             EmpMaster.email = empmaster.email;
             EmpMaster.mobileNo = empmaster.mobileNo;
-            EmpMaster.deptAccess = empmaster.deptAccess;
             EmpMaster.dob = empmaster.dob;
             EmpMaster.qualification = empmaster.qualification;
             EmpMaster.bloodGroup = empmaster.bloodGroup;
@@ -484,7 +482,7 @@ namespace iMARSARLIMS.Services
                 {
                     if (emplpyeeid != 0)
                     {
-                        var imagepath = db.empMaster.Where(e => e.id == emplpyeeid).Select(e => e.fileName).FirstOrDefault();
+                        var imagepath = db.empMaster.Where(e => e.empId == emplpyeeid).Select(e => e.fileName).FirstOrDefault();
                         byte[] imageBytes = File.ReadAllBytes(imagepath);
                         string image = Convert.ToBase64String(imageBytes);
                         return new ServiceStatusResponseModel
@@ -516,12 +514,12 @@ namespace iMARSARLIMS.Services
         async Task<ServiceStatusResponseModel> IempMasterServices.EmployeeWiseCentre(int EmplyeeId)
         {
             var Centres = await (from eca in db.empCenterAccess
-                                 join cm in db.centreMaster on eca.centreId equals cm.id
+                                 join cm in db.centreMaster on eca.centreId equals cm.centreId
                                  where eca.empId == EmplyeeId
                                  orderby eca.centreId
                                  select new
                                  {
-                                     CentreId = cm.id,
+                                     CentreId = cm.centreId,
                                      CentreName = cm.companyName
                                  }).ToListAsync();
 
@@ -704,7 +702,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var empdata =await  db.empMaster.Where(e => e.id == Employeeid).FirstOrDefaultAsync();
+                    var empdata =await  db.empMaster.Where(e => e.empId == Employeeid).FirstOrDefaultAsync();
                     empdata.password = Password;
                     empdata.tempPassword = "";
                     db.empMaster.Update(empdata);

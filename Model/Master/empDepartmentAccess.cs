@@ -9,6 +9,7 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         [Required]
+        [ForeignKey("empMaster")]
         public int empId { get; set; }
         [Required]
         public int departmentId { get; set; }

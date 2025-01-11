@@ -79,7 +79,7 @@ namespace iMARSARLIMS.Services
                 }).Cast<roleMenuAccess>();
 
                 var AccessData = await (from pd in paginatedData
-                                        join em in db.empMaster on pd.employeeId equals em.id
+                                        join em in db.empMaster on pd.employeeId equals em.empId
                                         join mm in db.menuMaster on pd.menuId equals mm.id
                                         join mm1 in db.menuMaster on pd.subMenuId equals mm1.id
                                         join rm in db.roleMaster on pd.roleId equals rm.id

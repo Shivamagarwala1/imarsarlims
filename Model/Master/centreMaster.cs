@@ -7,7 +7,7 @@ namespace iMARSARLIMS.Model.Master
     public class centreMaster : Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int id { get; set; }
+        public int centreId { get; set; }
         [Required, MaxLength(50)]
         public string centretype { get; set; }
         public int centretypeid { get; set; }
@@ -92,5 +92,7 @@ namespace iMARSARLIMS.Model.Master
         public int receptionarea { get; set; }
         public int waitingarea { get; set; }
         public int watercooler { get; set; }
+        [ForeignKey(nameof(centreId))]
+        public List<empCenterAccess> addEmpRoleAccess { get; set; }
     }
 }

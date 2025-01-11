@@ -26,7 +26,7 @@ namespace iMARSARLIMS.Services
                               join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                               join tos in db.tnx_Observations on tbi.id equals tos.testId
                               join tm in db.titleMaster on tb.title_id equals tm.id
-                              join cm in db.centreMaster on tb.centreId equals cm.id
+                              join cm in db.centreMaster on tb.centreId equals cm.centreId
                               where testIds.Contains(tbi.id) && tos.showInReport == 1
                               select new
                               {
@@ -257,7 +257,7 @@ namespace iMARSARLIMS.Services
                               join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                               join tos in db.tnx_Observations on tbi.id equals tos.testId
                               join tm in db.titleMaster on tb.title_id equals tm.id
-                              join cm in db.centreMaster on tb.centreId equals cm.id
+                              join cm in db.centreMaster on tb.centreId equals cm.centreId
                               where testIds.Contains(tbi.id) && tos.showInReport == 1
                               select new
                               {

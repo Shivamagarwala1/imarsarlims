@@ -26,7 +26,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             _logger = logger;
             _openAIService = openAIService;
         }
-        protected override IQueryable<empMaster> DbSet => db.empMaster.AsNoTracking().OrderBy(o => o.id);
+        protected override IQueryable<empMaster> DbSet => db.empMaster.AsNoTracking().OrderBy(o => o.empId);
 
 
         [HttpPost("UpdatePassword")]

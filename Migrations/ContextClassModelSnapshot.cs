@@ -555,7 +555,7 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.centreMaster", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("centreId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -803,7 +803,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("watercooler")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("centreId");
 
                     b.ToTable("centreMaster");
                 });
@@ -1331,9 +1331,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("empId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("empMasterid")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
 
@@ -1345,7 +1342,9 @@ namespace iMARSARLIMS.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("empMasterid");
+                    b.HasIndex("centreId");
+
+                    b.HasIndex("empId");
 
                     b.ToTable("empCenterAccess");
                 });
@@ -1378,6 +1377,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
+
+                    b.HasIndex("empId");
 
                     b.ToTable("empDepartmentAccess");
                 });
@@ -1445,7 +1446,7 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empMaster", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("empId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -1489,10 +1490,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("defaultrole")
                         .HasColumnType("int");
 
-                    b.Property<string>("deptAccess")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                    
 
                     b.Property<int>("designationId")
                         .HasColumnType("int");
@@ -1602,7 +1600,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("zone")
                         .HasColumnType("int");
 
-                    b.HasKey("id");
+                    b.HasKey("empId");
 
                     b.ToTable("empMaster");
                 });
@@ -1622,9 +1620,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("empId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("empMasterid")
-                        .HasColumnType("int");
-
                     b.Property<bool?>("isActive")
                         .HasColumnType("tinyint(1)");
 
@@ -1639,7 +1634,7 @@ namespace iMARSARLIMS.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("empMasterid");
+                    b.HasIndex("empId");
 
                     b.ToTable("empRoleAccess");
                 });
@@ -5011,16 +5006,35 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empCenterAccess", b =>
                 {
+                    b.HasOne("iMARSARLIMS.Model.Master.centreMaster", null)
+                        .WithMany("addEmpRoleAccess")
+                        .HasForeignKey("centreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("iMARSARLIMS.Model.Master.empMaster", null)
                         .WithMany("addEmpCentreAccess")
-                        .HasForeignKey("empMasterid");
+                        .HasForeignKey("empId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("iMARSARLIMS.Model.Master.empDepartmentAccess", b =>
+                {
+                    b.HasOne("iMARSARLIMS.Model.Master.empMaster", null)
+                        .WithMany("addEmpDepartmentAccess")
+                        .HasForeignKey("empId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empRoleAccess", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Master.empMaster", null)
                         .WithMany("addEmpRoleAccess")
-                        .HasForeignKey("empMasterid");
+                        .HasForeignKey("empId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
@@ -5050,9 +5064,16 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("iMARSARLIMS.Model.Master.centreMaster", b =>
+                {
+                    b.Navigation("addEmpRoleAccess");
+                });
+
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empMaster", b =>
                 {
                     b.Navigation("addEmpCentreAccess");
+
+                    b.Navigation("addEmpDepartmentAccess");
 
                     b.Navigation("addEmpRoleAccess");
                 });

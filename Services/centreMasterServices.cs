@@ -41,15 +41,17 @@ namespace iMARSARLIMS.Services
                         }
                     }
                     var centreId = 0;
-                    if (centremaster.id == 0)
+                    var message1 = "";
+                    if (centremaster.centreId == 0)
                     {
+                        
                         var CentreMasterData = CreateCentreDetails(centremaster);
                         var CentreData = await db.centreMaster.AddAsync(CentreMasterData);
                         await db.SaveChangesAsync();
-                        centreId = CentreData.Entity.id;
+                        centreId = CentreData.Entity.centreId;
                         if (centremaster.processingLab == 0)
                         {
-                            var Centre = await db.centreMaster.FirstOrDefaultAsync(cm => cm.id == centreId);
+                            var Centre = await db.centreMaster.FirstOrDefaultAsync(cm => cm.centreId == centreId);
                             if (Centre != null)
                             {
                                 Centre.processingLab = centreId;
@@ -83,7 +85,7 @@ namespace iMARSARLIMS.Services
                             var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId);
                             var EmployeeData = db.empMaster.Add(EmployeeRegData);
                             await db.SaveChangesAsync();
-                            var employeeId = EmployeeData.Entity.id;
+                            var employeeId = EmployeeData.Entity.empId;
                             var centreAccess = SaveEmpCentreAccess(employeeId, centreId, (int)centremaster.createdById, centremaster.createdDateTime);
                             db.empCenterAccess.Add(centreAccess);
                             await db.SaveChangesAsync();
@@ -91,19 +93,21 @@ namespace iMARSARLIMS.Services
                             db.empRoleAccess.Add(RoleAccess);
                             await db.SaveChangesAsync();
                         }
+                        await SaveEmpCentreAccessData(centremaster.addEmpRoleAccess, centreId);
+                        message1 = "Saved Successful";
                     }
 
 
                     else
                     {
-                        var CentreMaster = db.centreMaster.FirstOrDefault(cm => cm.id == centremaster.id);
+                        var CentreMaster = db.centreMaster.FirstOrDefault(cm => cm.centreId == centremaster.centreId);
                         if (CentreMaster != null)
                         {
                             UpdateCentreDetails(CentreMaster, centremaster);
                         }
                         var CentreMasterData = db.centreMaster.Update(CentreMaster);
                         await db.SaveChangesAsync();
-                        centreId = CentreMasterData.Entity.id;
+                        centreId = CentreMasterData.Entity.centreId;
                         if (centremaster.centretype == "Franchisee" || centremaster.centretype == "SubFranchisee")
                         {
                             //  var roleId = 0;
@@ -119,15 +123,17 @@ namespace iMARSARLIMS.Services
                             //  var RoleAccess = SaveEmpRoleAccess(employeeId, roleId, (int)centremaster.createdById, centremaster.createdDateTime);
 
                         }
-
+                        message1 = "Updated Successful";
                     }
                     await transaction.CommitAsync();
 
-                    var result = db.centreMaster.Where(c => c.id == centreId).ToList();
+                    var result = db.centreMaster.Where(c => c.centreId == centreId).ToList();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Data = result
+                        Data = result,
+                        Message= message1
+                        
                     };
                 }
                 catch (Exception ex)
@@ -145,7 +151,7 @@ namespace iMARSARLIMS.Services
         {
             return new centreMaster
             {
-                id = centremaster.id,
+                centreId = centremaster.centreId,
                 centretype = centremaster.centretype,
                 centretypeid= centremaster.centretypeid,
                 centrecode = centremaster.centrecode,
@@ -220,7 +226,7 @@ namespace iMARSARLIMS.Services
                 watercooler = centremaster.waitingarea
             };
         }
-
+        
         private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId)
         {
             return new empMaster
@@ -237,7 +243,6 @@ namespace iMARSARLIMS.Services
                 password = centremaster.mobileNo,
                 createdById = centremaster.createdById,
                 bloodGroup = "b+",
-                deptAccess = centremaster.centretype,
                 createdDateTime = centremaster.createdDateTime,
                 autoCreated = 1,
                 centreId = centreId,
@@ -378,7 +383,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var CentreData = await db.centreMaster.Where(c => c.id == CentreId).FirstOrDefaultAsync();
+                    var CentreData = await db.centreMaster.Where(c => c.centreId == CentreId).FirstOrDefaultAsync();
                     if (CentreData != null)
                     {
                         CentreData.isActive = status;
@@ -412,6 +417,38 @@ namespace iMARSARLIMS.Services
             }
         }
 
+        private async Task<ServiceStatusResponseModel> SaveEmpCentreAccessData(IEnumerable<empCenterAccess> empcentreaccess, int Centreid)
+        {
+            if (empcentreaccess != null)
+            {
+                var empCentreDataList = empcentreaccess.Select(empcentre => CreateEmpCentreData(empcentre, Centreid)).ToList();
+                if (empCentreDataList.Any())
+                {
+                    db.empCenterAccess.AddRange(empCentreDataList);
+                    await db.SaveChangesAsync();
+                }
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = empcentreaccess
+            };
+
+        }
+
+        private empCenterAccess CreateEmpCentreData(empCenterAccess empcentreaccess, int CentreId)
+        {
+            return new empCenterAccess
+            {
+                id = empcentreaccess.id,
+                empId = empcentreaccess.empId,
+                centreId = CentreId,
+                isActive = empcentreaccess.isActive,
+                createdById = empcentreaccess.createdById,
+                createdDateTime = empcentreaccess.createdDateTime
+            };
+
+        }
         async Task<ServiceStatusResponseModel> IcentreMasterServices.GetParentCentre()
         {
             try
@@ -421,12 +458,12 @@ namespace iMARSARLIMS.Services
                     .Select(c => new
                     {
                         c.companyName,
-                        c.id
+                        c.centreId
                     })
                     .ToListAsync();
 
-                ParentCentre.Add(new { companyName = "Self", id = 0 });
-                ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
+               // ParentCentre.Add(new { companyName = "Self", id = 0 });
+              //  ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
 
                 return new ServiceStatusResponseModel
                 {
@@ -454,12 +491,12 @@ namespace iMARSARLIMS.Services
                     .Select(c => new
                     {
                         c.companyName,
-                        c.id
+                        c.centreId
                     })
                     .ToListAsync();
 
-                ParentCentre.Add(new { companyName = "Self", id = 0 });
-                ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
+               // ParentCentre.Add(new { companyName = "Self", id = 0 });
+               // ParentCentre = ParentCentre.OrderBy(p => p.id).ToList();
 
                 return new ServiceStatusResponseModel
                 {

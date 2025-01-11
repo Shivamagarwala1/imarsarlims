@@ -801,7 +801,7 @@ namespace iMARSARLIMS.Services
                                join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                join tm in db.titleMaster on tb.title_id equals tm.id
-                               join cm in db.centreMaster on tb.centreId equals cm.id
+                               join cm in db.centreMaster on tb.centreId equals cm.centreId
                                where tb.workOrderId == workorderid
                                select new
                                {
@@ -1004,7 +1004,7 @@ namespace iMARSARLIMS.Services
                                join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                join tm in db.titleMaster on tb.title_id equals tm.id
-                               join cm in db.centreMaster on tb.centreId equals cm.id
+                               join cm in db.centreMaster on tb.centreId equals cm.centreId
                                where tb.workOrderId == workorderid
                                select new
                                {

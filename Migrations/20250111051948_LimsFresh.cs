@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class LimsStart : Migration
+    public partial class LimsFresh : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -204,7 +204,7 @@ namespace iMARSARLIMS.Migrations
                 name: "centreMaster",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    centreId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     centretype = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     centretypeid = table.Column<int>(type: "int", nullable: false),
@@ -283,7 +283,7 @@ namespace iMARSARLIMS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_centreMaster", x => x.id);
+                    table.PrimaryKey("PK_centreMaster", x => x.centreId);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -599,26 +599,6 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "empDepartmentAccess",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    empId = table.Column<int>(type: "int", nullable: false),
-                    departmentId = table.Column<int>(type: "int", nullable: false),
-                    isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
-                    createdById = table.Column<int>(type: "int", nullable: true),
-                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updateById = table.Column<int>(type: "int", nullable: true),
-                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_empDepartmentAccess", x => x.id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "empLoginDetails",
                 columns: table => new
                 {
@@ -647,7 +627,7 @@ namespace iMARSARLIMS.Migrations
                 name: "empMaster",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    empId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     empCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     title = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
@@ -657,7 +637,6 @@ namespace iMARSARLIMS.Migrations
                     pinCode = table.Column<int>(type: "int", nullable: true),
                     email = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
-                    deptAccess = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     qualification = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     bloodGroup = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: true),
@@ -694,7 +673,7 @@ namespace iMARSARLIMS.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_empMaster", x => x.id);
+                    table.PrimaryKey("PK_empMaster", x => x.empId);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1811,24 +1790,25 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     testId = table.Column<int>(type: "int", nullable: true),
                     labObservationId = table.Column<int>(type: "int", nullable: true),
-                    observationName = table.Column<string>(type: "longtext", nullable: true),
-                    value = table.Column<string>(type: "longtext", nullable: true),
-                    flag = table.Column<string>(type: "longtext", nullable: true),
+                    observationName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    value = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    flag = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: true),
                     min = table.Column<double>(type: "double", nullable: true),
                     max = table.Column<double>(type: "double", nullable: true),
                     minCritical = table.Column<double>(type: "double", nullable: true),
                     maxCritical = table.Column<double>(type: "double", nullable: true),
                     isCritical = table.Column<byte>(type: "tinyint unsigned", nullable: true),
-                    readingformat = table.Column<string>(type: "longtext", nullable: true),
-                    unit = table.Column<string>(type: "longtext", nullable: true),
-                    testMethod = table.Column<string>(type: "longtext", nullable: true),
-                    displayReading = table.Column<string>(type: "longtext", nullable: true),
-                    machineReading = table.Column<string>(type: "longtext", nullable: true),
+                    readingformat = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    unit = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    testMethod = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    displayReading = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
+                    machineReading = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true),
                     machineID = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     printseperate = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isBold = table.Column<byte>(type: "tinyint unsigned", nullable: true),
-                    machineName = table.Column<string>(type: "longtext", nullable: true),
+                    machineName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     showInReport = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    isHeader = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2169,7 +2149,6 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     empId = table.Column<int>(type: "int", nullable: false),
                     centreId = table.Column<int>(type: "int", nullable: false),
-                    empMasterid = table.Column<int>(type: "int", nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2180,10 +2159,43 @@ namespace iMARSARLIMS.Migrations
                 {
                     table.PrimaryKey("PK_empCenterAccess", x => x.id);
                     table.ForeignKey(
-                        name: "FK_empCenterAccess_empMaster_empMasterid",
-                        column: x => x.empMasterid,
+                        name: "FK_empCenterAccess_centreMaster_centreId",
+                        column: x => x.centreId,
+                        principalTable: "centreMaster",
+                        principalColumn: "centreId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_empCenterAccess_empMaster_empId",
+                        column: x => x.empId,
                         principalTable: "empMaster",
-                        principalColumn: "id");
+                        principalColumn: "empId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "empDepartmentAccess",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    empId = table.Column<int>(type: "int", nullable: false),
+                    departmentId = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_empDepartmentAccess", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_empDepartmentAccess_empMaster_empId",
+                        column: x => x.empId,
+                        principalTable: "empMaster",
+                        principalColumn: "empId",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2195,7 +2207,6 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     empId = table.Column<int>(type: "int", nullable: false),
                     roleId = table.Column<int>(type: "int", nullable: false),
-                    empMasterid = table.Column<int>(type: "int", nullable: true),
                     isActive = table.Column<bool>(type: "tinyint(1)", nullable: true),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2206,10 +2217,11 @@ namespace iMARSARLIMS.Migrations
                 {
                     table.PrimaryKey("PK_empRoleAccess", x => x.id);
                     table.ForeignKey(
-                        name: "FK_empRoleAccess_empMaster_empMasterid",
-                        column: x => x.empMasterid,
+                        name: "FK_empRoleAccess_empMaster_empId",
+                        column: x => x.empId,
                         principalTable: "empMaster",
-                        principalColumn: "id");
+                        principalColumn: "empId",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2224,7 +2236,7 @@ namespace iMARSARLIMS.Migrations
                     bookingDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     clientCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     patientId = table.Column<int>(type: "int", nullable: false),
-                    title_id = table.Column<int>(type: "int", maxLength: 10, nullable: false),
+                    title_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     gender = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
                     dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2414,14 +2426,24 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_empCenterAccess_empMasterid",
+                name: "IX_empCenterAccess_centreId",
                 table: "empCenterAccess",
-                column: "empMasterid");
+                column: "centreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_empRoleAccess_empMasterid",
+                name: "IX_empCenterAccess_empId",
+                table: "empCenterAccess",
+                column: "empId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_empDepartmentAccess_empId",
+                table: "empDepartmentAccess",
+                column: "empId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_empRoleAccess_empId",
                 table: "empRoleAccess",
-                column: "empMasterid");
+                column: "empId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_tnx_Booking_patientId",
@@ -2468,9 +2490,6 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "centreLedgerRemarks");
-
-            migrationBuilder.DropTable(
-                name: "centreMaster");
 
             migrationBuilder.DropTable(
                 name: "CentrePayment");
@@ -2705,6 +2724,9 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "zoneMaster");
+
+            migrationBuilder.DropTable(
+                name: "centreMaster");
 
             migrationBuilder.DropTable(
                 name: "empMaster");

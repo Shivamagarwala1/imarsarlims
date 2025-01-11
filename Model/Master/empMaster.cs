@@ -7,7 +7,7 @@ namespace iMARSARLIMS.Model.Master
     public class empMaster : Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int id { get; set; }
+        public int empId { get; set; }
         [Required, MaxLength(20)]
         public string empCode { get; set; }
         [Required, MaxLength(10)]
@@ -24,7 +24,6 @@ namespace iMARSARLIMS.Model.Master
         [Required,MaxLength(10)]
         public string mobileNo { get; set; }
         [Required, MaxLength(30)]
-        public string deptAccess { get; set; }
         public DateTime dob { get; set; }
         [MaxLength(50)]
         public string? qualification { get; set; }
@@ -65,9 +64,12 @@ namespace iMARSARLIMS.Model.Master
         public string? adminPassword { get; set; }
         [MaxLength(20)]
         public string? tempPassword { get; set; }
-
+        [ForeignKey(nameof(empId))]
         public List<empCenterAccess>? addEmpCentreAccess { get; set; }
+        [ForeignKey(nameof(empId))]
         public List<empRoleAccess>? addEmpRoleAccess { get; set; }
+        [ForeignKey(nameof(empId))]
+        public List<empDepartmentAccess>? addEmpDepartmentAccess { get; set; }
 
     }
 }

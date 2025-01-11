@@ -17,7 +17,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             db = context;
             this._centreMasterServices = centreMasterServices;
         }
-        protected override IQueryable<centreMaster> DbSet => db.centreMaster.AsNoTracking().OrderBy(o => o.id);
+        protected override IQueryable<centreMaster> DbSet => db.centreMaster.AsNoTracking().OrderBy(o => o.centreId);
 
         [HttpPost("SaveCentreDetail")]
         public async Task<ServiceStatusResponseModel> SaveCentreDetail(centreMaster centremaster)
