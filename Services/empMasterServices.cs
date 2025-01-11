@@ -102,6 +102,7 @@ namespace iMARSARLIMS.Services
                         var employeeId = EmployeeData.Entity.empId;
                         await SaveEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
+                        await SaveEmpDepartmentAccess(empmaster.addEmpDepartmentAccess, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
@@ -122,6 +123,7 @@ namespace iMARSARLIMS.Services
                         var employeeId = EmployeeMaster.Entity.empId;
                         await UpdateEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await UpdateEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
+                        await UpdateEmpDepartmentAccess(empmaster.addEmpDepartmentAccess, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
@@ -258,6 +260,38 @@ namespace iMARSARLIMS.Services
             };
 
         }
+        private async Task<ServiceStatusResponseModel> SaveEmpDepartmentAccess(IEnumerable<empDepartmentAccess> empDepartment, int employeeId)
+        {
+            if (empDepartment != null)
+            {
+                var empDepatrtmentDataList =  empDepartment.Select(empDept => CreateEmpDepartmentData(empDept, employeeId)).ToList();
+                if (empDepatrtmentDataList.Any())
+                {
+                    db.empDepartmentAccess.AddRange(empDepatrtmentDataList);
+                    await db.SaveChangesAsync();
+                }
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = empDepartment
+            };
+
+        }
+
+        private empDepartmentAccess CreateEmpDepartmentData(empDepartmentAccess empDepartment, int employeeId)
+        {
+            return new empDepartmentAccess
+            {
+                id = empDepartment.id,
+                empId = employeeId,
+                departmentId = empDepartment.departmentId,
+                isActive = empDepartment.isActive,
+                createdById = empDepartment.createdById,
+                createdDateTime = empDepartment.createdDateTime
+            };
+
+        }
 
         private void UpdateEmployee(empMaster EmpMaster, empMaster empmaster)
         {
@@ -339,6 +373,44 @@ namespace iMARSARLIMS.Services
             EmpCentreAccess.isActive = empcentreaccess.isActive;
             EmpCentreAccess.updateById = empcentreaccess.updateById;
             EmpCentreAccess.updateDateTime = empcentreaccess.updateDateTime;
+        }
+        private async Task<ServiceStatusResponseModel> UpdateEmpDepartmentAccess(IEnumerable<empDepartmentAccess> empDepartmentaccess, int employeeId)
+        {
+            foreach (var empDepartment in empDepartmentaccess)
+            {
+                if (empDepartment.id != 0)
+                {
+                    var empDepartmentData = await db.empDepartmentAccess.FirstOrDefaultAsync(em => em.id == empDepartment.id);
+                    if (empDepartmentData != null)
+                    {
+                        UpdateEmpDepartment(empDepartmentData, empDepartment, employeeId);
+                        var EmpCentreData = db.empDepartmentAccess.Update(empDepartmentData);
+                        await db.SaveChangesAsync();
+                        var id = EmpCentreData.Entity.id;
+                    }
+                }
+                else
+                {
+
+                    var empCenterData = CreateEmpDepartmentData(empDepartment, employeeId);
+                    var empCenter = db.empDepartmentAccess.Add(empCenterData);
+                    await db.SaveChangesAsync();
+                }
+
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = empDepartmentaccess
+            };
+        }
+        private void UpdateEmpDepartment(empDepartmentAccess EmpDepartmentAccess, empDepartmentAccess empdepartmnetaccess, int employeeId)
+        {
+            empdepartmnetaccess.empId = employeeId;
+            empdepartmnetaccess.departmentId = empdepartmnetaccess.departmentId;
+            empdepartmnetaccess.isActive = empdepartmnetaccess.isActive;
+            empdepartmnetaccess.updateById = empdepartmnetaccess.updateById;
+            empdepartmnetaccess.updateDateTime = empdepartmnetaccess.updateDateTime;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpRoleAccess(IEnumerable<empRoleAccess> emproleaccess, int employeeId)
