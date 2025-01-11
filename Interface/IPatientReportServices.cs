@@ -2,6 +2,7 @@
 {
     public interface IPatientReportServices
     {
-        byte[] GetPatientReport(string TestId);
+        byte[] GetPatientReportType1(string TestId);
+        byte[] GetPatientReportType2(string TestId);
     }
 }
