@@ -63,5 +63,26 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
 
         }
+
+        [HttpGet("GetPatientReportType3")]
+        public IActionResult GetPatientReportType3(string TestId)
+        {
+            try
+            {
+                var result = _PatientReportServices.GetPatientReportType3(TestId);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "PateintReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+
+        }
     }
 }

@@ -4,5 +4,6 @@
     {
         byte[] GetPatientReportType1(string TestId);
         byte[] GetPatientReportType2(string TestId);
+        byte[] GetPatientReportType3(string TestId);
     }
 }
