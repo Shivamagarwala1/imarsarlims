@@ -21,7 +21,7 @@ namespace iMARSARLIMS.Model.Transaction
         public int? ageMonth { get; set; }
         [Required]
         public short ageYear { get; set; }
-        public DateTime? dob { get; set; }
+        public DateTime dob { get; set; }
         public byte? isActualDOB { get; set; }
         [MaxLength(50)]
         public string? emailId { get; set; }

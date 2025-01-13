@@ -8,7 +8,9 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> SaveCentreDetail(centreMaster centremaster);
         Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, bool status, int UserId);
         Task<ServiceStatusResponseModel> GetParentCentre();
-        Task<ServiceStatusResponseModel> GetRateType();
+        Task<ServiceStatusResponseModel> GetProcesiongLab();
+        Task<ServiceStatusResponseModel> GetMRPRateType();
+        Task<ServiceStatusResponseModel> GetRateType(int CentreType, int ParentCentre);
         Task<ServiceStatusResponseModel> GetCentreData(int centreId);
     }
 }

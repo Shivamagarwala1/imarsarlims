@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250113065430_dateformatechage")]
+    partial class dateformatechage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -559,9 +562,6 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("DistrictId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Document")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -587,9 +587,6 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("QRCodeYPosition")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ZoneId")
                         .HasColumnType("int");
 
                     b.Property<int>("ac")
@@ -645,9 +642,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("chequeNo")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-
-                    b.Property<int>("cityId")
-                        .HasColumnType("int");
 
                     b.Property<int>("clientRate")
                         .HasColumnType("int");

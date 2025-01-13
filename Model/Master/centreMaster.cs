@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.OData.Edm;
 
 namespace iMARSARLIMS.Model.Master
 {
@@ -68,6 +69,10 @@ namespace iMARSARLIMS.Model.Master
         public int salesExecutiveID { get; set; }
         public int? isDefault { get; set; }
         public int? isLab { get; set; }
+        public int cityId { get; set; }
+        public int DistrictId { get; set; }
+        public int ZoneId { get; set; }
+
         public int minBookingAmt { get; set; }
         public int? lockedBy { get; set; }
         public DateTime? LockDate { get; set; }
@@ -79,7 +84,7 @@ namespace iMARSARLIMS.Model.Master
         [MaxLength(20)]
         public string? bankName { get; set; }
         public int chequeAmount { get; set; }
-        public int creditPeridos { get; set; }
+        public DateTime creditPeridos { get; set; }
         public int showClientCode { get; set; }
         public int patientRate { get; set; }
         public int clientRate { get; set; }
@@ -93,6 +98,6 @@ namespace iMARSARLIMS.Model.Master
         public int waitingarea { get; set; }
         public int watercooler { get; set; }
         [ForeignKey(nameof(centreId))]
-        public List<empCenterAccess> addEmpRoleAccess { get; set; }
+        public List<empCenterAccess> addEmpCenterAccess { get; set; }
     }
 }

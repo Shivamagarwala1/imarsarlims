@@ -11,8 +11,8 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    [Migration("20250111051948_LimsFresh")]
-    partial class LimsFresh
+    [Migration("20250113063438_LIMS1")]
+    partial class LIMS1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -663,8 +663,8 @@ namespace iMARSARLIMS.Migrations
                     b.Property<decimal>("creditLimt")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("creditPeridos")
-                        .HasColumnType("int");
+                    b.Property<DateOnly>("creditPeridos")
+                        .HasColumnType("date");
 
                     b.Property<int?>("docSignYPosition")
                         .HasColumnType("int");
@@ -1493,13 +1493,11 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("defaultrole")
                         .HasColumnType("int");
 
-                    
-
                     b.Property<int>("designationId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("dob")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly>("dob")
+                        .HasColumnType("date");
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -3534,8 +3532,8 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int?>("discountid")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("dob")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly>("dob")
+                        .HasColumnType("date");
 
                     b.Property<string>("gender")
                         .IsRequired()
@@ -4001,8 +3999,8 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("districtId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("dob")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateOnly?>("dob")
+                        .HasColumnType("date");
 
                     b.Property<int?>("documentId")
                         .HasColumnType("int");
@@ -5010,7 +5008,7 @@ namespace iMARSARLIMS.Migrations
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empCenterAccess", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Master.centreMaster", null)
-                        .WithMany("addEmpRoleAccess")
+                        .WithMany("addEmpCenterAccess")
                         .HasForeignKey("centreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -5069,7 +5067,7 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.centreMaster", b =>
                 {
-                    b.Navigation("addEmpRoleAccess");
+                    b.Navigation("addEmpCenterAccess");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.empMaster", b =>

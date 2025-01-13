@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class LimsFresh : Migration
+    public partial class LIMS1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -262,7 +262,7 @@ namespace iMARSARLIMS.Migrations
                     chequeNo = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     bankName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     chequeAmount = table.Column<int>(type: "int", nullable: false),
-                    creditPeridos = table.Column<int>(type: "int", nullable: false),
+                    creditPeridos = table.Column<DateOnly>(type: "date", nullable: false),
                     showClientCode = table.Column<int>(type: "int", nullable: false),
                     patientRate = table.Column<int>(type: "int", nullable: false),
                     clientRate = table.Column<int>(type: "int", nullable: false),
@@ -637,7 +637,7 @@ namespace iMARSARLIMS.Migrations
                     pinCode = table.Column<int>(type: "int", nullable: true),
                     email = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
-                    dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    dob = table.Column<DateOnly>(type: "date", nullable: false),
                     qualification = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     bloodGroup = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: true),
                     designationId = table.Column<int>(type: "int", nullable: false),
@@ -1705,7 +1705,7 @@ namespace iMARSARLIMS.Migrations
                     ageDays = table.Column<int>(type: "int", nullable: false),
                     ageMonth = table.Column<int>(type: "int", nullable: false),
                     ageYear = table.Column<short>(type: "smallint", nullable: false),
-                    dob = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    dob = table.Column<DateOnly>(type: "date", nullable: true),
                     isActualDOB = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     emailId = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     mobileNo = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: true),
@@ -2239,7 +2239,7 @@ namespace iMARSARLIMS.Migrations
                     title_id = table.Column<int>(type: "int", nullable: false),
                     name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     gender = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: false),
-                    dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    dob = table.Column<DateOnly>(type: "date", nullable: false),
                     ageYear = table.Column<int>(type: "int", nullable: false),
                     ageMonth = table.Column<int>(type: "int", nullable: false),
                     ageDay = table.Column<int>(type: "int", nullable: false),

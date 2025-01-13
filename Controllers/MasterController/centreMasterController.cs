@@ -73,12 +73,12 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
-        [HttpGet("GetRateType")]
-        public async Task<ServiceStatusResponseModel> GetRateType()
+        [HttpGet("GetProcesiongLab")]
+        public async Task<ServiceStatusResponseModel> GetProcesiongLab()
         {
             try
             {
-                var result = await _centreMasterServices.GetRateType();
+                var result = await _centreMasterServices.GetProcesiongLab();
                 return result;
             }
             catch (Exception ex)
@@ -90,6 +90,42 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
+        [HttpGet("GetMRPRateType")]
+        public async Task<ServiceStatusResponseModel> GetMRPRateType()
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetMRPRateType();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+        [HttpGet("GetRateType")]
+        public async Task<ServiceStatusResponseModel> GetRateType(int CentreType, int ParentCentre)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetRateType(CentreType, ParentCentre);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
         [HttpGet("GetCentreData")]
         public async Task<ServiceStatusResponseModel> GetCentreData(int centreId)
         {

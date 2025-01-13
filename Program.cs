@@ -131,6 +131,7 @@ builder.Services.AddScoped<IMenuMasterServices, MenuMasterServices>();
 builder.Services.AddSingleton<OpenAIService>();
 builder.Services.AddSingleton<JwtTokenGenrator>();
 builder.Services.AddScoped<IPatientReportServices, PatientReportServices>();
+builder.Services.AddScoped<ILocationsServices, LocationsServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
