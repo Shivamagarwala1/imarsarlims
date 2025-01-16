@@ -64,6 +64,7 @@ namespace iMARSARLIMS.Model.Master
         public string? adminPassword { get; set; }
         [MaxLength(20)]
         public string? tempPassword { get; set; }
+        public int district { get; set; }
         [ForeignKey(nameof(empId))]
         public List<empCenterAccess>? addEmpCentreAccess { get; set; }
         [ForeignKey(nameof(empId))]

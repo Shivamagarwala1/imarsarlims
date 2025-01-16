@@ -19,7 +19,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    if (itemmaster.id == 0)
+                    if (itemmaster.itemId == 0)
                     {
                         if (itemmaster.itemName == "")
                         {
@@ -44,7 +44,7 @@ namespace iMARSARLIMS.Services
                         var ItemMasterData = CreateItem(itemmaster);
                         var ItemData = db.itemMaster.Add(ItemMasterData);
                         await db.SaveChangesAsync();
-                        var itemId = ItemData.Entity.id;
+                        var itemId = ItemData.Entity.itemId;
                         if (itemmaster.itemType == 1)
                         {
                             var itemObservation = CreateItemObservation(itemmaster);
@@ -53,22 +53,21 @@ namespace iMARSARLIMS.Services
                             var observationId = itemObservationData.Entity.id;
                             var ItemObservationMapping = CreateItemObservationMapping(itemId, observationId);
                             db.ItemObservationMapping.Add(ItemObservationMapping);
+                            await db.SaveChangesAsync();
                         }
-                        var itemSampletype = CreateItemSampletype(itemId, sampletype: (int)itemmaster.defaultsampletype);
-                        db.itemSampleTypeMapping.Add(itemSampletype);
-                        await db.SaveChangesAsync();
+                        CreateItemSampletype(itemId, itemmaster.AddSampletype);
 
                     }
                     else
                     {
-                        var ItemMaster = db.itemMaster.FirstOrDefault(im => im.id == itemmaster.id);
+                        var ItemMaster = db.itemMaster.FirstOrDefault(im => im.itemId == itemmaster.itemId);
                         if (ItemMaster != null)
                         {
                             UpdateItemMaster(ItemMaster, itemmaster);
                         }
                         db.itemMaster.Update(ItemMaster);
+                        UpdateSampletypedata(itemmaster.AddSampletype, itemmaster.itemId);
                         await db.SaveChangesAsync();
-
                     }
                     await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
@@ -93,7 +92,7 @@ namespace iMARSARLIMS.Services
         {
             return new itemMaster
             {
-                id = itemmaster.id,
+                itemId = itemmaster.itemId,
                 itemName = itemmaster.itemName,
                 dispalyName = itemmaster.dispalyName,
                 testMethod = itemmaster.testMethod,
@@ -127,7 +126,7 @@ namespace iMARSARLIMS.Services
                 isAllergyTest = itemmaster.isAllergyTest,
                 displaySequence = itemmaster.displaySequence,
                 consentForm = itemmaster.consentForm,
-                isActive=itemmaster.isActive,
+                isActive = itemmaster.isActive,
                 createdById = itemmaster.createdById,
                 createdDateTime = itemmaster.createdDateTime
             };
@@ -138,7 +137,7 @@ namespace iMARSARLIMS.Services
         {
             return new itemObservationMaster
             {
-                id = itemmaster.id,
+                id = 0,
                 labObservationName = itemmaster.itemName,
                 dlcCheck = 0,
                 gender = itemmaster.gender,
@@ -175,20 +174,60 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        private itemSampleTypeMapping CreateItemSampletype(int itemId, int sampletype)
+        private async Task<ServiceStatusResponseModel> CreateItemSampletype(int itemId, IEnumerable<itemSampleTypeMapping> sampletypeList)
         {
-            var sampleTypeName = (from sm in db.sampletype_master
-                                  where sm.id == sampletype
-                                  select sm.sampleTypeName).ToString();
 
+            if (sampletypeList != null)
+            {
+                var sampleDataList = sampletypeList.Select(sampletype => CreateSampleTypeData(sampletype, itemId)).ToList();
+                if (sampleDataList.Any())
+                {
+                    db.itemSampleTypeMapping.AddRange(sampleDataList);
+                    await db.SaveChangesAsync();
+                }
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+            };
+        }
+        private itemSampleTypeMapping CreateSampleTypeData(itemSampleTypeMapping sampletype, int itemId)
+        {
             return new itemSampleTypeMapping
             {
                 id = 0,
-                sampleTypeId = sampletype,
-                sampleTypeName = sampleTypeName,
-                isDefault = 1
+                itemId = itemId,
+                sampleTypeId = sampletype.sampleTypeId,
+                sampleTypeName = sampletype.sampleTypeName,
+                isActive = sampletype.isActive,
+                createdById = sampletype.createdById,
+                createdDateTime = sampletype.createdDateTime,
+            };
+
+        }
+        private async Task<ServiceStatusResponseModel> UpdateSampletypedata(IEnumerable<itemSampleTypeMapping> sampletypedata, int ItemId)
+        {
+
+            var sampleTypeData = db.itemSampleTypeMapping.Where(e => e.itemId == ItemId).ToList();
+            db.itemSampleTypeMapping.RemoveRange(sampleTypeData);
+            await db.SaveChangesAsync();
+
+            if (sampletypedata != null)
+            {
+                var SamplemappingList = sampletypedata.Select(sample => CreateSampleTypeData(sample, ItemId)).ToList();
+                if (SamplemappingList.Any())
+                {
+                    db.itemSampleTypeMapping.AddRange(SamplemappingList);
+                    await db.SaveChangesAsync();
+                }
+            }
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
             };
         }
+
 
         private void UpdateItemMaster(itemMaster ItemMaster, itemMaster itemmaster)
         {
@@ -226,6 +265,47 @@ namespace iMARSARLIMS.Services
             ItemMaster.isAllergyTest = itemmaster.isAllergyTest;
             ItemMaster.displaySequence = itemmaster.displaySequence;
             ItemMaster.consentForm = itemmaster.consentForm;
+        }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.updateItemStatus(int ItemId, bool Status, int UserId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var itemData = await db.itemMaster.Where(I => I.itemId == ItemId).FirstOrDefaultAsync();
+                    if(itemData==null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Please Use Correct Item Id"
+                        };
+                    }
+                    else
+                    {
+                        itemData.isActive = Status;
+                        itemData.updateById = UserId;
+                        itemData.updateDateTime = DateTime.Now;
+                        db.itemMaster.Update(itemData);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
         }
     }
 }

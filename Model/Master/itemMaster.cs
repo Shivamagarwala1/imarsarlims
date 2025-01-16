@@ -7,7 +7,7 @@ namespace iMARSARLIMS.Model.Master
     public class itemMaster :Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int id { get; set; }
+        public int itemId { get; set; }
         [Required, MaxLength(100)]
         public string? itemName { get; set; }
         [Required, MaxLength(100)]
@@ -51,5 +51,7 @@ namespace iMARSARLIMS.Model.Master
         public int? displaySequence { get; set; }
         [MaxLength(150)]
         public string? consentForm { get; set; }
+        [ForeignKey(nameof(itemId))]
+        public List<itemSampleTypeMapping>? AddSampletype { get; set; }
     }
 }

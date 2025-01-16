@@ -308,8 +308,8 @@ namespace iMARSARLIMS
             modelBuilder.Entity<sampletype_master>().HasKey(x => x.id);
             modelBuilder.Entity<sampletype_master>().Property(x => x.id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<itemMaster>().HasKey(x => x.id);
-            modelBuilder.Entity<itemMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<itemMaster>().HasKey(x => x.itemId);
+            modelBuilder.Entity<itemMaster>().Property(x => x.itemId).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<item_outsourcemaster>().HasKey(x => x.id);
             modelBuilder.Entity<item_outsourcemaster>().Property(x => x.id).ValueGeneratedOnAdd();

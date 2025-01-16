@@ -269,7 +269,7 @@ namespace iMARSARLIMS.Services
                 if (tnxbookingitem.isPackage == 1)
                 {
                     var itemdetails = (from iom in db.ItemObservationMapping
-                                       join im in db.itemMaster on iom.itemObservationId equals im.id
+                                       join im in db.itemMaster on iom.itemObservationId equals im.itemId
                                        where iom.itemId == 3
                                        join rtr in db.rateTypeWiseRateList on iom.itemObservationId equals rtr.itemid into rtrJoin
                                        from rtr in rtrJoin.DefaultIfEmpty() // Left Join
@@ -279,7 +279,7 @@ namespace iMARSARLIMS.Services
                                        select new
                                        {
                                            testCode = im.code,
-                                           itemId = im.id,
+                                           itemId = im.itemId,
                                            im.deptId,
                                            departmentName = "", // Empty string as per SQL
                                            investigationName = im.itemName,
@@ -668,7 +668,7 @@ namespace iMARSARLIMS.Services
                     {
                         //var itemdetails = _MySql_Procedure_Services.GetPackageItem(BookingItems.itemId, BookingItems.centreId);
                         var itemdetails= (from iom in db.ItemObservationMapping
-                                                      join im in db.itemMaster on iom.itemObservationId equals im.id
+                                                      join im in db.itemMaster on iom.itemObservationId equals im.itemId
                                                       where iom.itemId == 3
                                                       join rtr in db.rateTypeWiseRateList on iom.itemObservationId equals rtr.itemid into rtrJoin
                                                       from rtr in rtrJoin.DefaultIfEmpty() // Left Join
@@ -678,7 +678,7 @@ namespace iMARSARLIMS.Services
                                                       select new
                                                       {
                                                           testcode = im.code,
-                                                          itemid = im.id,
+                                                          itemid = im.itemId,
                                                           im.deptId,
                                                           departmentname = "", // Empty string as per SQL
                                                           investigationName = im.itemName,

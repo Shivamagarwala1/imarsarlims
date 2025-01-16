@@ -22,31 +22,31 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    if (centremaster.centrecode == "")
-                    {
-                        return new ServiceStatusResponseModel
-                        {
-                            Success = false,
-                            Message = "CentreCode Can't Be blank"
-                        };
-                    }
-                    else
-                    {
-                        var exists = await db.centreMaster.AnyAsync(cm => cm.centrecode == centremaster.centrecode);
-                        if (exists)
-                        {
-                            return new ServiceStatusResponseModel
-                            {
-                                Success = false,
-                                Message = "Duplicate CentreCode"
-                            };
-                        }
-                    }
+                    
                     var centreId = 0;
                     var message1 = "";
                     if (centremaster.centreId == 0)
                     {
-
+                        if (centremaster.centrecode == "")
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "CentreCode Can't Be blank"
+                            };
+                        }
+                        else
+                        {
+                            var exists = await db.centreMaster.AnyAsync(cm => cm.centrecode == centremaster.centrecode);
+                            if (exists)
+                            {
+                                return new ServiceStatusResponseModel
+                                {
+                                    Success = false,
+                                    Message = "Duplicate CentreCode"
+                                };
+                            }
+                        }
                         var CentreMasterData = CreateCentreDetails(centremaster);
                         var CentreData = await db.centreMaster.AddAsync(CentreMasterData);
                         await db.SaveChangesAsync();

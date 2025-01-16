@@ -18,7 +18,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             db = context;
             this._itemMasterServices = itemMasterServices;
         }
-        protected override IQueryable<itemMaster> DbSet => db.itemMaster.AsNoTracking().OrderBy(o => o.id);
+        protected override IQueryable<itemMaster> DbSet => db.itemMaster.AsNoTracking().OrderBy(o => o.itemId);
 
         [HttpPost("SaveItemMaster")]
         public async Task<ServiceStatusResponseModel> SaveItemMaster(itemMaster itemmaster)
@@ -37,6 +37,43 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpPost("updateItemStatus")]
+        public async Task<ServiceStatusResponseModel> updateItemStatus(int ItemId,bool Status, int UserId)
+        {
+            try
+            {
+                var result = await _itemMasterServices.updateItemStatus(ItemId,Status,UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+        [HttpGet("GetItemMaster")]
+        public async Task<ServiceStatusResponseModel> GetItemMaster(int ItemId)
+        {
+            var result = await db.itemMaster.Where(p => p.itemId == ItemId)
+                              .Include(p => p.AddSampletype).FirstOrDefaultAsync();
+            if (result == null)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "Please enter correct ItemId"
+                };
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = result
+            };
+        }
 
     }
 }
+

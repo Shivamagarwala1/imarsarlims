@@ -8,6 +8,8 @@ namespace iMARSARLIMS.Model.Master
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
+        [ForeignKey("itemMaster")]
+        public int itemId { get; set; }
         public int sampleTypeId { get; set; }
         [Required, MaxLength(100)]
         public string? sampleTypeName { get; set; }

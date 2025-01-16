@@ -1,4 +1,5 @@
-﻿using iMARSARLIMS.Controllers;
+﻿using System.Linq;
+using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
@@ -108,7 +109,7 @@ namespace iMARSARLIMS.Services
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
-                            Data = result
+                            Message = "Saved Successful"
                         };
                     }
                     else
@@ -129,7 +130,7 @@ namespace iMARSARLIMS.Services
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
-                            Data = result
+                            Message = "Updated Successful"
                         };
 
 
@@ -171,6 +172,7 @@ namespace iMARSARLIMS.Services
                 state = empmaster.state,
                 city = empmaster.city,
                 area = empmaster.area,
+                district=empmaster.district,
                 defaultcentre = empmaster.defaultcentre,
                 pro = empmaster.pro,
                 defaultrole = empmaster.defaultrole,
@@ -219,7 +221,7 @@ namespace iMARSARLIMS.Services
         {
             return new empRoleAccess
             {
-                id = emproleaccess.id,
+                id = 0,
                 empId = employeeId,
                 roleId = emproleaccess.roleId,
                 isActive = emproleaccess.isActive,
@@ -251,7 +253,7 @@ namespace iMARSARLIMS.Services
         {
             return new empCenterAccess
             {
-                id = empcentreaccess.id,
+                id = 0,
                 empId = employeeId,
                 centreId = empcentreaccess.centreId,
                 isActive = empcentreaccess.isActive,
@@ -283,7 +285,7 @@ namespace iMARSARLIMS.Services
         {
             return new empDepartmentAccess
             {
-                id = empDepartment.id,
+                id = 0,
                 empId = employeeId,
                 departmentId = empDepartment.departmentId,
                 isActive = empDepartment.isActive,
@@ -313,6 +315,7 @@ namespace iMARSARLIMS.Services
             EmpMaster.state = empmaster.state;
             EmpMaster.city = empmaster.city;
             EmpMaster.area = empmaster.area;
+            EmpMaster.district= empmaster.district;
             EmpMaster.defaultcentre = empmaster.defaultcentre;
             EmpMaster.pro = empmaster.pro;
             EmpMaster.defaultrole = empmaster.defaultrole;
@@ -338,27 +341,20 @@ namespace iMARSARLIMS.Services
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)
         {
-            foreach (var empCentre in empcenteraccess)
-            {
-                if (empCentre.id != 0)
-                {
-                    var empCentreData = await db.empCenterAccess.FirstOrDefaultAsync(em => em.id == empCentre.id);
-                    if (empCentreData != null)
-                    {
-                        UpdateEmpCentre(empCentreData, empCentre, employeeId);
-                        var EmpCentreData = db.empCenterAccess.Update(empCentreData);
-                        await db.SaveChangesAsync();
-                        var id = EmpCentreData.Entity.id;
-                    }
-                }
-                else
-                {
+            var Empid= empcenteraccess.Select(e=> e.empId).FirstOrDefault();
+            var centreIds= empcenteraccess.Select(e => e.centreId).ToList();
+            var centreaccess = db.empCenterAccess.Where(e => e.empId == Empid).ToList();
+            db.empCenterAccess.RemoveRange(centreaccess);
+            await db.SaveChangesAsync();
 
-                    var empCenterData = CreateEmpCentreData(empCentre, employeeId);
-                    var empCenter = db.empCenterAccess.Add(empCenterData);
+            if (empcenteraccess != null)
+            {
+                var empCentreDataList = empcenteraccess.Select(empCentre => CreateEmpCentreData(empCentre, employeeId)).ToList();
+                if (empCentreDataList.Any())
+                {
+                    db.empCenterAccess.AddRange(empCentreDataList);
                     await db.SaveChangesAsync();
                 }
-
             }
             return new ServiceStatusResponseModel
             {
@@ -366,140 +362,55 @@ namespace iMARSARLIMS.Services
                 Data = empcenteraccess
             };
         }
-        private void UpdateEmpCentre(empCenterAccess EmpCentreAccess, empCenterAccess empcentreaccess, int employeeId)
+        private async Task<ServiceStatusResponseModel> UpdateEmpDepartmentAccess(IEnumerable<empDepartmentAccess> empDepartment, int employeeId)
         {
-            EmpCentreAccess.empId = employeeId;
-            EmpCentreAccess.centreId = empcentreaccess.centreId;
-            EmpCentreAccess.isActive = empcentreaccess.isActive;
-            EmpCentreAccess.updateById = empcentreaccess.updateById;
-            EmpCentreAccess.updateDateTime = empcentreaccess.updateDateTime;
-        }
-        private async Task<ServiceStatusResponseModel> UpdateEmpDepartmentAccess(IEnumerable<empDepartmentAccess> empDepartmentaccess, int employeeId)
-        {
-            foreach (var empDepartment in empDepartmentaccess)
-            {
-                if (empDepartment.id != 0)
-                {
-                    var empDepartmentData = await db.empDepartmentAccess.FirstOrDefaultAsync(em => em.id == empDepartment.id);
-                    if (empDepartmentData != null)
-                    {
-                        UpdateEmpDepartment(empDepartmentData, empDepartment, employeeId);
-                        var EmpCentreData = db.empDepartmentAccess.Update(empDepartmentData);
-                        await db.SaveChangesAsync();
-                        var id = EmpCentreData.Entity.id;
-                    }
-                }
-                else
-                {
+            var Empid = empDepartment.Select(e => e.empId).FirstOrDefault();
+            var DepartmentAccess = db.empDepartmentAccess.Where(e => e.empId == Empid).ToList();
+            db.empDepartmentAccess.RemoveRange(DepartmentAccess);
+            await db.SaveChangesAsync();
 
-                    var empCenterData = CreateEmpDepartmentData(empDepartment, employeeId);
-                    var empCenter = db.empDepartmentAccess.Add(empCenterData);
+            if (empDepartment != null)
+            {
+                var empDepartmentDataList = empDepartment.Select(empDept => CreateEmpDepartmentData(empDept, employeeId)).ToList();
+                if (empDepartmentDataList.Any())
+                {
+                    db.empDepartmentAccess.AddRange(empDepartmentDataList);
                     await db.SaveChangesAsync();
                 }
-
             }
+
             return new ServiceStatusResponseModel
             {
                 Success = true,
-                Data = empDepartmentaccess
+                Data = empDepartment
             };
         }
-        private void UpdateEmpDepartment(empDepartmentAccess EmpDepartmentAccess, empDepartmentAccess empdepartmnetaccess, int employeeId)
-        {
-            empdepartmnetaccess.empId = employeeId;
-            empdepartmnetaccess.departmentId = empdepartmnetaccess.departmentId;
-            empdepartmnetaccess.isActive = empdepartmnetaccess.isActive;
-            empdepartmnetaccess.updateById = empdepartmnetaccess.updateById;
-            empdepartmnetaccess.updateDateTime = empdepartmnetaccess.updateDateTime;
-        }
+        
 
         private async Task<ServiceStatusResponseModel> UpdateEmpRoleAccess(IEnumerable<empRoleAccess> emproleaccess, int employeeId)
         {
-            foreach (var emprole in emproleaccess)
-            {
-                if (emprole.id != 0)
-                {
-                    var empRoleData = await db.empRoleAccess.FirstOrDefaultAsync(em => em.id == emprole.id);
-                    if (empRoleData != null)
-                    {
-                        UpdateEmprole(empRoleData, emprole, employeeId);
-                        var EmpRoleData = db.empRoleAccess.Update(empRoleData);
-                        await db.SaveChangesAsync();
-                    }
-                }
-                else
-                {
+            var Empid = emproleaccess.Select(e => e.empId).FirstOrDefault();
+            var RoleAccess = db.empRoleAccess.Where(e => e.empId == Empid).ToList();
+            db.empRoleAccess.RemoveRange(RoleAccess);
+            await db.SaveChangesAsync();
 
-                    var empRoleData = CreateEmpRoleData(emprole, employeeId);
-                    var empRole = db.empRoleAccess.Add(empRoleData);
+            if (emproleaccess != null)
+            {
+                var EmproleList = emproleaccess.Select(empRole => CreateEmpRoleData(empRole, employeeId)).ToList();
+                if (EmproleList.Any())
+                {
+                    db.empRoleAccess.AddRange(EmproleList);
                     await db.SaveChangesAsync();
                 }
-
             }
+
             return new ServiceStatusResponseModel
             {
                 Success = true,
                 Data = emproleaccess
             };
         }
-        private void UpdateEmprole(empRoleAccess EmpRoleAccess, empRoleAccess emproleaccess, int employeeId)
-        {
-            EmpRoleAccess.empId = employeeId;
-            EmpRoleAccess.roleId = emproleaccess.roleId;
-            EmpRoleAccess.isActive = emproleaccess.isActive;
-            EmpRoleAccess.updateById = emproleaccess.updateById;
-            EmpRoleAccess.updateDateTime = emproleaccess.updateDateTime;
-        }
-
-        //private async Task<string> Uploademployeeimage(string fileBase64data)
-        //{
-        //    try
-        //    {
-        //        if (string.IsNullOrEmpty(fileBase64data))
-        //        {
-        //            return "Invalid image data.";
-        //        }
-        //        string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
-        //        string mainFolder = _configuration["DocumentPath:EmployeeImage"];
-        //        if (string.IsNullOrEmpty(primaryFolder) || string.IsNullOrEmpty(mainFolder))
-        //        {
-        //            return "Invalid folder configuration.";
-        //        }
-        //        if (!Directory.Exists(mainFolder))
-        //        {
-        //            Directory.CreateDirectory(mainFolder);
-        //        }
-        //        string uploadPath = Path.Combine(primaryFolder, mainFolder);
-        //        if (!Directory.Exists(uploadPath))
-        //        {
-        //            Directory.CreateDirectory(uploadPath);
-        //        }
-        //        string extension = ".jpg";
-        //        if (fileBase64data.StartsWith("data:image/png;base64,"))
-        //        {
-        //            extension = ".png";
-        //            fileBase64data = fileBase64data.Substring("data:image/png;base64,".Length);  // Remove data URL prefix
-        //        }
-        //        else if (fileBase64data.StartsWith("data:image/jpeg;base64,"))
-        //        {
-        //            extension = ".jpeg";
-        //            fileBase64data = fileBase64data.Substring("data:image/jpeg;base64,".Length);  // Remove data URL prefix
-        //        }
-
-        //        string fileName = Guid.NewGuid().ToString() + extension;
-        //        string filePath = Path.Combine(uploadPath, fileName);
-        //        byte[] fileBytes = Convert.FromBase64String(fileBase64data);
-        //        await File.WriteAllBytesAsync(filePath, fileBytes);
-
-        //        return filePath;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return "Error uploading image";
-        //    }
-        //}
-
-
+       
         async Task<ServiceStatusResponseModel> IempMasterServices.UploadDocument(IFormFile file)
         {
             string extension = Path.GetExtension(file.FileName);
@@ -811,6 +722,48 @@ namespace iMARSARLIMS.Services
                 Message = "Menu retrieved successfully.",
                 
             };
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.UpdateEmployeeStatus(int EmplyeeId, bool status,int UserId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var result =  db.empMaster.Where(e => e.empId == EmplyeeId).FirstOrDefault();
+                    if(result == null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Please enter Correct EmpId"
+                        };
+                    }
+                    else
+                    {
+                        result.isActive = status;
+                        result.updateById = UserId;
+                        result.updateDateTime= DateTime.Now;
+                        db.empMaster.Update(result);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Status Updated Successful"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
         }
     }
 }

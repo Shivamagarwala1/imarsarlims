@@ -17,5 +17,8 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetAllMenu();
         Task<ServiceStatusResponseModel> forgetPassword(string Username);
         Task<ServiceStatusResponseModel> UpdatePassword(int Employeeid, string Password);
+        Task<ServiceStatusResponseModel> UpdateEmployeeStatus(int EmplyeeId, bool status, int UserId);
+
+
     }
 }

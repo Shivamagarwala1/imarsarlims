@@ -1,4 +1,5 @@
 ﻿
+using System.Text;
 using HiQPdf;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
@@ -6,7 +7,6 @@ using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {
@@ -40,6 +40,23 @@ namespace iMARSARLIMS.Controllers.MasterController
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("UpdateEmployeeStatus")]
+        public async Task<ActionResult<ServiceStatusResponseModel>> UpdateEmployeeStatus(int EmplyeeId, bool status, int UserId)
+        {
+            if (EmplyeeId == 0)
+                return BadRequest("Invalid Employee ID.");
+
+            try
+            {
+                var result = await _empMasterServices.UpdateEmployeeStatus(EmplyeeId,status,UserId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -122,6 +139,36 @@ namespace iMARSARLIMS.Controllers.MasterController
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetEmployeeData")]
+        public async Task<ServiceStatusResponseModel> GetEmployeeData(int EmpId)
+        {
+            try
+            {
+                var result = await db.empMaster.Where(p => p.empId == EmpId)
+                             .Include(p => p.addEmpCentreAccess).Include(p => p.addEmpDepartmentAccess).Include(p => p.addEmpRoleAccess).FirstOrDefaultAsync();
+                if(result == null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "Please enter correct EmpId"
+                    };
+                }
+                return new ServiceStatusResponseModel
+                {
+                    Success=true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
 

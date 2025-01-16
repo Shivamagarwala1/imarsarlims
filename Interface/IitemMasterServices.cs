@@ -6,5 +6,6 @@ namespace iMARSARLIMS.Interface
     public interface IitemMasterServices
     {
         Task<ServiceStatusResponseModel> SaveItemMaster(itemMaster itemmaster);
+        Task<ServiceStatusResponseModel> updateItemStatus(int ItemId, bool Status, int UserId);
     }
 }

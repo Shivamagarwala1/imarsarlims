@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250114071157_adddisctrictinemp")]
+    partial class adddisctrictinemp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1826,7 +1829,7 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.itemMaster", b =>
                 {
-                    b.Property<int>("itemId")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -1961,7 +1964,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime?>("updateDateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("itemId");
+                    b.HasKey("id");
 
                     b.ToTable("itemMaster");
                 });
@@ -2093,9 +2096,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte?>("isDefault")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int>("itemId")
-                        .HasColumnType("int");
-
                     b.Property<int>("sampleTypeId")
                         .HasColumnType("int");
 
@@ -2111,8 +2111,6 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
-
-                    b.HasIndex("itemId");
 
                     b.ToTable("itemSampleTypeMapping");
                 });
@@ -5052,15 +5050,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.itemSampleTypeMapping", b =>
-                {
-                    b.HasOne("iMARSARLIMS.Model.Master.itemMaster", null)
-                        .WithMany("AddSampletype")
-                        .HasForeignKey("itemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Transaction.tnx_BookingPatient", null)
@@ -5100,11 +5089,6 @@ namespace iMARSARLIMS.Migrations
                     b.Navigation("addEmpDepartmentAccess");
 
                     b.Navigation("addEmpRoleAccess");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.itemMaster", b =>
-                {
-                    b.Navigation("AddSampletype");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
