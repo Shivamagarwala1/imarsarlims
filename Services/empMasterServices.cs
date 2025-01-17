@@ -724,7 +724,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<ServiceStatusResponseModel> IempMasterServices.UpdateEmployeeStatus(int EmplyeeId, bool status,int UserId)
+        async Task<ServiceStatusResponseModel> IempMasterServices.UpdateEmployeeStatus(int EmplyeeId, byte status,int UserId)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {

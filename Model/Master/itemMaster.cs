@@ -45,7 +45,7 @@ namespace iMARSARLIMS.Model.Master
         public byte? isorganism { get; set; }
         public byte? culturereport { get; set; }
         public byte? ismic { get; set; }
-        public byte? showOnWebsite { get; set; }
+        public int DocumentId { get; set; }
         public byte? isSpecialItem { get; set; }
         public byte? isAllergyTest { get; set; }
         public int? displaySequence { get; set; }

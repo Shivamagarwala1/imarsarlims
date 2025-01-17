@@ -5,11 +5,12 @@
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFunctions : Migration
+    public partial class addfunction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+
             migrationBuilder.Sql(@"CREATE FUNCTION get_workorderid(_CentreID INT(4),_type CHAR(1)) RETURNS VARCHAR(50) CHARSET utf8
 BEGIN
 DECLARE id INT DEFAULT 0;

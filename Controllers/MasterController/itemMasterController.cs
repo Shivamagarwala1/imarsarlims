@@ -38,7 +38,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
         [HttpPost("updateItemStatus")]
-        public async Task<ServiceStatusResponseModel> updateItemStatus(int ItemId,bool Status, int UserId)
+        public async Task<ServiceStatusResponseModel> updateItemStatus(int ItemId,byte Status, int UserId)
         {
             try
             {

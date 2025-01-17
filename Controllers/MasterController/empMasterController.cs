@@ -44,7 +44,7 @@ namespace iMARSARLIMS.Controllers.MasterController
         }
 
         [HttpPost("UpdateEmployeeStatus")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> UpdateEmployeeStatus(int EmplyeeId, bool status, int UserId)
+        public async Task<ActionResult<ServiceStatusResponseModel>> UpdateEmployeeStatus(int EmplyeeId, byte status, int UserId)
         {
             if (EmplyeeId == 0)
                 return BadRequest("Invalid Employee ID.");

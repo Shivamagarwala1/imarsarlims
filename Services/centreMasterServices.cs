@@ -77,14 +77,17 @@ namespace iMARSARLIMS.Services
                             db.rateTypeTagging.Add(ratetypeTagging);
                             await db.SaveChangesAsync();
                         }
-                        if (centremaster.centretype == "Franchisee" || centremaster.centretype == "SubFranchisee")
+                        if (centremaster.centretype == "Franchisee" || centremaster.centretype == "Sub-Franchisee")
                         {
                             var roleId = 0;
                             if (centremaster.centretype == "Franchisee")
-                                roleId = 2;
-                            if (centremaster.centretype == "SubFranchisee")
-                                roleId = 3;
-                            var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId);
+                                roleId = 8;
+                            if (centremaster.centretype == "Sub-Franchisee")
+                                roleId = 9;
+
+                            var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max();
+                            var empcode = string.Concat("IMS", maxempid.ToString("D2"));
+                            var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId, empcode);
                             var EmployeeData = db.empMaster.Add(EmployeeRegData);
                             await db.SaveChangesAsync();
                             var employeeId = EmployeeData.Entity.empId;
@@ -232,12 +235,13 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId)
+        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId,string EmpCode)
         {
+
             return new empMaster
             {
-                title = "",
-                empCode = centremaster.centrecode,
+                title = "Mr.",
+                empCode = EmpCode,
                 fName = centremaster.companyName,
                 lName = "",
                 address = centremaster.address,
@@ -255,7 +259,8 @@ namespace iMARSARLIMS.Services
                 city = 0,
                 state = centremaster.state,
                 defaultcentre = centreId,
-                fileName=""
+                fileName="",
+                isActive= centremaster.isActive
                 
 
             };
@@ -268,7 +273,7 @@ namespace iMARSARLIMS.Services
                 id = 0,
                 empId = employeeId,
                 centreId = centreId,
-                isActive = true,
+                isActive = 1,
                 createdById = createdById,
                 createdDateTime = createdDateTime
 
@@ -282,7 +287,7 @@ namespace iMARSARLIMS.Services
                 id = 0,
                 empId = employeeId,
                 roleId = roleId,
-                isActive = true,
+                isActive = 1,
                 createdById = createdById,
                 createdDateTime = createdDateTime
 
@@ -298,7 +303,7 @@ namespace iMARSARLIMS.Services
                 rateName = companyName,
                 rateTypeId = centreId,
                 rateType = companyName,
-                isActive = true,
+                isActive = 1,
                 createdById = createdById,
                 createdDateTime = createdDateTime
             };
@@ -387,7 +392,7 @@ namespace iMARSARLIMS.Services
             return CentreMaster;
         }
 
-        async Task<ServiceStatusResponseModel> IcentreMasterServices.UpdateCentreStatus(int CentreId, bool status, int UserId)
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.UpdateCentreStatus(int CentreId, byte status, int UserId)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
@@ -464,7 +469,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var ParentCentre = await db.centreMaster
-                    .Where(c => c.isActive == true && c.centretypeid==3)
+                    .Where(c => c.isActive == 1 && c.centretypeid==3)
                     .Select(c => new
                     {
                         c.companyName,
@@ -492,7 +497,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var ParentCentre = await db.centreMaster
-                    .Where(c => c.isActive == true && (c.centretypeid == 3 || c.centretypeid == 4))
+                    .Where(c => c.isActive == 1 && (c.centretypeid == 1 || c.centretypeid == 2))
                     .Select(c => new
                     {
                         c.companyName,
@@ -521,7 +526,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var ParentCentre = await db.rateTypeMaster
-                    .Where(c => c.isActive == true && c.id == 1)
+                    .Where(c => c.isActive == 1 && c.id == 1)
                     .Select(c => new
                     {
                         c.rateName,
@@ -564,7 +569,7 @@ namespace iMARSARLIMS.Services
                 else 
                 {
                     ParentCentre = await db.rateTypeMaster
-                        .Where(c => c.isActive == true)
+                        .Where(c => c.isActive == 1)
                         .Select(c => new CentreModel
                         {
                             RateName = c.rateName,

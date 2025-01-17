@@ -6,7 +6,7 @@ namespace iMARSARLIMS.Interface
     public interface IcentreMasterServices
     {
         Task<ServiceStatusResponseModel> SaveCentreDetail(centreMaster centremaster);
-        Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, bool status, int UserId);
+        Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, byte status, int UserId);
         Task<ServiceStatusResponseModel> GetParentCentre();
         Task<ServiceStatusResponseModel> GetProcesiongLab();
         Task<ServiceStatusResponseModel> GetMRPRateType();

@@ -5,7 +5,7 @@
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class AddStoreprocedure : Migration
+    public partial class addprocedure : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -76,6 +76,7 @@ namespace iMARSARLIMS.Migrations
                     ORDER BY t.testId, t.labObservationId;
                 END;
             ");
+
         }
 
         /// <inheritdoc />

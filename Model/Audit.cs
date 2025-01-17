@@ -2,7 +2,7 @@
 {
     public class Audit
     {
-        public bool? isActive { get; set; }
+        public byte isActive { get; set; }
         public int? createdById { get; set; }
         public DateTime createdDateTime { get; set; } 
         public int? updateById { get; set; } 

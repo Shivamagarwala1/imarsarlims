@@ -523,7 +523,7 @@ namespace iMARSARLIMS.Services
 
                 remarks = sra.remarks,
                 testId = sra.testId,
-                isActive = true,
+                isActive = 1,
             };
 
         }
@@ -616,7 +616,7 @@ namespace iMARSARLIMS.Services
                 createdDateTime = DateTime.Now,
                 remarks = batchStatusRecieveRequestModel.remarks,
                 testId = batchStatusRecieveRequestModel.testId,
-                isActive = true,
+                isActive = 1,
             };
 
         }

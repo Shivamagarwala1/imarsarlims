@@ -94,7 +94,7 @@ namespace iMARSARLIMS.Services
             OldData.updateDateTime = MenuMaster.updateDateTime;
         }
 
-        async Task<ServiceStatusResponseModel> IMenuMasterServices.UpdateMenuStatus(int menuId, bool Status)
+        async Task<ServiceStatusResponseModel> IMenuMasterServices.UpdateMenuStatus(int menuId, byte Status)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {

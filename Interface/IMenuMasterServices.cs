@@ -7,7 +7,7 @@ namespace iMARSARLIMS.Interface
     public interface IMenuMasterServices
     {
         Task<ServiceStatusResponseModel> SaveMenu(menuMaster MenuMaster);
-        Task<ServiceStatusResponseModel> UpdateMenuStatus(int menuId, bool Status);
+        Task<ServiceStatusResponseModel> UpdateMenuStatus(int menuId, byte Status);
         Task<ServiceStatusResponseModel> GetAllMenu(ODataQueryOptions<menuMaster> queryOptions);
     }
 }

@@ -55,7 +55,7 @@ namespace iMARSARLIMS.Services
                             db.ItemObservationMapping.Add(ItemObservationMapping);
                             await db.SaveChangesAsync();
                         }
-                        CreateItemSampletype(itemId, itemmaster.AddSampletype);
+                        await CreateItemSampletype(itemId, itemmaster.AddSampletype);
 
                     }
                     else
@@ -70,6 +70,7 @@ namespace iMARSARLIMS.Services
                         await db.SaveChangesAsync();
                     }
                     await transaction.CommitAsync();
+
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -121,7 +122,7 @@ namespace iMARSARLIMS.Services
                 isorganism = itemmaster.isorganism,
                 culturereport = itemmaster.culturereport,
                 ismic = itemmaster.ismic,
-                showOnWebsite = itemmaster.showOnWebsite,
+                DocumentId = itemmaster.DocumentId,
                 isSpecialItem = itemmaster.isSpecialItem,
                 isAllergyTest = itemmaster.isAllergyTest,
                 displaySequence = itemmaster.displaySequence,
@@ -260,14 +261,14 @@ namespace iMARSARLIMS.Services
             ItemMaster.isorganism = itemmaster.isorganism;
             ItemMaster.culturereport = itemmaster.culturereport;
             ItemMaster.ismic = itemmaster.ismic;
-            ItemMaster.showOnWebsite = itemmaster.showOnWebsite;
+            ItemMaster.DocumentId = itemmaster.DocumentId;
             ItemMaster.isSpecialItem = itemmaster.isSpecialItem;
             ItemMaster.isAllergyTest = itemmaster.isAllergyTest;
             ItemMaster.displaySequence = itemmaster.displaySequence;
             ItemMaster.consentForm = itemmaster.consentForm;
         }
 
-        async Task<ServiceStatusResponseModel> IitemMasterServices.updateItemStatus(int ItemId, bool Status, int UserId)
+        async Task<ServiceStatusResponseModel> IitemMasterServices.updateItemStatus(int ItemId, byte Status, int UserId)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
