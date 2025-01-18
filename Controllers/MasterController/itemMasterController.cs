@@ -3,6 +3,8 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
+using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {
@@ -74,6 +76,76 @@ namespace iMARSARLIMS.Controllers.MasterController
             };
         }
 
+        [HttpGet("GetItemMasterAll")]
+        public async Task<ServiceStatusResponseModel> GetItemMasterAll()
+        {
+            try
+            {
+                var result = await _itemMasterServices.GetItemMasterAll();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message= ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetItemObservation")]
+        public async Task<ServiceStatusResponseModel> GetItemObservation(int itemtype)
+        {
+            try
+            {
+                var result = await _itemMasterServices.GetItemObservation(itemtype);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetMappedItem")]
+        public async Task<ServiceStatusResponseModel> GetMappedItem(int itemtype,int itemid)
+        {
+            try
+            {
+                var result = await _itemMasterServices.GetMappedItem(itemtype, itemid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("RemoveMapping")]
+        public async Task<ServiceStatusResponseModel> RemoveMapping(int Id)
+        {
+            try
+            {
+                var result = await _itemMasterServices.RemoveMapping(Id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }
 

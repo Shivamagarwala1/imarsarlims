@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250118061951_printorder")]
+    partial class printorder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,21 +229,12 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<byte?>("dlcCheck")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("formula")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte?>("isBold")
                         .HasColumnType("tinyint unsigned");
@@ -269,6 +263,9 @@ namespace iMARSARLIMS.Migrations
                     b.Property<short>("itemType")
                         .HasColumnType("smallint");
 
+                    b.Property<DateTime>("mappedDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int?>("printOrder")
                         .HasColumnType("int");
 
@@ -277,12 +274,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<byte?>("showInReport")
                         .HasColumnType("tinyint unsigned");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 

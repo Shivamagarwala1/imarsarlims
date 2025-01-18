@@ -83,8 +83,10 @@ namespace iMARSARLIMS.Services
                 isBold = itemObservationMapping.isBold,
                 isCritical = itemObservationMapping.isCritical,
                 printSeparate = itemObservationMapping.printSeparate,
-                mappedDate = itemObservationMapping.mappedDate
-
+                printOrder = itemObservationMapping.printOrder,
+                isActive = itemObservationMapping.isActive,
+                createdById = itemObservationMapping.createdById,
+                createdDateTime = itemObservationMapping.createdDateTime
 
             };
         }
@@ -103,7 +105,11 @@ namespace iMARSARLIMS.Services
             ObservationMapping.isBold = itemObservationMapping.isBold;
             ObservationMapping.isCritical = itemObservationMapping.isCritical;
             ObservationMapping.printSeparate = itemObservationMapping.printSeparate;
-            ObservationMapping.mappedDate = itemObservationMapping.mappedDate;
+            ObservationMapping.printOrder = itemObservationMapping.printOrder;
+            ObservationMapping.isActive = itemObservationMapping.isActive;
+            ObservationMapping.updateById   = itemObservationMapping.updateById;
+            ObservationMapping.updateDateTime = itemObservationMapping.updateDateTime;
+
         }
     }
 }

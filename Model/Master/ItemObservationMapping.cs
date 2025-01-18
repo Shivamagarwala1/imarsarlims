@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(ItemObservationMapping))]
-    public class ItemObservationMapping
+    public class ItemObservationMapping :Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
@@ -22,6 +22,6 @@ namespace iMARSARLIMS.Model.Master
         public byte? isBold { get; set; }
         public byte? isCritical { get; set; }
         public byte? printSeparate { get; set; }
-        public DateTime mappedDate { get; set; }
+        public int? printOrder { get; set; }
     }
 }

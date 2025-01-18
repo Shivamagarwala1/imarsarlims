@@ -3,6 +3,7 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -19,6 +20,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
+                    var msg = "Saved Successful";
                     if (itemmaster.itemId == 0)
                     {
                         if (itemmaster.itemName == "")
@@ -66,15 +68,16 @@ namespace iMARSARLIMS.Services
                             UpdateItemMaster(ItemMaster, itemmaster);
                         }
                         db.itemMaster.Update(ItemMaster);
-                        UpdateSampletypedata(itemmaster.AddSampletype, itemmaster.itemId);
                         await db.SaveChangesAsync();
+                        await UpdateSampletypedata(itemmaster.AddSampletype, itemmaster.itemId);
+                        msg = "Updated Successful";
                     }
                     await transaction.CommitAsync();
 
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Message = "Saved Successful"
+                        Message = msg
                     };
                 }
                 catch (Exception ex)
@@ -151,6 +154,9 @@ namespace iMARSARLIMS.Services
                 observationWiseInterpretation = "",
                 resultRequired = 1,
                 collectionRequire = 1,
+                isActive= itemmaster.isActive,
+                createdById= itemmaster.createdById,
+                createdDateTime= itemmaster.createdDateTime,
                 displaySequence = itemmaster.displaySequence,
             };
         }
@@ -201,6 +207,7 @@ namespace iMARSARLIMS.Services
                 sampleTypeId = sampletype.sampleTypeId,
                 sampleTypeName = sampletype.sampleTypeName,
                 isActive = sampletype.isActive,
+                isDefault = sampletype.isDefault,
                 createdById = sampletype.createdById,
                 createdDateTime = sampletype.createdDateTime,
             };
@@ -212,7 +219,6 @@ namespace iMARSARLIMS.Services
             var sampleTypeData = db.itemSampleTypeMapping.Where(e => e.itemId == ItemId).ToList();
             db.itemSampleTypeMapping.RemoveRange(sampleTypeData);
             await db.SaveChangesAsync();
-
             if (sampletypedata != null)
             {
                 var SamplemappingList = sampletypedata.Select(sample => CreateSampleTypeData(sample, ItemId)).ToList();
@@ -222,7 +228,6 @@ namespace iMARSARLIMS.Services
                     await db.SaveChangesAsync();
                 }
             }
-
             return new ServiceStatusResponseModel
             {
                 Success = true,
@@ -275,7 +280,7 @@ namespace iMARSARLIMS.Services
                 try
                 {
                     var itemData = await db.itemMaster.Where(I => I.itemId == ItemId).FirstOrDefaultAsync();
-                    if(itemData==null)
+                    if (itemData == null)
                     {
                         return new ServiceStatusResponseModel
                         {
@@ -295,6 +300,190 @@ namespace iMARSARLIMS.Services
                         {
                             Success = true,
                             Message = "Updated Successful"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.GetItemMasterAll()
+        {
+            try
+            {
+                var itemdata = await (from im in db.itemMaster
+                                      join dm in db.labDepartment on im.deptId equals dm.id
+                                      join stm in db.sampletype_master on im.defaultsampletype equals stm.id
+                                      select new
+                                      {
+                                          im.itemId,
+                                          itemType = im.itemType == 1 ? "Test" : im.itemType == 2 ? "Profile" : "Package",
+                                          im.itemName,
+                                          dm.deptName,
+                                          stm.sampleTypeName,
+                                          Reporttype = im.reportType == 1 ? "Numeric" : im.reportType == 2 ? "TextReport" : im.reportType == 3 ? "Radiology" : im.reportType == 4 ? "Microbiology" : im.reportType == 5 ? "Historeport" : "Not Required",
+                                          im.isActive
+                                      }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = itemdata
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
+        async Task<ServiceStatusResponseModel> IitemMasterServices.GetItemObservation(int itemtype)
+        {
+            try
+            {
+                if (itemtype == 1 || itemtype == 2)
+                {
+                    var ObservationData = await db.itemObservationMaster
+                          .Where(l => l.isActive == 1)
+                          .Select(l => new
+                          {
+                              l.id,
+                              l.labObservationName
+                          }).ToListAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = ObservationData
+                    };
+                }
+                else
+                {
+                    var ObservationData = await db.itemMaster
+                         .Where(l => l.isActive == 1 && (l.itemType == 1 || l.itemType == 2))
+                         .Select(l => new
+                         {
+                             id = l.itemId,
+                             labObservationName = l.itemName
+                         }).ToListAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = ObservationData
+                    };
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Data = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.GetMappedItem(int itemtype, int itemid)
+        {
+
+            try
+            {
+                if (itemtype == 1 || itemtype == 2)
+                {
+                    var ObservationData = await (
+                             from iom in db.ItemObservationMapping
+                             join lom in db.itemObservationMaster on iom.itemObservationId equals lom.id
+                             where iom.itemId == itemid
+                             select new
+                             {
+                                 iom.id,
+                                 lom.labObservationName,
+                                 iom.dlcCheck,
+                                 iom.isBold,
+                                 iom.isHeader,
+                                 iom.isCritical,
+                                 iom.showInReport,
+                                 iom.printSeparate,
+                                 iom.printOrder
+                             }).ToListAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = ObservationData
+                    };
+                }
+                else
+                {
+                    var ObservationData = await (
+                            from iom in db.ItemObservationMapping
+                            join im in db.itemMaster on iom.itemObservationId equals im.itemId
+                            where iom.itemId == itemid
+                            select new
+                            {
+                                iom.id,
+                                labObservationName= im.itemName,
+                                iom.dlcCheck,
+                                iom.isBold,
+                                iom.isHeader,
+                                iom.isCritical,
+                                iom.showInReport,
+                                iom.printSeparate,
+                                iom.printOrder
+                            }).ToListAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = ObservationData
+                    };
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Data = ex.Message
+                };
+            }
+
+        }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.RemoveMapping(int Id)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var itemData = await db.ItemObservationMapping.Where(I => I.id == Id).FirstOrDefaultAsync();
+                    if (itemData == null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Please Use Correct Id"
+                        };
+                    }
+                    else
+                    {
+                        db.ItemObservationMapping.Remove(itemData);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Removed Successful"
                         };
                     }
                 }
