@@ -167,7 +167,7 @@ namespace iMARSARLIMS.Services
             {
                 id = 0,
                 itemId = itemId,
-                itemObservationId = observationId,
+                observationID = observationId,
                 itemType = 1,
                 isTest = 1,
                 isPackage = 0,
@@ -177,7 +177,9 @@ namespace iMARSARLIMS.Services
                 isHeader = 0,
                 formula = "",
                 dlcCheck = 0,
-                showInReport = 1
+                showInReport = 1,
+                createdById = 0,
+                createdDateTime = DateTime.Now
             };
         }
 
@@ -324,6 +326,7 @@ namespace iMARSARLIMS.Services
                                       select new
                                       {
                                           im.itemId,
+                                          itemCode= im.code,
                                           itemType = im.itemType == 1 ? "Test" : im.itemType == 2 ? "Profile" : "Package",
                                           im.itemName,
                                           dm.deptName,
@@ -402,11 +405,12 @@ namespace iMARSARLIMS.Services
                 {
                     var ObservationData = await (
                              from iom in db.ItemObservationMapping
-                             join lom in db.itemObservationMaster on iom.itemObservationId equals lom.id
+                             join lom in db.itemObservationMaster on iom.observationID equals lom.id
                              where iom.itemId == itemid
                              select new
                              {
                                  iom.id,
+                                 observationID=lom.id,
                                  lom.labObservationName,
                                  iom.dlcCheck,
                                  iom.isBold,
@@ -426,11 +430,12 @@ namespace iMARSARLIMS.Services
                 {
                     var ObservationData = await (
                             from iom in db.ItemObservationMapping
-                            join im in db.itemMaster on iom.itemObservationId equals im.itemId
+                            join im in db.itemMaster on iom.observationID equals im.itemId
                             where iom.itemId == itemid
                             select new
                             {
                                 iom.id,
+                                observationID= im.itemId,
                                 labObservationName= im.itemName,
                                 iom.dlcCheck,
                                 iom.isBold,

@@ -269,9 +269,9 @@ namespace iMARSARLIMS.Services
                 if (tnxbookingitem.isPackage == 1)
                 {
                     var itemdetails = (from iom in db.ItemObservationMapping
-                                       join im in db.itemMaster on iom.itemObservationId equals im.itemId
+                                       join im in db.itemMaster on iom.observationID equals im.itemId
                                        where iom.itemId == 3
-                                       join rtr in db.rateTypeWiseRateList on iom.itemObservationId equals rtr.itemid into rtrJoin
+                                       join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
                                        from rtr in rtrJoin.DefaultIfEmpty() // Left Join
                                        join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
                                        from rtt in rttJoin.DefaultIfEmpty() // Left Join
@@ -668,9 +668,9 @@ namespace iMARSARLIMS.Services
                     {
                         //var itemdetails = _MySql_Procedure_Services.GetPackageItem(BookingItems.itemId, BookingItems.centreId);
                         var itemdetails= (from iom in db.ItemObservationMapping
-                                                      join im in db.itemMaster on iom.itemObservationId equals im.itemId
+                                                      join im in db.itemMaster on iom.observationID equals im.itemId
                                                       where iom.itemId == 3
-                                                      join rtr in db.rateTypeWiseRateList on iom.itemObservationId equals rtr.itemid into rtrJoin
+                                                      join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
                                                       from rtr in rtrJoin.DefaultIfEmpty() // Left Join
                                                       join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
                                                       from rtt in rttJoin.DefaultIfEmpty() // Left Join

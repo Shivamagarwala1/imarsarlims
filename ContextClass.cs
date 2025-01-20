@@ -61,8 +61,8 @@ namespace iMARSARLIMS
         public DbSet<itemRateMaster> itemRateMaster { get; set; }
         public DbSet<centerAccess> centerAccess { get; set; }
         public DbSet<centreWelcomeEmail> centreWelcomeEmail { get; set; }
-        public DbSet<testInterpretation> testInterpretation { get; set; }
-        public DbSet<testInterpretationLog> testInterpretationLog { get; set; }
+        public DbSet<itemInterpretation> itemInterpretation { get; set; }
+        public DbSet<itemInterpretationLog> itemInterpretationLog { get; set; }
         public DbSet<formulaMaster> formulaMaster { get; set; }
         public DbSet<tnx_BookingPatient> tnx_BookingPatient { get; set; }
         public DbSet<machineMaster> machineMaster { get; set; }
@@ -263,11 +263,11 @@ namespace iMARSARLIMS
             modelBuilder.Entity<centreWelcomeEmail>().HasKey(x => x.id);
             modelBuilder.Entity<centreWelcomeEmail>().Property(x => x.id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<testInterpretation>().HasKey(x => x.id);
-            modelBuilder.Entity<testInterpretation>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<itemInterpretation>().HasKey(x => x.id);
+            modelBuilder.Entity<itemInterpretation>().Property(x => x.id).ValueGeneratedOnAdd();
             
-            modelBuilder.Entity<testInterpretationLog>().HasKey(x => x.id);
-            modelBuilder.Entity<testInterpretationLog>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<itemInterpretationLog>().HasKey(x => x.id);
+            modelBuilder.Entity<itemInterpretationLog>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<formulaMaster>().HasKey(x => x.id);
             modelBuilder.Entity<formulaMaster>().Property(x => x.id).ValueGeneratedOnAdd();

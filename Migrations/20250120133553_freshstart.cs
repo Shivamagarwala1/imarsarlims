@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class blanckdatabase : Migration
+    public partial class freshstart : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -813,6 +813,52 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "itemInterpretation",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    itemId = table.Column<int>(type: "int", nullable: false),
+                    interpretation = table.Column<string>(type: "longtext", nullable: false),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    showInReport = table.Column<int>(type: "int", nullable: false),
+                    showinPackages = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_itemInterpretation", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "itemInterpretationLog",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    itemId = table.Column<int>(type: "int", nullable: false),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    interpretation = table.Column<string>(type: "longtext", nullable: false),
+                    showInReport = table.Column<int>(type: "int", nullable: false),
+                    showinPackages = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_itemInterpretationLog", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "itemMaster",
                 columns: table => new
                 {
@@ -831,7 +877,7 @@ namespace iMARSARLIMS.Migrations
                     isOutsource = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     lmpRequire = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     reportType = table.Column<int>(type: "int", nullable: true),
-                    gender = table.Column<string>(type: "longtext", nullable: true),
+                    gender = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true),
                     sampleVolume = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     containerColor = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     testRemarks = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
@@ -870,7 +916,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     itemId = table.Column<int>(type: "int", nullable: true),
-                    itemObservationId = table.Column<int>(type: "int", nullable: true),
+                    observationID = table.Column<int>(type: "int", nullable: true),
                     isTest = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isProfile = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isPackage = table.Column<byte>(type: "tinyint unsigned", nullable: true),
@@ -882,7 +928,12 @@ namespace iMARSARLIMS.Migrations
                     isBold = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isCritical = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     printSeparate = table.Column<byte>(type: "tinyint unsigned", nullable: true),
-                    mappedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    printOrder = table.Column<int>(type: "int", nullable: true),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -898,7 +949,7 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     labObservationName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     dlcCheck = table.Column<byte>(type: "tinyint unsigned", nullable: true),
-                    gender = table.Column<string>(type: "varchar(6)", maxLength: 6, nullable: true),
+                    gender = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: true),
                     printSeparate = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     shortName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     roundUp = table.Column<double>(type: "double", nullable: true),
@@ -1552,52 +1603,6 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Testing", x => x.id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "testInterpretation",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    itemId = table.Column<int>(type: "int", nullable: false),
-                    interpretation = table.Column<string>(type: "longtext", nullable: false),
-                    centreId = table.Column<int>(type: "int", nullable: false),
-                    showInReport = table.Column<int>(type: "int", nullable: false),
-                    showinPackages = table.Column<int>(type: "int", nullable: false),
-                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    createdById = table.Column<int>(type: "int", nullable: true),
-                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updateById = table.Column<int>(type: "int", nullable: true),
-                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_testInterpretation", x => x.id);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "testInterpretationLog",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    itemId = table.Column<int>(type: "int", nullable: false),
-                    centreId = table.Column<int>(type: "int", nullable: false),
-                    interpretation = table.Column<string>(type: "longtext", nullable: false),
-                    showInReport = table.Column<int>(type: "int", nullable: false),
-                    showinPackages = table.Column<int>(type: "int", nullable: false),
-                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    createdById = table.Column<int>(type: "int", nullable: true),
-                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updateById = table.Column<int>(type: "int", nullable: true),
-                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_testInterpretationLog", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2586,6 +2591,12 @@ namespace iMARSARLIMS.Migrations
                 name: "itemDocumentMapping");
 
             migrationBuilder.DropTable(
+                name: "itemInterpretation");
+
+            migrationBuilder.DropTable(
+                name: "itemInterpretationLog");
+
+            migrationBuilder.DropTable(
                 name: "ItemObservationMapping");
 
             migrationBuilder.DropTable(
@@ -2677,12 +2688,6 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "Testing");
-
-            migrationBuilder.DropTable(
-                name: "testInterpretation");
-
-            migrationBuilder.DropTable(
-                name: "testInterpretationLog");
 
             migrationBuilder.DropTable(
                 name: "ThemeColour");

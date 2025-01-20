@@ -26,6 +26,7 @@ namespace iMARSARLIMS.Model.Master
         public byte? isOutsource { get; set; }
         public byte? lmpRequire { get; set; }
         public int? reportType { get; set; }
+        [MaxLength(15)]
         public string? gender { get; set; }
         [Required, MaxLength(20)]
         public string? sampleVolume { get; set; }

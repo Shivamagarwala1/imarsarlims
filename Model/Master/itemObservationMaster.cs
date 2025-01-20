@@ -11,7 +11,7 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(100)]
         public string? labObservationName { get; set; }
         public byte? dlcCheck { get; set; }
-        [MaxLength(6)]
+        [MaxLength(15)]
         public string? gender { get; set; }
         public byte? printSeparate { get; set; }
         [MaxLength(50)]

@@ -9,7 +9,7 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         public int? itemId { get; set; }
-        public int? itemObservationId { get; set; }
+        public int? observationID { get; set; }
         public byte? isTest { get; set; }
         public byte? isProfile { get; set; }
         public byte? isPackage { get; set; }

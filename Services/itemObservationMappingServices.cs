@@ -50,7 +50,8 @@ namespace iMARSARLIMS.Services
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Data = itemObservationMapping
+                        Data = itemObservationMapping,
+                        Message = "Mapped Successfull"
                     };
                 }
                 catch (Exception ex)
@@ -71,7 +72,7 @@ namespace iMARSARLIMS.Services
             {
                 id = itemObservationMapping.id,
                 itemId = itemObservationMapping.itemId,
-                itemObservationId = itemObservationMapping.itemObservationId,
+                observationID = itemObservationMapping.observationID,
                 isTest = itemObservationMapping.isTest,
                 isProfile = itemObservationMapping.isProfile,
                 isPackage = itemObservationMapping.isPackage,
@@ -93,7 +94,7 @@ namespace iMARSARLIMS.Services
         private void UpdateObservationMapping(ItemObservationMapping ObservationMapping, ItemObservationMapping itemObservationMapping)
         {
             ObservationMapping.itemId = itemObservationMapping.itemId;
-            ObservationMapping.itemObservationId = itemObservationMapping.itemObservationId;
+            ObservationMapping.observationID = itemObservationMapping.observationID;
             ObservationMapping.isTest = itemObservationMapping.isTest;
             ObservationMapping.isProfile = itemObservationMapping.isProfile;
             ObservationMapping.isPackage = itemObservationMapping.isPackage;
