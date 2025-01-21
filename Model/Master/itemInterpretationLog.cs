@@ -10,6 +10,7 @@ namespace iMARSARLIMS.Model.Master
         public int id { get; set; }
         [Required]
         public int? itemId { get; set; }
+        public int interpatationid { get; set; }
         [Required]
         public int? centreId { get; set; }
         [Required]

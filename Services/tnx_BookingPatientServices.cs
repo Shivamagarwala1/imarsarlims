@@ -711,7 +711,6 @@ namespace iMARSARLIMS.Services
 
         private void updateBookingItemDetail(tnx_BookingItem tnxBookItem, tnx_BookingItem bookingItem)
         {
-
             tnxBookItem.workOrderId = bookingItem.workOrderId;
             tnxBookItem.transactionId = bookingItem.transactionId;
             tnxBookItem.testcode = bookingItem.testcode;
@@ -792,7 +791,6 @@ namespace iMARSARLIMS.Services
             tnxBookItem.isActive = bookingItem.isActive;
             tnxBookItem.updateById = bookingItem.updateById;
             tnxBookItem.updateDateTime = bookingItem.updateDateTime;
-
         }
 
         byte[] Itnx_BookingPatientServices.GetPatientReceipt(string workorderid)
@@ -809,7 +807,6 @@ namespace iMARSARLIMS.Services
                                    tm.title,tb.name,Age= tb.ageYear+ "Y " + tb.ageMonth + "M "+ tb.ageDay +"D" , tb.mrp, tb.grossAmount, tb.discount, tb.netAmount,
                                    tb.paidAmount, cm.companyName, CentreAddress = cm.address, CentreMobile = cm.mobileNo, tbp.mobileNo, tb.gender, tbi.barcodeNo,
                                    tbi.departmentName, tbi.investigationName, ItemMRP = tbi.mrp, ItemRate = tbi.rate, ItemDiscount = tbi.discount, ItemNetAmount = tbi.netAmount }).ToList();
-
             if (Receiptdata.Count>0)
             {
                 QuestPDF.Settings.License = LicenseType.Community;
@@ -820,14 +817,11 @@ namespace iMARSARLIMS.Services
                     container.Page(page =>
                     {
                         page.Size(PageSizes.A4);
-
                         page.MarginTop(0.5f, Unit.Centimetre);
                         page.Margin(0.5f, Unit.Centimetre);
-
                         page.PageColor(Colors.White);
                         page.DefaultTextStyle(x => x.FontFamily("Arial"));
                         page.DefaultTextStyle(x => x.FontSize(20));
-
                         page.Header()
                         .Column(column =>
                         {
@@ -852,7 +846,6 @@ namespace iMARSARLIMS.Services
                                     table.Cell().ColumnSpan(6).AlignCenter().Text("MONEY RECEIPT / BILL").Style(TextStyle.Default.FontSize(10).Bold().Underline());
                                     table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
                                 });
-
                             // Product table header
                             column.Item()
                                 .Table(table =>

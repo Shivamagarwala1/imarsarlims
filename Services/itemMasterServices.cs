@@ -3,7 +3,6 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -58,7 +57,6 @@ namespace iMARSARLIMS.Services
                             await db.SaveChangesAsync();
                         }
                         await CreateItemSampletype(itemId, itemmaster.AddSampletype);
-
                     }
                     else
                     {
@@ -73,7 +71,6 @@ namespace iMARSARLIMS.Services
                         msg = "Updated Successful";
                     }
                     await transaction.CommitAsync();
-
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -91,7 +88,6 @@ namespace iMARSARLIMS.Services
                 }
             }
         }
-
         private itemMaster CreateItem(itemMaster itemmaster)
         {
             return new itemMaster
@@ -134,9 +130,7 @@ namespace iMARSARLIMS.Services
                 createdById = itemmaster.createdById,
                 createdDateTime = itemmaster.createdDateTime
             };
-
         }
-
         private itemObservationMaster CreateItemObservation(itemMaster itemmaster)
         {
             return new itemObservationMaster
@@ -160,7 +154,6 @@ namespace iMARSARLIMS.Services
                 displaySequence = itemmaster.displaySequence,
             };
         }
-
         private ItemObservationMapping CreateItemObservationMapping(int itemId, int observationId)
         {
             return new ItemObservationMapping
@@ -182,10 +175,8 @@ namespace iMARSARLIMS.Services
                 createdDateTime = DateTime.Now
             };
         }
-
         private async Task<ServiceStatusResponseModel> CreateItemSampletype(int itemId, IEnumerable<itemSampleTypeMapping> sampletypeList)
         {
-
             if (sampletypeList != null)
             {
                 var sampleDataList = sampletypeList.Select(sampletype => CreateSampleTypeData(sampletype, itemId)).ToList();
@@ -213,11 +204,9 @@ namespace iMARSARLIMS.Services
                 createdById = sampletype.createdById,
                 createdDateTime = sampletype.createdDateTime,
             };
-
         }
         private async Task<ServiceStatusResponseModel> UpdateSampletypedata(IEnumerable<itemSampleTypeMapping> sampletypedata, int ItemId)
         {
-
             var sampleTypeData = db.itemSampleTypeMapping.Where(e => e.itemId == ItemId).ToList();
             db.itemSampleTypeMapping.RemoveRange(sampleTypeData);
             await db.SaveChangesAsync();
@@ -235,8 +224,6 @@ namespace iMARSARLIMS.Services
                 Success = true,
             };
         }
-
-
         private void UpdateItemMaster(itemMaster ItemMaster, itemMaster itemmaster)
         {
             ItemMaster.itemName = itemmaster.itemName;
@@ -274,7 +261,6 @@ namespace iMARSARLIMS.Services
             ItemMaster.displaySequence = itemmaster.displaySequence;
             ItemMaster.consentForm = itemmaster.consentForm;
         }
-
         async Task<ServiceStatusResponseModel> IitemMasterServices.updateItemStatus(int ItemId, byte Status, int UserId)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
@@ -383,8 +369,6 @@ namespace iMARSARLIMS.Services
                         Data = ObservationData
                     };
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -451,8 +435,6 @@ namespace iMARSARLIMS.Services
                         Data = ObservationData
                     };
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -462,7 +444,6 @@ namespace iMARSARLIMS.Services
                     Data = ex.Message
                 };
             }
-
         }
 
         async Task<ServiceStatusResponseModel> IitemMasterServices.RemoveMapping(int Id)

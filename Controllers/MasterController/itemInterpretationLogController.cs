@@ -14,6 +14,5 @@ namespace iMARSARLIMS.Controllers.MasterController
             db = context;
         }
         protected override IQueryable<itemInterpretationLog> DbSet => db.itemInterpretationLog.AsNoTracking().OrderBy(o => o.id);
-
     }
 }
