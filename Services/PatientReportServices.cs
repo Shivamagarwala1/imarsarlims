@@ -5,11 +5,15 @@ using QRCoder;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
+using IronBarCode;
+
+
 namespace iMARSARLIMS.Services
 {
     public class PatientReportServices : IPatientReportServices
     {
+       
+
         private readonly ContextClass db;
         public PatientReportServices(ContextClass context, ILogger<BaseController<tnx_BookingPatient>> logger)
         {
@@ -207,7 +211,7 @@ namespace iMARSARLIMS.Services
                                         if (double.TryParse(item.value, out double numericValue))
                                         {
                                             if (numericValue < item.min || numericValue > item.max)
-                                                table.Cell().Border(0.4f, Unit.Point).Text(" " + item.value).Style(TextStyle.Default.FontSize(10).Bold().FontColor(Color.FromHex("#B20000"))); // Highlight abnormal values
+                                                table.Cell().Border(0.4f, Unit.Point).Text(" " + item.value).Style(TextStyle.Default.FontSize(10).Bold().FontColor(QuestPDF.Infrastructure.Color.FromHex("#B20000"))); // Highlight abnormal values
                                             else
                                                 table.Cell().Border(0.4f, Unit.Point).Text(" " + item.value).Style(TextStyle.Default.FontSize(10)); // Normal style for values within the range
                                         }
@@ -215,8 +219,8 @@ namespace iMARSARLIMS.Services
                                         {
                                             table.Cell().Border(0.4f, Unit.Point).Text(" " + item.value).Style(TextStyle.Default.FontSize(10)); // Display with a different style for non-numeric values
                                         }
-                                        table.Cell().Border(0.4f, Unit.Point).Text(" "+ item.unit).Style(TextStyle.Default.FontSize(10));
-                                        table.Cell().Border(0.4f, Unit.Point).Text(" "+ item.displayReading).Style(TextStyle.Default.FontSize(10));
+                                        table.Cell().Border(0.4f, Unit.Point).Text(" " + item.unit).Style(TextStyle.Default.FontSize(10));
+                                        table.Cell().Border(0.4f, Unit.Point).Text(" " + item.displayReading).Style(TextStyle.Default.FontSize(10));
                                         table.Cell().Border(0.4f, Unit.Point).Text(" " + item.testMethod).Style(TextStyle.Default.FontSize(10));
                                     }
                                 });
@@ -225,25 +229,28 @@ namespace iMARSARLIMS.Services
                         });
 
                         page.Footer().Height(2.5f, Unit.Centimetre)
-                          .Column(column =>
-                          {
-                              column.Item().Table(table =>
-                              {
-                                  table.ColumnsDefinition(columns =>
-                                  {
-                                      columns.RelativeColumn();
-                                      columns.RelativeColumn();
-                                  });
-                                  table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
-                                  table.Cell().AlignRight().AlignBottom().Text(text =>
-                                  {
-                                      text.DefaultTextStyle(x => x.FontSize(8));
-                                      text.CurrentPageNumber();
-                                      text.Span(" of ");
-                                      text.TotalPages();
-                                  });
-                              });
-                          });
+                           .Column(column =>
+                           {
+                               column.Item().Table(table =>
+                               {
+                                   table.ColumnsDefinition(columns =>
+                                   {
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                   });
+                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
+                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Image(GenerateBarcode(Reportdata[0].workOrderId));
+
+                                   table.Cell().AlignRight().AlignBottom().Text(text =>
+                                   {
+                                       text.DefaultTextStyle(x => x.FontSize(8));
+                                       text.CurrentPageNumber();
+                                       text.Span(" of ");
+                                       text.TotalPages();
+                                   });
+                               });
+                           });
                     });
 
                 });
@@ -456,25 +463,28 @@ namespace iMARSARLIMS.Services
                         });
 
                         page.Footer().Height(2.5f, Unit.Centimetre)
-                          .Column(column =>
-                          {
-                              column.Item().Table(table =>
-                              {
-                                  table.ColumnsDefinition(columns =>
-                                  {
-                                      columns.RelativeColumn();
-                                      columns.RelativeColumn();
-                                  });
-                                  table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
-                                  table.Cell().AlignRight().AlignBottom().Text(text =>
-                                  {
-                                      text.DefaultTextStyle(x => x.FontSize(8));
-                                      text.CurrentPageNumber();
-                                      text.Span(" of ");
-                                      text.TotalPages();
-                                  });
-                              });
-                          });
+                           .Column(column =>
+                           {
+                               column.Item().Table(table =>
+                               {
+                                   table.ColumnsDefinition(columns =>
+                                   {
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                   });
+                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
+                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Image(GenerateBarcode(Reportdata[0].workOrderId));
+
+                                   table.Cell().AlignRight().AlignBottom().Text(text =>
+                                   {
+                                       text.DefaultTextStyle(x => x.FontSize(8));
+                                       text.CurrentPageNumber();
+                                       text.Span(" of ");
+                                       text.TotalPages();
+                                   });
+                               });
+                           });
                     });
                 });
 
@@ -487,14 +497,18 @@ namespace iMARSARLIMS.Services
             }
         }
         public static byte[] GenerateQrCode(string text)
-       {
-           using var qrGenrater= new QRCodeGenerator();
-           using var qrCodeData = qrGenrater.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+        {
+            using var qrGenrater = new QRCodeGenerator();
+            using var qrCodeData = qrGenrater.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
             var qrCode = new PngByteQRCode(qrCodeData);
             return qrCode.GetGraphic(10);
         }
-
-
+        public static byte[] GenerateBarcode(string text)
+        {
+            GeneratedBarcode barcode = BarcodeWriter.CreateBarcode(text, BarcodeEncoding.Code128,600,180);
+            var barcodeimage = barcode.ToPngBinaryData();
+            return barcodeimage;
+        }
         public byte[] GetPatientReportType3(string TestId)
         {
 
@@ -684,7 +698,7 @@ namespace iMARSARLIMS.Services
                                         if (double.TryParse(item.value, out double numericValue))
                                         {
                                             if (numericValue < item.min || numericValue > item.max)
-                                                table.Cell().Text(item.value).Style(TextStyle.Default.FontSize(10).Bold().FontColor(Color.FromHex("#B20000"))); // Highlight abnormal values
+                                                table.Cell().Text(item.value).Style(TextStyle.Default.FontSize(10).Bold().FontColor(QuestPDF.Infrastructure.Color.FromHex("#B20000"))); // Highlight abnormal values
                                             else
                                                 table.Cell().Text(item.value).Style(TextStyle.Default.FontSize(10)); // Normal style for values within the range
                                         }
@@ -710,8 +724,11 @@ namespace iMARSARLIMS.Services
                                     {
                                         columns.RelativeColumn();
                                         columns.RelativeColumn();
+                                        columns.RelativeColumn();
                                     });
                                     table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
+                                    table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Image(GenerateBarcode(Reportdata[0].workOrderId));
+
                                     table.Cell().AlignRight().AlignBottom().Text(text =>
                                     {
                                         text.DefaultTextStyle(x => x.FontSize(8));

@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BarCode" Version="2025.1.10" />
     <PackageReference Include="EPPlus" Version="7.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Google.Cloud.Dialogflow.V2" Version="4.24.0" />
