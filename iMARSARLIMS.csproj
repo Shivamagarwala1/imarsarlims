@@ -10,7 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
+=======
+    <PackageReference Include="BarCode" Version="2025.1.10" />
+>>>>>>> f7887cead462ebedf9e8c9d75e861d58bd1408fd
     <PackageReference Include="EPPlus" Version="7.5.1" />
     <PackageReference Include="IronPdf" Version="2025.1.1" />
     <PackageReference Include="itext7" Version="9.0.0" />
