@@ -9,41 +9,24 @@ namespace iMARSARLIMS.Controllers.MasterController
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class itemCommentMasterController : BaseController<itemCommentMaster>
+    public class itemTemplateController : BaseController<itemTemplate>
     {
         private readonly ContextClass db;
-        private readonly ICommentInterpatationservices _CommentInterpatationservices;
+        private readonly IitemTemplateServices _itemTemplateServices;
 
-
-        public itemCommentMasterController(ContextClass context, ILogger<BaseController<itemCommentMaster>> logger, ICommentInterpatationservices CommentInterpatationservices) : base(context, logger)
+        public itemTemplateController(ContextClass context, ILogger<BaseController<itemTemplate>> logger, IitemTemplateServices itemTemplateServices) : base(context, logger)
         {
             db = context;
-            this._CommentInterpatationservices = CommentInterpatationservices;
+            this._itemTemplateServices = itemTemplateServices;
         }
-        protected override IQueryable<itemCommentMaster> DbSet => db.itemCommentMaster.AsNoTracking().OrderBy(o => o.id);
-        [HttpPost("SaveCommentMaster")]
-        public async Task<ServiceStatusResponseModel> SaveCommentMaster(itemCommentMaster Comment)
+        protected override IQueryable<itemTemplate> DbSet => db.itemTemplate.AsNoTracking().OrderBy(o => o.id);
+
+        [HttpPost("SaveUpdateTemplate")]
+        public async Task<ServiceStatusResponseModel> SaveUpdateTemplate(itemTemplate Template)
         {
             try
             {
-                var result = await _CommentInterpatationservices.SaveCommentMaster(Comment);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.InnerException?.Message ?? "An error occurred."
-                };
-            }
-        }
-        [HttpPost("updateCommentStatus")]
-        public async Task<ServiceStatusResponseModel> updateCommentStatus(int CommentId, byte Status, int UserId)
-        {
-            try
-            {
-                var result = await _CommentInterpatationservices.updateCommentStatus(CommentId, Status, UserId);
+                var result = await _itemTemplateServices.SaveUpdateTemplate(Template);
                 return result;
             }
             catch (Exception ex)
@@ -56,14 +39,30 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
-
-
-        [HttpPost("GetCommentData")]
-        public async Task<ServiceStatusResponseModel> GetCommentData(int CentreID, string type, int testid)
+        [HttpPost("UpdateTemplateStatus")]
+        public async Task<ServiceStatusResponseModel> UpdateTemplateStatus(int id,byte status, int Userid)
         {
             try
             {
-                var result = await _CommentInterpatationservices.GetCommentData(CentreID, type, testid);
+                var result = await _itemTemplateServices.UpdateTemplateStatus(id,status, Userid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
+        [HttpPost("GetTemplateData")]
+        public async Task<ServiceStatusResponseModel> GetTemplateData(int CentreID, int testid)
+        {
+            try
+            {
+                var result = await _itemTemplateServices.GetTemplateData(CentreID, testid);
                 return result;
             }
             catch (Exception ex)

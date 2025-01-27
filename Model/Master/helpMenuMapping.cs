@@ -9,11 +9,12 @@ namespace iMARSARLIMS.Model.Master
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int? id { get; set; }
         public int? helpId { get; set; }
-        public int? labTestId { get; set; }
+        public int? ObservationId { get; set; }
         public int? itemId { get; set; }
-        [MaxLength(100)]
-        public string? mappedName { get; set; }
-        [MaxLength(20)]
-        public string? helpName { get; set; }
+        public int mappedById{ get; set; }
+        public DateTime mappedDate { get; set; }
+        public int isActive { get; set; }
+        public int removedById { get; set; }
+        public DateTime removedDate { get; set; }
 }
 }

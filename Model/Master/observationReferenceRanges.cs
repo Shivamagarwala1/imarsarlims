@@ -14,11 +14,9 @@ namespace iMARSARLIMS.Model.Master
         public int? toAge { get; set; }
         public double? minValue { get; set; }
         public double? maxValue { get; set; }
-        public string? method { get; set; }
         public string? unit { get; set; }
         public string? reportReading { get; set; }
         public string? defaultValue { get; set; }
-        public byte? autoHold { get; set; }
         public double? minCritical { get; set; }
         public double? maxCritical { get; set; }
         public double? minAutoApprovalValue { get; set; }

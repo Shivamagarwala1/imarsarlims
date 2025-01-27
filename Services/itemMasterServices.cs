@@ -1,4 +1,5 @@
-﻿using iMARSARLIMS.Controllers;
+﻿using System.Linq;
+using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
@@ -483,5 +484,35 @@ namespace iMARSARLIMS.Services
                 }
             }
         }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.GetItemForTemplate()
+        {
+            var reporttype = new List<int> { 2, 3 };
+            try
+            {
+                var itemdata = await (from im in db.itemMaster
+                                      where reporttype.Contains(im.reportType ?? 0) // Use .Contains() for checking multiple values
+                                      select new
+                                      {
+                                          im.itemId,
+                                          im.itemName,
+                                      }).ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = itemdata
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,  // Change to false to indicate failure
+                    Message = ex.Message
+                };
+            }
+        }
+
     }
 }

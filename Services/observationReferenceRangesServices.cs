@@ -2,6 +2,7 @@
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
 {
@@ -74,11 +75,9 @@ namespace iMARSARLIMS.Services
                 toAge = ObservationReferenceRanges.toAge,
                 minValue = ObservationReferenceRanges.minValue,
                 maxValue = ObservationReferenceRanges.maxValue,
-                method = ObservationReferenceRanges.method,
                 unit = ObservationReferenceRanges.unit,
                 reportReading = ObservationReferenceRanges.reportReading,
                 defaultValue = ObservationReferenceRanges.defaultValue,
-                autoHold = ObservationReferenceRanges.autoHold,
                 minCritical = ObservationReferenceRanges.minCritical,
                 maxCritical = ObservationReferenceRanges.maxCritical,
                 minAutoApprovalValue = ObservationReferenceRanges.minAutoApprovalValue,
@@ -100,11 +99,9 @@ namespace iMARSARLIMS.Services
             oldranges.toAge = ObservationReferenceRanges.toAge;
             oldranges.minValue = ObservationReferenceRanges.minValue;
             oldranges.maxValue = ObservationReferenceRanges.maxValue;
-            oldranges.method = ObservationReferenceRanges.method;
             oldranges.unit = ObservationReferenceRanges.unit;
             oldranges.reportReading = ObservationReferenceRanges.reportReading;
             oldranges.defaultValue = ObservationReferenceRanges.defaultValue;
-            oldranges.autoHold = ObservationReferenceRanges.autoHold;
             oldranges.minCritical = ObservationReferenceRanges.minCritical;
             oldranges.maxCritical = ObservationReferenceRanges.maxCritical;
             oldranges.minAutoApprovalValue = ObservationReferenceRanges.minAutoApprovalValue;
@@ -115,6 +112,44 @@ namespace iMARSARLIMS.Services
             oldranges.updateById = ObservationReferenceRanges.updateById;
             oldranges.updateDateTime = ObservationReferenceRanges.updateDateTime;
 
+        }
+
+        async Task<ServiceStatusResponseModel> IobservationReferenceRangesServices.DeleteReferenceRange(int Id)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var result = await db.observationReferenceRanges.Where(o => o.id == Id).FirstOrDefaultAsync();
+                    if (result != null)
+                    {
+                        db.observationReferenceRanges.Remove(result);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Deleted Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Please use correct ID"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
         }
     }
 }

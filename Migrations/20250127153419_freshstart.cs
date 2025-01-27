@@ -516,8 +516,9 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     centreId = table.Column<int>(type: "int", nullable: false),
                     empId = table.Column<int>(type: "int", nullable: false),
+                    empName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     doctorName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    signature = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    signature = table.Column<string>(type: "longtext", nullable: false),
                     approve = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     notApprove = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     hold = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -688,8 +689,13 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     itemId = table.Column<int>(type: "int", nullable: false),
-                    labTestId = table.Column<int>(type: "int", nullable: false),
-                    formula = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    observationId = table.Column<int>(type: "int", nullable: false),
+                    formula = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -704,10 +710,13 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     helpId = table.Column<int>(type: "int", nullable: true),
-                    labTestId = table.Column<int>(type: "int", nullable: true),
+                    ObservationId = table.Column<int>(type: "int", nullable: true),
                     itemId = table.Column<int>(type: "int", nullable: true),
-                    mappedName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    helpName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                    mappedById = table.Column<int>(type: "int", nullable: false),
+                    mappedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    isActive = table.Column<int>(type: "int", nullable: false),
+                    removedById = table.Column<int>(type: "int", nullable: false),
+                    removedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -776,6 +785,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     type = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    centreId = table.Column<int>(type: "int", nullable: false),
                     itemId = table.Column<int>(type: "int", nullable: false),
                     observationId = table.Column<int>(type: "int", nullable: false),
                     templateName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
@@ -842,6 +852,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     itemId = table.Column<int>(type: "int", nullable: false),
+                    interpatationid = table.Column<int>(type: "int", nullable: false),
                     centreId = table.Column<int>(type: "int", nullable: false),
                     interpretation = table.Column<string>(type: "longtext", nullable: false),
                     showInReport = table.Column<int>(type: "int", nullable: false),
@@ -994,6 +1005,29 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "itemTemplate",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    itemId = table.Column<int>(type: "int", nullable: false),
+                    Template = table.Column<string>(type: "longtext", nullable: false),
+                    CentreId = table.Column<int>(type: "int", nullable: false),
+                    gender = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_itemTemplate", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "labDepartment",
                 columns: table => new
                 {
@@ -1100,6 +1134,15 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     machineName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     machineType = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    referRange = table.Column<int>(type: "int", nullable: false),
+                    comPort = table.Column<string>(type: "longtext", nullable: false),
+                    boundRate = table.Column<int>(type: "int", nullable: false),
+                    dataBit = table.Column<int>(type: "int", nullable: false),
+                    stopBit = table.Column<int>(type: "int", nullable: false),
+                    parity = table.Column<string>(type: "longtext", nullable: false),
+                    machinePortNo = table.Column<int>(type: "int", nullable: false),
+                    machineIP = table.Column<string>(type: "longtext", nullable: false),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -1209,11 +1252,9 @@ namespace iMARSARLIMS.Migrations
                     toAge = table.Column<int>(type: "int", nullable: true),
                     minValue = table.Column<double>(type: "double", nullable: true),
                     maxValue = table.Column<double>(type: "double", nullable: true),
-                    method = table.Column<string>(type: "longtext", nullable: true),
                     unit = table.Column<string>(type: "longtext", nullable: true),
                     reportReading = table.Column<string>(type: "longtext", nullable: true),
                     defaultValue = table.Column<string>(type: "longtext", nullable: true),
-                    autoHold = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     minCritical = table.Column<double>(type: "double", nullable: true),
                     maxCritical = table.Column<double>(type: "double", nullable: true),
                     minAutoApprovalValue = table.Column<double>(type: "double", nullable: true),
@@ -2607,6 +2648,9 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "itemSampleTypeMapping");
+
+            migrationBuilder.DropTable(
+                name: "itemTemplate");
 
             migrationBuilder.DropTable(
                 name: "labDepartment");

@@ -37,5 +37,22 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpPost("DeleteReferenceRange")]
+        public async Task<ServiceStatusResponseModel> DeleteReferenceRange(int Id)
+        {
+            try
+            {
+                var result = await _observationReferenceRangesServices.DeleteReferenceRange(Id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }

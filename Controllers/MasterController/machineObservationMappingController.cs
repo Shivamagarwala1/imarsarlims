@@ -1,4 +1,6 @@
-﻿using iMARSARLIMS.Model.Master;
+﻿using iMARSARLIMS.Interface;
+using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,11 +11,67 @@ namespace iMARSARLIMS.Controllers.MasterController
     public class machineObservationMappingController : BaseController<machineObservationMapping>
     {
         private readonly ContextClass db;
+        private readonly ImachineMasterServices _machineMasterServices;
 
-        public machineObservationMappingController(ContextClass context, ILogger<BaseController<machineObservationMapping>> logger) : base(context, logger)
+        public machineObservationMappingController(ContextClass context, ILogger<BaseController<machineObservationMapping>> logger, ImachineMasterServices machineMasterServices) : base(context, logger)
         {
             db = context;
+            this._machineMasterServices = machineMasterServices;
         }
         protected override IQueryable<machineObservationMapping> DbSet => db.machineObservationMapping.AsNoTracking().OrderBy(o => o.id);
+        [HttpPost("SaveUpdateMapping")]
+        public async Task<ServiceStatusResponseModel> SaveUpdateMapping(List<machineObservationMapping> MachineMapping)
+        {
+            try
+            {
+                var result = await _machineMasterServices.SaveUpdateMapping(MachineMapping);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
+        [HttpGet("GetMachineMapping")]
+        public async Task<ServiceStatusResponseModel> GetMachineMapping()
+        {
+            try
+            {
+                var result= await (from mom in db.machineObservationMapping
+                             join mm in db.machineMaster on mom.machineId equals mm.id
+                             join ob in db.itemObservationMaster on mom.labTestID equals ob.id
+                             select new
+                             {
+                                 mom.id,
+                                 mm.machineName,
+                                 TestName=ob.labObservationName,
+                                 mom.suffix,
+                                 mom.roundUp,
+                                 mom.assay,
+                                 mom.isOrderable,
+                                 mom.isActive,
+                                 mom.multiplication
+                             }).ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace iMARSARLIMS.Model.Master
         public int id { get; set; }
         [Required, MaxLength(20)]
         public string? type { get; set; }
+        public int centreId { get; set; }
         [Required]
         public int? itemId { get; set; }
         [Required]

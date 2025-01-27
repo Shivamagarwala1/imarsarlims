@@ -1,4 +1,6 @@
 
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using iMARSARLIMS;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Services;
@@ -80,6 +82,9 @@ Log.Logger = new LoggerConfiguration()
                 .CreateLogger();
 
 builder.Host.UseSerilog();
+// Register DinkToPdf
+builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+
 
 builder.Services.AddCors(opttions =>
 {
@@ -135,6 +140,11 @@ builder.Services.AddSingleton<OpenAIService>();
 builder.Services.AddSingleton<JwtTokenGenrator>();
 builder.Services.AddScoped<IPatientReportServices, PatientReportServices>();
 builder.Services.AddScoped<ILocationsServices, LocationsServices>();
+builder.Services.AddScoped<IitemTemplateServices, itemTemplateServices>();
+builder.Services.AddScoped<IdoctorApprovalmasterservices, doctorApprovalmasterservices>();
+builder.Services.AddScoped<ImachineMasterServices, machineMasterServices>();
+builder.Services.AddScoped<IhelpMenuMasterServices, helpMenuMasterServices>();
+builder.Services.AddScoped<IFormulaMasterServices, FormulaMasterServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

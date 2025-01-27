@@ -9,5 +9,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> updateInterpatationStatus(int InterpatationId, byte Status, int UserId);
         Task<ServiceStatusResponseModel> SaveCommentMaster(itemCommentMaster Comment);
         Task<ServiceStatusResponseModel> updateCommentStatus(int CommentId, byte Status, int UserId);
+        Task<ServiceStatusResponseModel> GetCommentData(int CentreID, string type, int testid);
+
     }
 }

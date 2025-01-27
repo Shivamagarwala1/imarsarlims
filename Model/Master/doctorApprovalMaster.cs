@@ -13,8 +13,9 @@ namespace iMARSARLIMS.Model.Master
         [Required]
         public int empId { get; set; }
         [Required, MaxLength(50)]
+        public string empName { get; set; }
+        [Required, MaxLength(50)]
         public string doctorName { get; set; }
-        [Required,MaxLength(100)]
         public string signature { get; set; }
         public byte approve { get; set; }
         public byte notApprove { get; set; }

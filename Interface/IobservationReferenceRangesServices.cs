@@ -6,5 +6,6 @@ namespace iMARSARLIMS.Interface
     public interface IobservationReferenceRangesServices
     {
         Task<ServiceStatusResponseModel> SaveUpdateReferenceRange(List<observationReferenceRanges> ObservationReferenceRanges);
+        Task<ServiceStatusResponseModel> DeleteReferenceRange(int Id);
     }
 }

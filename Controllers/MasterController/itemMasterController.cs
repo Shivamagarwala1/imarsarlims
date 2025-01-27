@@ -94,6 +94,53 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpGet("GetItemForTemplate")]
+        public async Task<ServiceStatusResponseModel> GetItemForTemplate()
+        {
+            try
+            {
+                var result = await _itemMasterServices.GetItemForTemplate();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetProfileObservation")]
+        public async Task<ServiceStatusResponseModel> GetProfileObservation(int itemId)
+        {
+            try
+            {
+                var result = (from om in db.itemObservationMaster
+                              join omm in db.ItemObservationMapping on om.id equals omm.observationID
+                              where omm.itemId == itemId
+                              select new
+                              {
+                                  om.id,
+                                  om.labObservationName
+                              }).ToList();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
+
         [HttpGet("GetItemObservation")]
         public async Task<ServiceStatusResponseModel> GetItemObservation(int itemtype)
         {

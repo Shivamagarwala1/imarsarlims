@@ -4,15 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(formulaMaster))]
-    public class formulaMaster
+    public class formulaMaster:Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         public int id { get; set; }
         [Required]
         public int itemId { get; set; }
         [Required]
-        public int labTestId { get; set; }
+        public int observationId { get; set; }
         [Required, MaxLength(200)]
         public string formula { get; set; }
     }

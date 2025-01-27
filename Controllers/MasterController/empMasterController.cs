@@ -208,7 +208,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             {
                 //LGRFfXxI-SmBFTl5N-XlUdHgIc-DB0MHQwV-FB0YDB8d-Ah0eAhUV-FRU=
                 // Initialize the PDF document
-                HtmlToPdf htmlToPdfConverter = new HtmlToPdf();
+                HiQPdf.HtmlToPdf htmlToPdfConverter = new HiQPdf.HtmlToPdf();
                 htmlToPdfConverter.SerialNumber = "YCgJMTAE-BiwJAhIB-EhlWTlBA-UEBRQFBA-U1FOUVJO-WVlZWQ==";
 
 

@@ -66,6 +66,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -136,6 +137,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -187,6 +189,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -229,12 +232,61 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
                         Message = ex.Message
                     };
                 }
+            }
+        }
+
+        public async Task<ServiceStatusResponseModel> GetCommentData(int CentreID, string type, int testid)
+        {
+            if(type== "Item Wise")
+            {
+                var result= await (from ic in db.itemCommentMaster 
+                                   join im in db.itemMaster on ic.itemId equals im.itemId
+                                   join cm in db.centreMaster on ic.centreId equals cm.centreId
+                                   where ic.itemId==testid && ic.centreId==CentreID
+                                   select new
+                                   {
+                                       ic.id,
+                                       ic.type,
+                                       im.itemName,
+                                       cm.companyName,
+                                       ic.template,
+                                       ic.templateName,
+                                       ic.isActive
+                                   }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            else
+            {
+                var result = await (from ic in db.itemCommentMaster
+                                    join im in db.itemObservationMaster on ic.itemId equals im.id
+                                    join cm in db.centreMaster on ic.centreId equals cm.centreId
+                                    where ic.itemId == testid && ic.centreId==CentreID
+                                    select new
+                                    {
+                                        ic.id,
+                                        ic.type,
+                                        itemName= im.labObservationName,
+                                        cm.companyName,
+                                        ic.template,
+                                        ic.templateName,
+                                        ic.isActive
+                                    }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
             }
         }
     }
