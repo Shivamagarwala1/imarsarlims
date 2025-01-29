@@ -1,13 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection.PortableExecutable;
-using iMARSARLIMS.Controllers;
+﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
-using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-using static Org.BouncyCastle.Utilities.Test.FixedSecureRandom;
 
 namespace iMARSARLIMS.Services
 {
@@ -25,33 +20,37 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
+                    var assayno = MachineMappings.Select(x => x.assay).FirstOrDefault();
+                    var data= db.machineObservationMapping.Where(mo=>mo.assay==assayno).ToList();
+                    db.machineObservationMapping.RemoveRange(data);
+                    await db.SaveChangesAsync();
                     var newObservations = MachineMappings.Where(map => map.id == 0).Select(CreateObservationMapping).ToList();
                     if (newObservations.Any())
                     {
                         db.machineObservationMapping.AddRange(newObservations);
                     }
-                    var existingMappingsIds = MachineMappings.Where(item => item.id != 0).Select(item => item.id).ToList();
-                    var existingMappings = await db.machineObservationMapping
-                        .Where(b => existingMappingsIds.Contains(b.id))
-                        .ToListAsync();
+                    //var existingMappingsIds = MachineMappings.Where(item => item.id != 0).Select(item => item.id).ToList();
+                    //var existingMappings = await db.machineObservationMapping
+                    //    .Where(b => existingMappingsIds.Contains(b.id))
+                    //    .ToListAsync();
 
-                    // Update existing mappings
-                    var updatedObservations = new List<machineObservationMapping>();
-                    foreach (var mapping in MachineMappings.Where(item => item.id != 0))
-                    {
-                        var machineObservationMappingOld = existingMappings.FirstOrDefault(b => b.id == mapping.id);
-                        if (machineObservationMappingOld != null)
-                        {
-                            updateObservationmapping(machineObservationMappingOld, mapping);
-                            updatedObservations.Add(machineObservationMappingOld);
-                        }
-                    }
+                    //// Update existing mappings
+                    //var updatedObservations = new List<machineObservationMapping>();
+                    //foreach (var mapping in MachineMappings.Where(item => item.id != 0))
+                    //{
+                    //    var machineObservationMappingOld = existingMappings.FirstOrDefault(b => b.id == mapping.id);
+                    //    if (machineObservationMappingOld != null)
+                    //    {
+                    //        updateObservationmapping(machineObservationMappingOld, mapping);
+                    //        updatedObservations.Add(machineObservationMappingOld);
+                    //    }
+                    //}
 
-                    // Apply updates
-                    if (updatedObservations.Any())
-                    {
-                        db.machineObservationMapping.UpdateRange(updatedObservations);
-                    }
+                    //// Apply updates
+                    //if (updatedObservations.Any())
+                    //{
+                    //    db.machineObservationMapping.UpdateRange(updatedObservations);
+                    //}
 
                     // Save changes and commit the transaction
                     await db.SaveChangesAsync();

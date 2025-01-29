@@ -11,8 +11,8 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    [Migration("20250127153419_freshstart")]
-    partial class freshstart
+    [Migration("20250129122804_FreshDatabase")]
+    partial class FreshDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2358,8 +2358,8 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<byte?>("printSequence")
-                        .HasColumnType("tinyint unsigned");
+                    b.Property<int>("printSequence")
+                        .HasColumnType("int");
 
                     b.Property<string>("subDeptName")
                         .IsRequired()
@@ -2840,14 +2840,16 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("machineCode")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<byte?>("microType")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("organismAntibiotic")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");
@@ -3119,8 +3121,23 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("centreId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("createdById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("createdDateTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<byte>("isActive")
+                        .HasColumnType("tinyint unsigned");
+
                     b.Property<int>("rateTypeId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("updateById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("updateDateTime")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 
@@ -3133,13 +3150,10 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("createdBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("createdById")
+                    b.Property<int?>("createdById")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("createdOn")
+                    b.Property<DateTime>("createdDateTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("deptId")
@@ -3147,6 +3161,9 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<double>("discount")
                         .HasColumnType("double");
+
+                    b.Property<byte>("isActive")
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("itemCode")
                         .HasColumnType("longtext");
@@ -3174,6 +3191,12 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("transferRemarks")
                         .HasColumnType("longtext");
+
+                    b.Property<int?>("updateById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("updateDateTime")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 

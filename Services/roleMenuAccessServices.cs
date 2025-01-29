@@ -7,6 +7,7 @@ using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
+using static Google.Cloud.Dialogflow.V2.MessageEntry.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -127,16 +128,19 @@ namespace iMARSARLIMS.Services
                             {
                                 foreach (var employeeId in employeeIds)
                                 {
-                                    var roleMenuAccess = new roleMenuAccess
+                                    var count= db.roleMenuAccess.Where(rm=>rm.subMenuId== Convert.ToInt32(subMenuId) && rm.employeeId== Convert.ToInt32(employeeId) && rm.roleId == roleMenu.roleId).Count();
+                                    if (count == 0)
                                     {
-                                        roleId = roleMenu.roleId,
-                                        menuId = roleMenu.menuId,
-                                        subMenuId = Convert.ToInt32(subMenuId), // Correctly assigning the subMenuId
-                                        employeeId = Convert.ToInt32(employeeId),
-                                        isActive = true
-                                    };
-
-                                    db.roleMenuAccess.Add(roleMenuAccess);
+                                        var roleMenuAccess = new roleMenuAccess
+                                        {
+                                            roleId = roleMenu.roleId,
+                                            menuId = roleMenu.menuId,
+                                            subMenuId = Convert.ToInt32(subMenuId), // Correctly assigning the subMenuId
+                                            employeeId = Convert.ToInt32(employeeId),
+                                            isActive = true
+                                        };
+                                        db.roleMenuAccess.Add(roleMenuAccess);
+                                    }
                                 }
                             }
 

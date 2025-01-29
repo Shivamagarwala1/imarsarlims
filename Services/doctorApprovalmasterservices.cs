@@ -69,6 +69,15 @@ namespace iMARSARLIMS.Services
                     var msg = "";
                     if (doctorApproval.id == 0)
                     {
+                        var count = db.doctorApprovalMaster.Where(d=> d.empId == doctorApproval.empId  &&  d.doctorId== doctorApproval.doctorId).Count();
+                        if (count > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Appproval rights already Available"
+                            };
+                        }
                         db.doctorApprovalMaster.Add(doctorApproval);
                         await db.SaveChangesAsync();
                         await transaction.CommitAsync();

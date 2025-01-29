@@ -3,7 +3,7 @@
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(rateTypeWiseRateList))]
-    public class rateTypeWiseRateList
+    public class rateTypeWiseRateList :Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
@@ -16,9 +16,6 @@ namespace iMARSARLIMS.Model.Master
         public int itemid { get; set; }
         public string? itemCode { get; set; }
         public string? panelItemName { get; set; }
-        public string? createdBy { get; set; }
-        public int createdById { get; set; }
-        public DateTime createdOn { get; set; }
         public string? transferRemarks { get; set; }
         public DateTime? transferDate { get; set; }
     }

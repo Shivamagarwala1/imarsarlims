@@ -45,7 +45,8 @@ namespace iMARSARLIMS.Controllers.MasterController
                 var result= await (from mom in db.machineObservationMapping
                              join mm in db.machineMaster on mom.machineId equals mm.id
                              join ob in db.itemObservationMaster on mom.labTestID equals ob.id
-                             select new
+                             where mom.isActive==1
+                                   select new
                              {
                                  mom.id,
                                  mm.machineName,
@@ -57,11 +58,25 @@ namespace iMARSARLIMS.Controllers.MasterController
                                  mom.isActive,
                                  mom.multiplication
                              }).ToListAsync();
+                var resultGroupBy = result
+    .GroupBy(r => r.assay)
+    .Select(g => new
+    {
+        Assay = g.Key, // This is the group key (i.e., 'assay')
+        Id = g.FirstOrDefault()?.id, // Get the first item's id from the group
+        MachineName = g.FirstOrDefault()?.machineName, // Get the first machineName
+        TestName = string.Join(", ", g.Select(r => r.TestName)), // Join TestName values
+        Suffix = g.FirstOrDefault()?.suffix,
+        RoundUp = g.FirstOrDefault()?.roundUp,
+        IsOrderable = g.FirstOrDefault()?.isOrderable,
+        IsActive = g.FirstOrDefault()?.isActive,
+        Multiplication = g.FirstOrDefault()?.multiplication
+    }).ToList();
 
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
-                    Data = result
+                    Data = resultGroupBy
                 };
             }
             catch (Exception ex)

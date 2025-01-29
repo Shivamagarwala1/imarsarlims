@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class freshstart : Migration
+    public partial class FreshDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -1037,7 +1037,7 @@ namespace iMARSARLIMS.Migrations
                     deptName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     subDeptName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     abbreviation = table.Column<string>(type: "varchar(5)", maxLength: 5, nullable: true),
-                    printSequence = table.Column<byte>(type: "tinyint unsigned", nullable: true)
+                    printSequence = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1279,8 +1279,8 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    organismAntibiotic = table.Column<string>(type: "longtext", nullable: false),
-                    machineCode = table.Column<string>(type: "longtext", nullable: true),
+                    organismAntibiotic = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    machineCode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     microType = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
@@ -1420,7 +1420,12 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     rateTypeId = table.Column<int>(type: "int", nullable: false),
-                    centreId = table.Column<int>(type: "int", nullable: false)
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1443,11 +1448,13 @@ namespace iMARSARLIMS.Migrations
                     itemid = table.Column<int>(type: "int", nullable: false),
                     itemCode = table.Column<string>(type: "longtext", nullable: true),
                     panelItemName = table.Column<string>(type: "longtext", nullable: true),
-                    createdBy = table.Column<string>(type: "longtext", nullable: true),
-                    createdById = table.Column<int>(type: "int", nullable: false),
-                    createdOn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     transferRemarks = table.Column<string>(type: "longtext", nullable: true),
-                    transferDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                    transferDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {

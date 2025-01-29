@@ -145,6 +145,11 @@ builder.Services.AddScoped<IdoctorApprovalmasterservices, doctorApprovalmasterse
 builder.Services.AddScoped<ImachineMasterServices, machineMasterServices>();
 builder.Services.AddScoped<IhelpMenuMasterServices, helpMenuMasterServices>();
 builder.Services.AddScoped<IFormulaMasterServices, FormulaMasterServices>();
+builder.Services.AddScoped<IorganismAntibioticMasterServices, organismAntibioticMasterServices>();
+builder.Services.AddScoped<IorganismAntibioticTagMasterServices, organismAntibioticTagMasterServices>();
+builder.Services.AddScoped<IrateTypeMasterServices, rateTypeMasterServices>();
+builder.Services.AddScoped<IlabDepartmentServices, labDepartmentServices>();
+
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

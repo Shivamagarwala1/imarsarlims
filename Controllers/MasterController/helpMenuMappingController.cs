@@ -54,5 +54,37 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpPost("GetHelpMenuMapping")]
+        public async Task<ServiceStatusResponseModel> GetHelpMenuMapping(int itemId, int observationId)
+        {
+            try
+            {
+                var result = await (from hmm in db.helpMenuMapping 
+                              join hm in db.helpMenuMaster on hmm.helpId equals hm.id
+                              where hmm.itemId== itemId && hmm.ObservationId  ==observationId
+                              select new
+                              {
+                                  hm.id,
+                                  hm.helpName,
+                                  hmm.itemId,
+                                  hmm.ObservationId
+
+                              }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
     }
 }

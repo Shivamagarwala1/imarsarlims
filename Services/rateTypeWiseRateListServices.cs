@@ -62,9 +62,8 @@ namespace iMARSARLIMS.Services
                 itemid = ratelist.itemid,
                 itemCode = ratelist.itemCode,
                 panelItemName = ratelist.panelItemName,
-                createdBy = ratelist.createdBy,
                 createdById = ratelist.createdById,
-                createdOn = ratelist.createdOn,
+                createdDateTime = ratelist.createdDateTime,
                 transferRemarks = ratelist.transferRemarks,
                 transferDate = ratelist.transferDate
             };
@@ -112,9 +111,8 @@ namespace iMARSARLIMS.Services
                                 discount = Discount,
                                 itemid = Itemid,
                                 itemCode = ItemCode,
-                                createdBy = "IMS",
                                 createdById = 1,
-                                createdOn = DateTime.Now
+                                createdDateTime = DateTime.Now
                             };
                             RateListData.Add(rateTypeWiseRateList);
 
