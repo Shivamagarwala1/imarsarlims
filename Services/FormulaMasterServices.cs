@@ -34,6 +34,7 @@ namespace iMARSARLIMS.Services
                     {
                         var data= db.formulaMaster.Where(f => f.observationId == Formula.observationId && f.itemId == Formula.itemId).FirstOrDefault();
                         data.formula = Formula.formula;
+                        data.FormulaText = Formula.FormulaText;
                         data.updateById= Formula.updateById;
                         data.updateDateTime= DateTime.Now;
                         db.formulaMaster.Update(data);

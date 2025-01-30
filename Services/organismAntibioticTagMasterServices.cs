@@ -34,6 +34,7 @@ namespace iMARSARLIMS.Services
                     var OrganismAntibioticMpping = organismAntibioticTag.Select(organismAntibioticTagData).ToList();
                     db.organismAntibioticTagMaster.AddRange(OrganismAntibioticMpping);
                     await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -42,6 +43,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -60,6 +62,7 @@ namespace iMARSARLIMS.Services
                 organismId = organismAntibioticTag.organismId,
                 antibiticId = organismAntibioticTag.antibiticId,
                 centreId = organismAntibioticTag.centreId,
+                isActive = organismAntibioticTag.isActive,
                 createdById = organismAntibioticTag.createdById,
                 createdDateTime  = organismAntibioticTag.createdDateTime
             };

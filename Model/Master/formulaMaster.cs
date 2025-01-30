@@ -14,5 +14,7 @@ namespace iMARSARLIMS.Model.Master
         public int observationId { get; set; }
         [Required, MaxLength(200)]
         public string formula { get; set; }
+        [Required, MaxLength(500)]
+        public string FormulaText { get; set; }
     }
 }

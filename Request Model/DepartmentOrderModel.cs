@@ -2,7 +2,7 @@
 {
     public class DepartmentOrderModel
     {
-        public int deptId {  get; set; }
+        public int id {  get; set; }
         public int order {  get; set; }
     }
 }

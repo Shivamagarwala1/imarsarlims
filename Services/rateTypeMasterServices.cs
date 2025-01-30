@@ -22,28 +22,26 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var result = await (from rtt in db.rateTypeTagging
-                                    join rt in db.rateTypeMaster on rtt.rateTypeId equals rt.id
-                                    join cm in db.centreMaster on rtt.centreId equals cm.centreId
-                                    where rtt.isActive == 1
+                var result = await (from rt in db.rateTypeMaster
+                                    join rtt in db.rateTypeTagging on rt.id equals rtt.rateTypeId into rttGroup
+                                    from rtt in rttGroup.DefaultIfEmpty()
+                                    join cm in db.centreMaster on rtt.centreId equals cm.centreId into cmGroup
+                                    from cm in cmGroup.DefaultIfEmpty()
                                     select new
                                     {
-                                        rtt.id,
-                                        rt.rateType,
-                                        rtt.rateTypeId,
-                                        cm.companyName,
-                                        rtt.centreId,
-                                        rtt.isActive
-                                    }).ToListAsync();
-                var resultGroupBy = result.GroupBy(r => r.rateType).Select(r => new
-                {
+                                        rt.id,
+                                        rt.rateName,
+                                        companyName = cm != null ? cm.companyName : "",  // Default to "Unknown" if cm is null
+                                        centreId = cm != null ? cm.centreId : (int?)null  // Default to null if cm is null
 
-                    Id = r.FirstOrDefault()?.id,
-                    Ratetype = r.FirstOrDefault()?.rateType,
-                    RateTypeId = r.FirstOrDefault()?.rateTypeId,
-                    CentreName = string.Join(", ", r.Select(r => r.companyName)),
-                    CentreId = string.Join(", ", r.Select(r => r.centreId)),
-                    IsActive = r.FirstOrDefault()?.isActive
+                                    }).ToListAsync();
+                var resultGroupBy = result.GroupBy(r => r.id).Select(g => new
+                                    {
+                                       
+                                        Id = g.FirstOrDefault()?.id, // Get the first item's id from the group
+                                        RateName = g.FirstOrDefault()?.rateName, // Get the first machineName
+                                        CentreName = string.Join(", ", g.Select(r => r.companyName)), // Join TestName values
+                                        CentreId= string.Join(", ", g.Select(r => r.centreId))
                 }).ToList();
                 return new ServiceStatusResponseModel
                 {

@@ -39,11 +39,11 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
         [HttpPost("UpdateDepartmentOrder")]
-        public async Task<ServiceStatusResponseModel> UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder)
+        public async Task<ServiceStatusResponseModel> UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder,string type)
         {
             try
             {
-                var result = await _labDepartmentServices.UpdateDepartmentOrder(DepartmentOrder);
+                var result = await _labDepartmentServices.UpdateDepartmentOrder(DepartmentOrder,type);
                 return result;
             }
             catch (Exception ex)

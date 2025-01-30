@@ -57,29 +57,47 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> IlabDepartmentServices.UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder)
+        async Task<ServiceStatusResponseModel> IlabDepartmentServices.UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder, string type)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var departmentIds = DepartmentOrder.Select(d => d.deptId).ToList();
-
-                    var departmentsToUpdate = await db.labDepartment
-                                                      .Where(d => departmentIds.Contains(d.id))
-                                                      .ToListAsync();
-
-                    var departmentOrderDict = DepartmentOrder.ToDictionary(d => d.deptId, d => d.order);
-
-                    foreach (var department in departmentsToUpdate)
+                    var Ids = DepartmentOrder.Select(d => d.id).ToList();
+                    if (type == "Department")
                     {
-                        if (departmentOrderDict.ContainsKey(department.id))
-                        {
-                            department.printSequence = departmentOrderDict[department.id];
-                        }
-                    }
+                        var departmentsToUpdate = await db.labDepartment
+                                                          .Where(d => Ids.Contains(d.id))
+                                                          .ToListAsync();
 
-                    db.labDepartment.UpdateRange(departmentsToUpdate);
+                        var departmentOrderDict = DepartmentOrder.ToDictionary(d => d.id, d => d.order);
+
+                        foreach (var department in departmentsToUpdate)
+                        {
+                            if (departmentOrderDict.ContainsKey(department.id))
+                            {
+                                department.printSequence = departmentOrderDict[department.id];
+                            }
+                        }
+                        db.labDepartment.UpdateRange(departmentsToUpdate);
+                    }
+                    else
+                    {
+                        var departmentsToUpdate = await db.itemMaster
+                                                          .Where(d => Ids.Contains(d.itemId))
+                                                          .ToListAsync();
+
+                        var departmentOrderDict = DepartmentOrder.ToDictionary(d => d.id, d => d.order);
+
+                        foreach (var department in departmentsToUpdate)
+                        {
+                            if (departmentOrderDict.ContainsKey(department.itemId))
+                            {
+                                department.displaySequence = departmentOrderDict[department.itemId];
+                            }
+                        }
+                        db.itemMaster.UpdateRange(departmentsToUpdate);
+                    }
                     await db.SaveChangesAsync();
                     await transaction.CommitAsync();
 
