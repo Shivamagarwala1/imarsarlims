@@ -149,6 +149,8 @@ builder.Services.AddScoped<IorganismAntibioticMasterServices, organismAntibiotic
 builder.Services.AddScoped<IorganismAntibioticTagMasterServices, organismAntibioticTagMasterServices>();
 builder.Services.AddScoped<IrateTypeMasterServices, rateTypeMasterServices>();
 builder.Services.AddScoped<IlabDepartmentServices, labDepartmentServices>();
+builder.Services.AddScoped<IitemOutSourceServices, itemOutSourceServices>();
+builder.Services.AddScoped<IitemOutHouseServices, itemOutHouseServices>();
 
 builder.Services.AddHttpClient();
 var app = builder.Build();

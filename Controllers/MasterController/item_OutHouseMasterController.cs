@@ -8,25 +8,24 @@ namespace iMARSARLIMS.Controllers.MasterController
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class item_outsourcemasterController : BaseController<item_outsourcemaster>
+    public class item_OutHouseMasterController : BaseController<item_OutHouseMaster>
     {
         private readonly ContextClass db;
-        private readonly IitemOutSourceServices _itemOutSourceServices;
+        private readonly IitemOutHouseServices _itemOutHouseServices;
 
-        public item_outsourcemasterController(ContextClass context, ILogger<BaseController<item_outsourcemaster>> logger, IitemOutSourceServices itemOutSourceServices) : base(context, logger)
+        public item_OutHouseMasterController(ContextClass context, ILogger<BaseController<item_OutHouseMaster>> logger, IitemOutHouseServices itemOutHouseServices) : base(context, logger)
         {
             db = context;
-            this._itemOutSourceServices = itemOutSourceServices;
+            this._itemOutHouseServices = itemOutHouseServices;
         }
-        protected override IQueryable<item_outsourcemaster> DbSet => db.item_outsourcemaster.AsNoTracking().OrderBy(o => o.id);
+        protected override IQueryable<item_OutHouseMaster> DbSet => db.item_OutHouseMaster.AsNoTracking().OrderBy(o => o.id);
 
-
-        [HttpPost("SaveOutSourceMapping")]
-        public async Task<ServiceStatusResponseModel> SaveOutSourceMapping(List<item_outsourcemaster> OutSourceMapping)
+        [HttpPost("SaveOutHouseMapping")]
+        public async Task<ServiceStatusResponseModel> SaveOutHouseMapping(List<item_OutHouseMaster> OutHouseMapping)
         {
             try
             {
-                var result = await _itemOutSourceServices.SaveOutSourceMapping(OutSourceMapping);
+                var result = await _itemOutHouseServices.SaveOutHouseMapping(OutHouseMapping);
                 return result;
             }
             catch (Exception ex)
@@ -38,12 +37,12 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
-        [HttpGet("GetOutSourceMapping")]
-        public async Task<ServiceStatusResponseModel> GetOutSourceMapping(int BookingCentre, int OutSourceLab, int DeptId)
+        [HttpGet("GetOutHouseMapping")]
+        public async Task<ServiceStatusResponseModel> GetOutHouseMapping(int BookingCentre, int ProcessingCentre,int DeptId)
         {
             try
             {
-                var result = await _itemOutSourceServices.GetOutSourceMapping(BookingCentre, OutSourceLab, DeptId);
+                var result = await _itemOutHouseServices.GetOutHouseMapping(BookingCentre, ProcessingCentre,DeptId);
                 return result;
             }
             catch (Exception ex)
@@ -55,12 +54,12 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
-        [HttpPost("RemoveOutSourceMapping")]
-        public async Task<ServiceStatusResponseModel> RemoveOutSourceMapping(int id)
+        [HttpPost("RemoveOutHouseMapping")]
+        public async Task<ServiceStatusResponseModel> RemoveOutHouseMapping(int id)
         {
             try
             {
-                var result = await _itemOutSourceServices.RemoveOutSourceMapping(id);
+                var result = await _itemOutHouseServices.RemoveOutHouseMapping(id);
                 return result;
             }
             catch (Exception ex)
@@ -72,6 +71,5 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
-
     }
 }

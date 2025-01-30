@@ -99,6 +99,7 @@ namespace iMARSARLIMS
         public DbSet<ThemeColour> ThemeColour { get; set; }
         public DbSet<menuIconMaster> menuIconMaster { get; set; }
         public DbSet<itemTemplate> itemTemplate { get; set; }
+        public DbSet<item_OutHouseMaster> item_OutHouseMaster { get; set; }
         public DbSet<Testing> Testing { get; set; }
 
 
@@ -372,8 +373,10 @@ namespace iMARSARLIMS
             modelBuilder.Entity<Testing>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
             modelBuilder.Entity<itemTemplate>().HasKey(x => x.id);
-            modelBuilder.Entity<itemTemplate>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<itemTemplate>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
+            modelBuilder.Entity<item_OutHouseMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<item_OutHouseMaster>().Property(x => x.id).ValueGeneratedOnAdd();
 
 
 
