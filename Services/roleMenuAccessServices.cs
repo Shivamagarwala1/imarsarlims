@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Migrations;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
@@ -7,7 +8,6 @@ using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
-using static Google.Cloud.Dialogflow.V2.MessageEntry.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -19,6 +19,90 @@ namespace iMARSARLIMS.Services
         public roleMenuAccessServices(ContextClass context, ILogger<BaseController<tnx_BookingPatient>> logger)
         {
             db = context;
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.SaveUpdateRole(roleMaster Role)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (Role.id == 0)
+                    {
+                        db.roleMaster.Add(Role);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Saved Successful"
+                        };
+                    }
+                    else
+                    {
+                        db.roleMaster.Update(Role);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.UpdateRoleStatus(int id, byte status, int userId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.roleMaster.Where(d => d.id == id).FirstOrDefault();
+                    if (data == null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No Data Found to Update"
+                        };
+                    }
+                    else
+                    {
+                        data.isActive = status;
+                        data.updateById = userId;
+                        data.updateDateTime = DateTime.Now;
+                        db.roleMaster.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
         }
 
         async Task<ServiceStatusResponseModel> IroleMenuAccessServices.EmpPageAccessRemove(int Id)
@@ -36,7 +120,6 @@ namespace iMARSARLIMS.Services
                             Message = "Menu access not found"
                         };
                     }
-
                     db.roleMenuAccess.Remove(menuAccess);
                     await db.SaveChangesAsync();
                     await transaction.CommitAsync();

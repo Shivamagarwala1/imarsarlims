@@ -93,7 +93,7 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
         [HttpGet("EmployeeWiseMenu")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseMenu(String EmplyeeId,String RoleId,string CentreId)
+        public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseMenu(string EmplyeeId,string RoleId,string CentreId, int MenuType)
         {
             if (EmplyeeId == "0" || EmplyeeId == "")
                 return BadRequest("Invalid Employee ID.");
@@ -104,7 +104,7 @@ namespace iMARSARLIMS.Controllers.MasterController
 
             try
             {
-                var result = await _empMasterServices.EmployeeWiseMenu(EmplyeeId, RoleId,CentreId);
+                var result = await _empMasterServices.EmployeeWiseMenu(EmplyeeId, RoleId,CentreId,MenuType);
                 return Ok(result);
             }
             catch (Exception ex)

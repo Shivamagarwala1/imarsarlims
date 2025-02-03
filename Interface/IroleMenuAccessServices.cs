@@ -11,5 +11,8 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> SaveRoleMenuAccess(RoleMenuAccessRequestModel roleMenu);
         Task<ServiceStatusResponseModel> GetAllRoleMenuAcess(ODataQueryOptions<roleMenuAccess> queryOptions);
         Task<ServiceStatusResponseModel> EmpPageAccessRemove(int Id);
+
+        Task<ServiceStatusResponseModel> SaveUpdateRole(roleMaster Role);
+        Task<ServiceStatusResponseModel> UpdateRoleStatus(int id, byte status, int userId);
     }
 }

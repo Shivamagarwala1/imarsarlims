@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250201074800_discountreson")]
+    partial class discountreson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1075,25 +1078,10 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
                     b.Property<string>("type")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 
@@ -1361,25 +1349,10 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("documentType")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 
@@ -2433,12 +2406,6 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("varchar(5)");
 
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("deptCode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -2449,9 +2416,6 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
                     b.Property<int>("printSequence")
                         .HasColumnType("int");
 
@@ -2459,12 +2423,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 
@@ -2775,9 +2733,6 @@ namespace iMARSARLIMS.Migrations
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("MenuType")
                         .HasColumnType("int");
 
                     b.Property<int?>("createdById")

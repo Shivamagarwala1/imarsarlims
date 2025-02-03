@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(documentTypeMaster))]
-    public class documentTypeMaster
+    public class documentTypeMaster:Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }

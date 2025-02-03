@@ -16,5 +16,6 @@ namespace iMARSARLIMS.Model.Master
         public int? displaySequence { get; set; }
         public int? parentId { get; set; }
         public bool isHide { get; set; }
+        public int MenuType { get; set; }
     }
 }

@@ -151,6 +151,13 @@ builder.Services.AddScoped<IrateTypeMasterServices, rateTypeMasterServices>();
 builder.Services.AddScoped<IlabDepartmentServices, labDepartmentServices>();
 builder.Services.AddScoped<IitemOutSourceServices, itemOutSourceServices>();
 builder.Services.AddScoped<IitemOutHouseServices, itemOutHouseServices>();
+builder.Services.AddScoped<IdegreeMasterServices, degreeMasterServices>();
+builder.Services.AddScoped<IdesignationMasterServices, designationMasterServices>();
+builder.Services.AddScoped<IdiscountReasonMasterServices, discountReasonMasterServices>();
+builder.Services.AddScoped<IsampleRejectionReasonServices, sampleRejectionReasonServices>();
+builder.Services.AddScoped<ItitleMasterServices, titleMasterServices>();
+builder.Services.AddScoped<IdocumentTypeMasterServices, documentTypeMasterServices>();
+
 
 builder.Services.AddHttpClient();
 var app = builder.Build();

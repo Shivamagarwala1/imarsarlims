@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250202114151_dynamicMaster")]
+    partial class dynamicMaster
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2433,12 +2436,6 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("varchar(5)");
 
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("deptCode")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -2449,9 +2446,6 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
                     b.Property<int>("printSequence")
                         .HasColumnType("int");
 
@@ -2459,12 +2453,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("id");
 

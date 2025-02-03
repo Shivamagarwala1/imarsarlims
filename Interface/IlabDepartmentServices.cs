@@ -8,5 +8,6 @@ namespace iMARSARLIMS.Interface
     {
         Task<ServiceStatusResponseModel> SaveUpdateLabDepartment(labDepartment Department);
         Task<ServiceStatusResponseModel> UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder,string type);
+        Task<ServiceStatusResponseModel> UpdateLabDepartmentStatus(int id, byte status, int Userid);
     }
 }

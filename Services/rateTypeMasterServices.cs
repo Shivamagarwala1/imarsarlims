@@ -3,9 +3,6 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
-using MySqlX.XDevAPI.CRUD;
-using static Org.BouncyCastle.Utilities.Test.FixedSecureRandom;
 
 namespace iMARSARLIMS.Services
 {
@@ -30,9 +27,10 @@ namespace iMARSARLIMS.Services
                                     select new
                                     {
                                         rt.id,
+                                        rt.isActive,
                                         rt.rateName,
                                         companyName = cm != null ? cm.companyName : "",  // Default to "Unknown" if cm is null
-                                        centreId = cm != null ? cm.centreId : (int?)null  // Default to null if cm is null
+                                        centreId = cm != null ? cm.centreId.ToString() : "" // Default to null if cm is null
 
                                     }).ToListAsync();
                 var resultGroupBy = result.GroupBy(r => r.id).Select(g => new
@@ -41,7 +39,8 @@ namespace iMARSARLIMS.Services
                                         Id = g.FirstOrDefault()?.id, // Get the first item's id from the group
                                         RateName = g.FirstOrDefault()?.rateName, // Get the first machineName
                                         CentreName = string.Join(", ", g.Select(r => r.companyName)), // Join TestName values
-                                        CentreId= string.Join(", ", g.Select(r => r.centreId))
+                                        CentreId= string.Join(", ", g.Select(r => r.centreId)),
+                                        IsActive= g.FirstOrDefault()?.isActive
                 }).ToList();
                 return new ServiceStatusResponseModel
                 {
@@ -84,7 +83,7 @@ namespace iMARSARLIMS.Services
                     else
                     {
                         rateId = rateTypeId;
-                        var count = db.rateTypeMaster.Where(r => r.rateType == rateTypeName && r.id == rateTypeId).Count();
+                        var count = db.rateTypeMaster.Where(r => r.rateType == rateTypeName && r.id != rateTypeId).Count();
                         if (count > 0)
                         {
                             return new ServiceStatusResponseModel
@@ -104,6 +103,9 @@ namespace iMARSARLIMS.Services
                     }
 
                     var centreList = CentreId.Split(',').Select(c => int.Parse(c.Trim())).ToList();
+                    var data= db.rateTypeTagging.Where(r=>r.rateTypeId == rateId && centreList.Contains(r.centreId)).ToList();
+                    db.rateTypeTagging.RemoveRange(data);
+                    await db.SaveChangesAsync();
                     var tasks = centreList.Select(centre =>
                         Task.Run(async () =>
                         {
@@ -156,6 +158,47 @@ namespace iMARSARLIMS.Services
                 createdById = userId,
                 createdDateTime = DateTime.Now,
             };
+        }
+
+        async Task<ServiceStatusResponseModel> IrateTypeMasterServices.UpdateRateTypeStatus(int id, byte status, int userId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.rateTypeMaster.Where(r => r.id == id).FirstOrDefault();
+                    if (data != null)
+                    {
+                        data.isActive = status;
+                        data.updateById = userId;
+                        data.updateDateTime = DateTime.Now;
+                        db.rateTypeMaster.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message="Please use correct Id"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
         }
     }
 }

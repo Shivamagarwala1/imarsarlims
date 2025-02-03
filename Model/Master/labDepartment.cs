@@ -5,7 +5,7 @@ namespace iMARSARLIMS.Model.Master
 {
 
     [Table(nameof(labDepartment))]
-    public class labDepartment
+    public class labDepartment :Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }

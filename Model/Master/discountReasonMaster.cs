@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(discountReasonMaster))]
-    public class discountReasonMaster
+    public class discountReasonMaster : Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }

@@ -38,6 +38,24 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
+        [HttpPost("UpdateLabDepartmentStatus")]
+        public async Task<ServiceStatusResponseModel> UpdateLabDepartmentStatus(int id,byte status, int Userid)
+        {
+            try
+            {
+                var result = await _labDepartmentServices.UpdateLabDepartmentStatus(id,status,Userid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
         [HttpPost("UpdateDepartmentOrder")]
         public async Task<ServiceStatusResponseModel> UpdateDepartmentOrder(List<DepartmentOrderModel> DepartmentOrder,string type)
         {

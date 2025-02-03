@@ -534,7 +534,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        public async Task<ServiceStatusResponseModel> EmployeeWiseMenu(string employeeId, string roleId, string centreId)
+        public async Task<ServiceStatusResponseModel> EmployeeWiseMenu(string employeeId, string roleId, string centreId,int MenuType)
         {
             // Fetch menu data
             var menuData = from rma in db.roleMenuAccess
@@ -545,6 +545,7 @@ namespace iMARSARLIMS.Services
                            join mi1 in db.menuIconMaster on 4 equals mi1.id into childIcons
                            from childIcon in childIcons.DefaultIfEmpty()
                            where employeeId == rma.employeeId.ToString() && roleId == rma.roleId.ToString()
+                 
                            select new
                            {
                                ParentMenuId = mm.id,
@@ -555,9 +556,14 @@ namespace iMARSARLIMS.Services
                                ChildMenuName = mm1.menuName,
                                NavigationURL = mm1.navigationUrl,
                                ChildDisplayOrder = mm1.displaySequence,
-                               ChildIcon = childIcon
+                               ChildIcon = childIcon,
+                               mm.MenuType
                            };
 
+            if (MenuType == 2)
+            {
+                menuData = menuData.Where(m => m.ParentMenuId == m.ParentMenuId && m.MenuType == MenuType);
+            }
             // Materialize data to allow client-side operations
             var menuDataList = await menuData.ToListAsync();
 

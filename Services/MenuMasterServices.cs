@@ -76,6 +76,7 @@ namespace iMARSARLIMS.Services
                 parentId = MenuMaster.parentId,
                 displaySequence = MenuMaster.displaySequence,
                 isHide = MenuMaster.isHide,
+                MenuType=MenuMaster.MenuType,
                 isActive = MenuMaster.isActive,
                 createdById = MenuMaster.createdById,
                 createdDateTime = MenuMaster.createdDateTime
@@ -89,6 +90,7 @@ namespace iMARSARLIMS.Services
             OldData.parentId = MenuMaster.parentId;
             OldData.displaySequence = MenuMaster.displaySequence;
             OldData.isHide = MenuMaster.isHide;
+            OldData.MenuType = MenuMaster.MenuType;
             OldData.isActive = MenuMaster.isActive;
             OldData.updateById = MenuMaster.updateById;
             OldData.updateDateTime = MenuMaster.updateDateTime;
