@@ -157,8 +157,7 @@ builder.Services.AddScoped<IdiscountReasonMasterServices, discountReasonMasterSe
 builder.Services.AddScoped<IsampleRejectionReasonServices, sampleRejectionReasonServices>();
 builder.Services.AddScoped<ItitleMasterServices, titleMasterServices>();
 builder.Services.AddScoped<IdocumentTypeMasterServices, documentTypeMasterServices>();
-
-
+builder.Services.AddScoped<Ibank_masterServices, bank_masterServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

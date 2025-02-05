@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -132,6 +133,24 @@ namespace iMARSARLIMS.Controllers.MasterController
             try
             {
                 var result = await _centreMasterServices.GetCentreData(centreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("SaveLetterHead")]
+        public async Task<ServiceStatusResponseModel> SaveLetterHead(ReportLetterHead LetterHead)
+        {
+            try
+            {
+                var result = await _centreMasterServices.SaveLetterHead(LetterHead);
                 return result;
             }
             catch (Exception ex)

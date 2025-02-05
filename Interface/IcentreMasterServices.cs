@@ -1,4 +1,5 @@
 ﻿using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 
 namespace iMARSARLIMS.Interface
@@ -12,5 +13,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetMRPRateType();
         Task<ServiceStatusResponseModel> GetRateType(int CentreType, int ParentCentre);
         Task<ServiceStatusResponseModel> GetCentreData(int centreId);
+        Task<ServiceStatusResponseModel> SaveLetterHead(ReportLetterHead LetterHead);
     }
 }

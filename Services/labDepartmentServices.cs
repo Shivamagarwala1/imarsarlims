@@ -124,6 +124,14 @@ namespace iMARSARLIMS.Services
                             }
                         }
                         db.labDepartment.UpdateRange(departmentsToUpdate);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Department Order Update Successful"
+                        };
                     }
                     else
                     {
@@ -141,15 +149,16 @@ namespace iMARSARLIMS.Services
                             }
                         }
                         db.itemMaster.UpdateRange(departmentsToUpdate);
-                    }
-                    await db.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
 
-                    return new ServiceStatusResponseModel
-                    {
-                        Success = true,
-                        Message = "Update Successful"
-                    };
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Investigation Order Update Successful"
+                        };
+                    }
+                    
                 }
                 catch (Exception ex)
                 {

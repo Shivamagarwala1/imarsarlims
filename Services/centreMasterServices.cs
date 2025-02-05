@@ -1,9 +1,8 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -22,7 +21,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    
+
                     var centreId = 0;
                     var message1 = "";
                     if (centremaster.centreId == 0)
@@ -211,7 +210,7 @@ namespace iMARSARLIMS.Services
                 unlockDate = centremaster.unlockDate,
                 ZoneId = centremaster.ZoneId,
                 state = centremaster.state,
-                DistrictId= centremaster.DistrictId,
+                DistrictId = centremaster.DistrictId,
                 cityId = centremaster.cityId,
                 chequeNo = centremaster.chequeNo,
                 bankName = centremaster.bankName,
@@ -235,7 +234,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId,string EmpCode)
+        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId, string EmpCode)
         {
 
             return new empMaster
@@ -259,9 +258,9 @@ namespace iMARSARLIMS.Services
                 city = 0,
                 state = centremaster.state,
                 defaultcentre = centreId,
-                fileName="",
-                isActive= centremaster.isActive
-                
+                fileName = "",
+                isActive = centremaster.isActive
+
 
             };
 
@@ -367,8 +366,8 @@ namespace iMARSARLIMS.Services
             CentreMaster.unlockDate = centremaster.unlockDate;
             CentreMaster.ZoneId = centremaster.ZoneId;
             CentreMaster.state = centremaster.state;
-            CentreMaster.DistrictId= centremaster.DistrictId;
-            CentreMaster.cityId= centremaster.cityId;
+            CentreMaster.DistrictId = centremaster.DistrictId;
+            CentreMaster.cityId = centremaster.cityId;
             CentreMaster.chequeNo = centremaster.chequeNo;
             CentreMaster.bankName = centremaster.bankName;
             CentreMaster.chequeAmount = centremaster.chequeAmount;
@@ -469,7 +468,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var ParentCentre = await db.centreMaster
-                    .Where(c => c.isActive == 1 && c.centretypeid==3)
+                    .Where(c => c.isActive == 1 && c.centretypeid == 3)
                     .Select(c => new
                     {
                         c.companyName,
@@ -553,7 +552,7 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-               // 1   Refrence Lab,2   SateLite Lab,3   Franchisee,4   Sub - Franchisee
+                // 1   Refrence Lab,2   SateLite Lab,3   Franchisee,4   Sub - Franchisee
                 List<CentreModel> ParentCentre;
                 if (CentreType == 4)
                 {
@@ -566,7 +565,7 @@ namespace iMARSARLIMS.Services
                                               Id = rtm.id
                                           }).ToListAsync();
                 }
-                else 
+                else
                 {
                     ParentCentre = await db.rateTypeMaster
                         .Where(c => c.isActive == 1)
@@ -577,7 +576,7 @@ namespace iMARSARLIMS.Services
                         })
                         .ToListAsync();
                 }
-                
+
                 if (CentreType == 4 || CentreType == 3)
                 {
                     ParentCentre.Add(new CentreModel { RateName = "Self", Id = 0 });
@@ -600,7 +599,7 @@ namespace iMARSARLIMS.Services
             }
         }
         public class CentreModel
-        { 
+        {
             public string RateName { get; set; } // For cases where rateName is required
             public int? Id { get; set; } // For cases where rateTypeId (id) is required
         }
@@ -630,6 +629,54 @@ namespace iMARSARLIMS.Services
                 Success = true,
                 Data = result
             };
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.SaveLetterHead(ReportLetterHead LetterHead)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.centreMaster.Where(c => c.centreId == LetterHead.CentreId).FirstOrDefault();
+                    UpdateLetterHeadDetail(data, LetterHead);
+                    db.centreMaster.Update(data);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Saved Successful"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        private void UpdateLetterHeadDetail(centreMaster Centre, ReportLetterHead LetterHead)
+        {
+            Centre.reporrtHeaderHeightY = LetterHead.reporrtHeaderHeightY;
+            Centre.patientYHeader = LetterHead.patientYHeader;
+            Centre.barcodeXPosition = LetterHead.barcodeXPosition;
+            Centre.barcodeYPosition = LetterHead.barcodeYPosition;
+            Centre.QRCodeXPosition = LetterHead.QRCodeXPosition;
+            Centre.QRCodeYPosition = LetterHead.QRCodeYPosition;
+            Centre.isQRheader = LetterHead.isQRheader;
+            Centre.isBarcodeHeader = LetterHead.isBarcodeHeader;
+            Centre.footerHeight = LetterHead.footerHeight;
+            Centre.NABLxPosition = LetterHead.NABLxPosition;
+            Centre.NABLyPosition = LetterHead.NABLyPosition;
+            Centre.docSignYPosition = LetterHead.docSignYPosition;
+            Centre.receiptHeaderY = LetterHead.receiptHeaderY;
+            Centre.reportHeader = LetterHead.reportHeader;
+            Centre.reciptHeader = LetterHead.reciptHeader;
+            Centre.reciptFooter = LetterHead.reciptFooter;
         }
     }
 }
