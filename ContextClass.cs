@@ -3,6 +3,7 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace iMARSARLIMS
 {
@@ -102,7 +103,9 @@ namespace iMARSARLIMS
         public DbSet<item_OutHouseMaster> item_OutHouseMaster { get; set; }
         public DbSet<Testing> Testing { get; set; }
 
-
+        public DbSet<chatGroupMaster> chatGroupMaster { get; set; }
+        public DbSet<chatGroupMasterEmployee> chatGroupMasterEmployee { get; set; }
+        public DbSet<chatMessage> chatMessage { get; set; }
         public ContextClass(DbContextOptions<ContextClass> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -378,7 +381,21 @@ namespace iMARSARLIMS
             modelBuilder.Entity<item_OutHouseMaster>().HasKey(x => x.id);
             modelBuilder.Entity<item_OutHouseMaster>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<chatGroupMaster>().HasKey(x => x.groupMasterId);
+            modelBuilder.Entity<chatGroupMaster>().Property(x => x.groupMasterId).ValueGeneratedOnAdd();
+            modelBuilder.Entity<chatGroupMaster>().Property(b => b.createdDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+            modelBuilder.Entity<chatGroupMaster>().Property(b => b.updateDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
+            modelBuilder.Entity<chatGroupMasterEmployee>().HasKey(x => x.groupMasterEmployeeId);
+            modelBuilder.Entity<chatGroupMasterEmployee>().Property(x => x.groupMasterEmployeeId).ValueGeneratedOnAdd();
+            modelBuilder.Entity<chatGroupMasterEmployee>().Property(b => b.createdDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+            modelBuilder.Entity<chatGroupMasterEmployee>().Property(b => b.updateDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+            modelBuilder.Entity<chatMessage>().HasKey(x => x.messageId);
+            modelBuilder.Entity<chatMessage>().Property(x => x.messageId).ValueGeneratedOnAdd();
+            modelBuilder.Entity<chatMessage>().Property(b => b.createdDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+            modelBuilder.Entity<chatMessage>().Property(b => b.updateDateTime).HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+            modelBuilder.Entity<chatMessage>().Property(b => b.isSeen).HasDefaultValue(0);
 
             modelBuilder.Entity<SingleStringResponseModel>().HasNoKey();
             modelBuilder.Entity<ResultEntryResponseModle>().HasNoKey();

@@ -1,6 +1,3 @@
-
-using DinkToPdf.Contracts;
-using DinkToPdf;
 using iMARSARLIMS;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Services;
@@ -13,7 +10,6 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Serilog;
 using System.Text;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,29 +79,51 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 // Register DinkToPdf
-builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+//builder.Services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
+//builder.Services.AddSignalR();
+//builder.Services.AddCors(opttions =>
+//{
+//    opttions.AddPolicy("AllowAllOrgiins", builder =>
+//    {
+//        builder
+//                .AllowAnyOrigin()
+//                .AllowAnyHeader()
+//                .AllowAnyMethod();
+//});
+////});
+//.WithOrigins("http://lims.imarsar.com:8083")
 
-builder.Services.AddCors(opttions =>
+// Define specific origins (Replace these with your actual allowed origins)
+string[] allowedOrigins = new string[] { "https://imarsar.com:8085", "http://localhost:5268" };
+
+// Add services to the container.
+builder.Services.AddCors(options =>
 {
-    opttions.AddPolicy("AllowAllOrgiins", builder =>
+    options.AddPolicy("AllowAllOrgiins", builder =>
     {
         builder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed((hosts) => true);
     });
 });
 
-//.WithOrigins("http://lims.imarsar.com:8083")
-// Add services to the container.
+builder.Services.AddSignalR();
 
-builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers()
-.AddNewtonsoftJson(p => p.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
+.AddNewtonsoftJson(p =>
+{
+    p.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    p.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
+    p.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+})
 .AddOData(options => options
 .Expand()
 .Select()
@@ -114,8 +132,6 @@ builder.Services.AddControllers()
 .SetMaxTop(1000)
 .Count())
 .AddODataNewtonsoftJson();
-
-
 
 builder.Services.AddDbContextPool<ContextClass>(options =>
 {
@@ -158,9 +174,10 @@ builder.Services.AddScoped<IsampleRejectionReasonServices, sampleRejectionReason
 builder.Services.AddScoped<ItitleMasterServices, titleMasterServices>();
 builder.Services.AddScoped<IdocumentTypeMasterServices, documentTypeMasterServices>();
 builder.Services.AddScoped<Ibank_masterServices, bank_masterServices>();
+builder.Services.AddScoped<IchatGroupServices, chatGroupServices>();
+builder.Services.AddScoped<IchatMessageServices, chatMessageServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
-
 
 app.Use(async (context, next) =>
 {
@@ -184,13 +201,12 @@ app.UseSwaggerUI(option =>
     option.SwaggerEndpoint("/swagger/v1/swagger.json", "LIMS BE API");
     option.RoutePrefix = "swagger";
 });
+
 app.UseCors("AllowAllOrgiins");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-
 app.MapControllers();
-
+app.MapHub<ChatHub>("/chatHub");
 app.Run();
 
