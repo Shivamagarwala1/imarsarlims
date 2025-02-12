@@ -95,7 +95,7 @@ builder.Host.UseSerilog();
 //.WithOrigins("http://lims.imarsar.com:8083")
 
 // Define specific origins (Replace these with your actual allowed origins)
-string[] allowedOrigins = new string[] { "https://imarsar.com:8085", "http://localhost:5268" };
+string[] allowedOrigins = new string[] { "https://imarsar.com:8085", "http://localhost:5268", "https://localhost:44345" };
 
 // Add services to the container.
 builder.Services.AddCors(options =>
