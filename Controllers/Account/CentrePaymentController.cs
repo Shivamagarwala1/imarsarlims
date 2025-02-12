@@ -263,7 +263,7 @@ namespace iMARSARLIMS.Controllers.Account
         {
             try
             {
-                var result = await _CentrePaymentServices.GetWorkOrderNewRate(WorkOrderid);
+                var result = await _CentrePaymentServices.GetWorkOrderNewRate(WorkOrderid, RatetypeId);
                 return result;
             }
             catch (Exception ex)

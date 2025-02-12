@@ -174,6 +174,8 @@ builder.Services.AddScoped<IsampleRejectionReasonServices, sampleRejectionReason
 builder.Services.AddScoped<ItitleMasterServices, titleMasterServices>();
 builder.Services.AddScoped<IdocumentTypeMasterServices, documentTypeMasterServices>();
 builder.Services.AddScoped<Ibank_masterServices, bank_masterServices>();
+builder.Services.AddScoped<IchatGroupServices, chatGroupServices>();
+builder.Services.AddScoped<IchatMessageServices, chatMessageServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
