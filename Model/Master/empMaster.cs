@@ -72,5 +72,10 @@ namespace iMARSARLIMS.Model.Master
         [ForeignKey(nameof(empId))]
         public List<empDepartmentAccess>? addEmpDepartmentAccess { get; set; }
 
+        [ForeignKey(nameof(empId))]
+        public List<chatGroupMasterEmployee>? addChatGroupMasterEmployee { get; set; }
+        [ForeignKey(nameof(empId))]
+        public List<chatMessage>? addChatchatMessage { get; set; }
+
     }
 }

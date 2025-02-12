@@ -1,20 +1,17 @@
 ﻿using iMARSARLIMS.Interface;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using IronPdf;
 using Microsoft.AspNetCore.Mvc;
 //using PdfSharpCore.Pdf.Actions;
 //using PdfSharpCore.Pdf.IO;
 
 //using Microsoft.Playwright;
-using PuppeteerSharp;
-using PuppeteerSharp.Media;
+//using PuppeteerSharp;
+//using PuppeteerSharp.Media;
 
 using System.Drawing;
 //using PDFiumSharp;
-using DinkToPdf;
-using DinkToPdf.Contracts;
-using ImageMagick;
+//using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,13 +26,13 @@ namespace iMARSARLIMS.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IempMasterServices _empMasterServices;
-        private readonly IConverter _converter;
+       // private readonly IConverter _converter;
 
         // Constructor for dependency injection
-        public LoginController(IempMasterServices empMasterServices, IConverter converter)
+        public LoginController(IempMasterServices empMasterServices )
         {
             _empMasterServices = empMasterServices;
-            _converter = converter;
+            // _converter = converter; IConverter converter
         }
 
         [HttpPost("Login")]
@@ -119,53 +116,53 @@ namespace iMARSARLIMS.Controllers
         //        return BadRequest(new { error = ex.Message });
         //    }
         //}
-        [HttpPost("generate-pdf")]
-        public async Task<IActionResult> GeneratePdf([FromBody] PdfRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request.HtmlContent))
-            {
-                return BadRequest("HTML content is required.");
-            }
+        //[HttpPost("generate-pdf")]
+        //public async Task<IActionResult> GeneratePdf([FromBody] PdfRequest request)
+        //{
+        //    if (string.IsNullOrWhiteSpace(request.HtmlContent))
+        //    {
+        //        return BadRequest("HTML content is required.");
+        //    }
 
-            // Download the Chromium browser if not already done
-            var browserFetcher = new BrowserFetcher();
-            var revisionInfo = await browserFetcher.DownloadAsync(); // Downloads the default Chromium version
+        //    // Download the Chromium browser if not already done
+        //    var browserFetcher = new BrowserFetcher();
+        //    var revisionInfo = await browserFetcher.DownloadAsync(); // Downloads the default Chromium version
 
-            // Launch the browser
-            await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-            {
-                Headless = true // Run in headless mode
-            });
+        //    // Launch the browser
+        //    await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        //    {
+        //        Headless = true // Run in headless mode
+        //    });
 
-            // Open a new page
-            await using var page = await browser.NewPageAsync();
+        //    // Open a new page
+        //    await using var page = await browser.NewPageAsync();
 
-            // Set the page content to the provided HTML
-            await page.SetContentAsync(request.HtmlContent);
+        //    // Set the page content to the provided HTML
+        //    await page.SetContentAsync(request.HtmlContent);
 
-            // Generate the PDF with header and footer
-            var pdfStream = await page.PdfStreamAsync(new PdfOptions
-            {
-                Format = PaperFormat.A4,
-                PrintBackground = true, // Include background styles
-                DisplayHeaderFooter = true, // Enable header and footer
-                HeaderTemplate = "<span style=\"font-size: 12px; font-weight: bold;\">Custom Header</span>", // Custom header
-                FooterTemplate = "<span style=\"font-size: 10px;\">Page <span class=\"pageNumber\"></span> of <span class=\"totalPages\"></span></span>", // Custom footer with page numbers
-                MarginOptions = new MarginOptions
-                {
-                    Top = "2cm",
-                    Bottom = "2cm",
-                    Left = "1cm",
-                    Right = "1cm"
-                }
-            });
-            // Close the browser
-            await browser.CloseAsync();
+        //    // Generate the PDF with header and footer
+        //    var pdfStream = await page.PdfStreamAsync(new PdfOptions
+        //    {
+        //        Format = PaperFormat.A4,
+        //        PrintBackground = true, // Include background styles
+        //        DisplayHeaderFooter = true, // Enable header and footer
+        //        HeaderTemplate = "<span style=\"font-size: 12px; font-weight: bold;\">Custom Header</span>", // Custom header
+        //        FooterTemplate = "<span style=\"font-size: 10px;\">Page <span class=\"pageNumber\"></span> of <span class=\"totalPages\"></span></span>", // Custom footer with page numbers
+        //        MarginOptions = new MarginOptions
+        //        {
+        //            Top = "2cm",
+        //            Bottom = "2cm",
+        //            Left = "1cm",
+        //            Right = "1cm"
+        //        }
+        //    });
+        //    // Close the browser
+        //    await browser.CloseAsync();
 
-            // Return the PDF file as a response
-            return File(pdfStream, "application/pdf", "GeneratedDocument.pdf");
+        //    // Return the PDF file as a response
+        //    return File(pdfStream, "application/pdf", "GeneratedDocument.pdf");
 
-        }
+        //}
 
         //[HttpPost("GeneratePdfWithImages")]
         //public IActionResult GeneratePdfWithImages([FromBody] PdfRequest request)
