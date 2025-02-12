@@ -11,8 +11,8 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    [Migration("20250203021539_dynamicMaster1")]
-    partial class dynamicMaster1
+    [Migration("20250205045152_freshdatabase")]
+    partial class freshdatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

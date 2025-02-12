@@ -6,6 +6,7 @@ namespace iMARSARLIMS.Interface
     public interface IcentreInvoiceServices
     {
         Task<ServiceStatusResponseModel> CreateInvoice(centreInvoiceRequestModel CentreInvoice);
-        ServiceStatusResponseModel SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreId);
+        Task<ServiceStatusResponseModel> SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreId);
+        Task<ServiceStatusResponseModel> GetLastInvoiceData(List<int> CentreId);
     }
 }

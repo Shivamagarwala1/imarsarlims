@@ -43,8 +43,25 @@ namespace iMARSARLIMS.Controllers.Account
         {
             try
             {
-                var result = _centreInvoiceServices.SearchInvoiceData( FromDate,  Todate, CentreId);
-                return Task.FromResult(result);
+                var result = _centreInvoiceServices.SearchInvoiceData(FromDate, Todate, CentreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+        [HttpGet("GetLastInvoiceData")]
+        public Task<ServiceStatusResponseModel> GetLastInvoiceData(List<int> CentreId)
+        {
+            try
+            {
+                var result = _centreInvoiceServices.GetLastInvoiceData( CentreId);
+                return result;
             }
             catch (Exception ex)
             {

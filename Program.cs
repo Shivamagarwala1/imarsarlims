@@ -158,6 +158,8 @@ builder.Services.AddScoped<IsampleRejectionReasonServices, sampleRejectionReason
 builder.Services.AddScoped<ItitleMasterServices, titleMasterServices>();
 builder.Services.AddScoped<IdocumentTypeMasterServices, documentTypeMasterServices>();
 builder.Services.AddScoped<Ibank_masterServices, bank_masterServices>();
+builder.Services.AddScoped<ICentrePaymentServices, CentrePaymentServices>();
+builder.Services.AddScoped<IcentreInvoiceServices, centreInvoiceServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

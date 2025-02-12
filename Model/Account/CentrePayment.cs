@@ -8,7 +8,7 @@ namespace iMARSARLIMS.Model.Account
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
         public int centreId { get; set; }
-        public DateTime? paymentDate { get; set; }
+        public DateTime paymentDate { get; set; }
         public string? paymentMode { get; set; }
         public float? advancePaymentAmt { get; set; }
         public string? bank { get; set; }

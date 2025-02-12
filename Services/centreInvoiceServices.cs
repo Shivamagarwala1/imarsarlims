@@ -4,6 +4,9 @@ using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace iMARSARLIMS.Services
 {
@@ -147,28 +150,86 @@ namespace iMARSARLIMS.Services
             InvoiceItem.isInvoiceCreated = 0;
         }
 
-        ServiceStatusResponseModel IcentreInvoiceServices.SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreIds)
+       async Task<ServiceStatusResponseModel> IcentreInvoiceServices.SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreIds)
         {
-           var InvoiceData=  db.tnx_BookingItem
-            .Where(item => item.invoiceNo == ""
-                        && item.createdDateTime >= FromDate
-                        && item.createdDateTime <= Todate
-                        && CentreIds.Contains(item.centreId))
-            .GroupBy(item => item.centreId)
-            .Select(group => new
+            try
             {
-                CentreId = group.Key,
-                Rate = group.Sum(item => item.netAmount),
-                FromDate = group.Min(item => item.createdDateTime).Date,
-                ToDate = group.Max(item => item.createdDateTime).Date
-            })
-            .ToList();
+                var invoiceData = await (from tbi in db.tnx_BookingItem
+                                         join TB in db.tnx_Booking on tbi.transactionId equals TB.transactionId
+                                         join cm in db.centreMaster on TB.centreId equals cm.centreId
+                                         where tbi.createdDateTime >= FromDate && tbi.createdDateTime <= Todate
+                                             && CentreIds.Contains(cm.parentCentreID)
+                                             && (tbi.isPackage == 1 || tbi.isSampleCollected == "Y")
+                                             && string.IsNullOrEmpty(tbi.invoiceNo)
+                                             && tbi.isRemoveItem == 0
+                                         group new { tbi, TB, cm } by cm.parentCentreID into g
+                                         select new
+                                         {
+                                             FromDate = g.Min(t => t.tbi.createdDateTime).ToString("dd-MMM-yyyy"),
+                                             ToDate = g.Max(t => t.tbi.createdDateTime).ToString("dd-MMM-yyyy"),
+                                             CreditAmount = g.Sum(t => t.tbi.rate),
+                                             TransactionId = g.FirstOrDefault().tbi.transactionId, // Get the transactionId of the first item in the group
+                                             CompanyID = g.FirstOrDefault().cm.centreId,           // Get the centreId of the first item in the group
+                                             Discount = g.Sum(t => t.tbi.discount),
+                                             NetAmount = g.Sum(t => t.tbi.netAmount),
+                                             Centre = g.FirstOrDefault().cm.companyName // Get the CompanyName of the first item in the group
+                                         }).ToListAsync();
 
-            return new ServiceStatusResponseModel
+
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = invoiceData
+                };
+            }
+            catch (Exception ex) 
             {
-                Success = true,
-                Data = InvoiceData
-            };
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreInvoiceServices.GetLastInvoiceData(List<int> CentreId)
+        {
+            try
+            {
+                var result = await (from cm in db.centreMaster
+                                    join ci in db.centreInvoice on cm.centreId equals ci.centreid
+                                    join em in db.empMaster on ci.createdBy equals em.empId
+                                    where CentreId.Contains(cm.centreId)
+                                    orderby ci.InvoiceDate descending 
+                                    group new { ci, cm, em } by cm.centreId into grouped
+                                    select new
+                                    {
+                                        centreId = grouped.Key,
+                                        invoiceNo = grouped.FirstOrDefault().ci.id,
+                                        CompanyName = grouped.FirstOrDefault().cm.companyName,
+                                        invoiceDate = grouped.FirstOrDefault().ci.InvoiceDate,
+                                        FromDate = grouped.FirstOrDefault().ci.fromDate,
+                                        ToDate = grouped.FirstOrDefault().ci.toDate,
+                                        Rate = grouped.FirstOrDefault().ci.rate,
+                                        CreatedBy = string.Concat(grouped.FirstOrDefault().em.fName, " ", grouped.FirstOrDefault().em.lName)
+                                    }).ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
     }
 }
