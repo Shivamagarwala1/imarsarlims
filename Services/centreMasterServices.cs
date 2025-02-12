@@ -678,5 +678,34 @@ namespace iMARSARLIMS.Services
             Centre.reciptHeader = LetterHead.reciptHeader;
             Centre.reciptFooter = LetterHead.reciptFooter;
         }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetRatetypeCentreWise(int CentreId)
+        {
+            try
+            {
+                var result = (from rt in db.rateTypeMaster
+                              join rtt in db.rateTypeTagging on rt.id equals rtt.rateTypeId
+                              where rtt.centreId == CentreId
+                              select new
+                              {
+                                  rt.id,
+                                  rt.rateName
+                              }).ToList();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
     }
 }

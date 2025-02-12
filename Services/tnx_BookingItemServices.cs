@@ -19,7 +19,7 @@ namespace iMARSARLIMS.Services
             this._MySql_Procedure_Services = MySql_Procedure_Services;
         }
 
-        Task<List<SampleProcessingResponseModel>> Itnx_BookingItemServices.GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
+       async  Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
         {
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
@@ -76,7 +76,13 @@ namespace iMARSARLIMS.Services
             }
 
             query = query.OrderBy(q => q.patientId).ThenBy(q => q.transactionId);
-            return query.ToListAsync();
+            var result= await  query.ToListAsync();
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = result
+            };
         }
 
         async Task<List<ResultEntryResponseModle>> Itnx_BookingItemServices.GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
@@ -619,6 +625,39 @@ namespace iMARSARLIMS.Services
                 isActive = 1,
             };
 
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetitemDetailRate(int ratetype)
+        {
+            try
+            {
+                var result = await (from im in db.itemMaster
+                                    join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid
+                                    where rtt.rateTypeId == ratetype
+                                    select new
+                                    {
+                                        im.itemId,
+                                        im.itemName,
+                                        im.itemType,
+                                        im.sortName,
+                                        im.gender,
+                                        rtt.rate,
+                                        deliveryDate= DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")                                        
+                                    }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };                  
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
     }
 }

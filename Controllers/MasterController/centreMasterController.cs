@@ -163,6 +163,24 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpGet("GetRatetypeCentreWise")]
+        public async Task<ServiceStatusResponseModel> GetRatetypeCentreWise(int CentreId)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetRatetypeCentreWise(CentreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
 
     }
 }

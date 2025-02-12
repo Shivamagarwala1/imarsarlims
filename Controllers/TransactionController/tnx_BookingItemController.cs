@@ -21,8 +21,27 @@ namespace iMARSARLIMS.Controllers.TransactionController
         }
         protected override IQueryable<tnx_BookingItem> DbSet => db.tnx_BookingItem.AsNoTracking().OrderBy(o => o.id);
 
+
+        [HttpGet("GetitemDetailRate")]
+        public async Task<ServiceStatusResponseModel> GetitemDetailRate(int ratetype)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetitemDetailRate(ratetype);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
         [HttpPost("GetSampleProcessingData")]
-        public async Task<ActionResult<List<SampleProcessingResponseModel>>> GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
+        public async Task<ServiceStatusResponseModel> GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
         {
             try
             {
@@ -31,7 +50,11 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
         [HttpPost("UpdateSampleStatus")]
