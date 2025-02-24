@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace iMARSARLIMS.Model.Master
 {
     [Table(nameof(doctorReferalMaster))]
-    public class doctorReferalMaster
+    public class doctorReferalMaster :Audit
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int doctorId { get; set; }
@@ -43,5 +43,6 @@ namespace iMARSARLIMS.Model.Master
         public int? areaId { get; set; }
         public int? city { get; set; }
         public int? state { get; set; }
+        public int type { get; set; }
     }
 }

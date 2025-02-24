@@ -503,7 +503,9 @@ namespace iMARSARLIMS.Services
                                  select new
                                  {
                                      CentreId = cm.centreId,
-                                     CentreName = cm.companyName
+                                     CentreName = cm.companyName,
+                                     cm.paymentMode,
+                                     cm.paymentModeId
                                  }).ToListAsync();
 
             return new ServiceStatusResponseModel

@@ -106,6 +106,7 @@ namespace iMARSARLIMS
         public DbSet<chatGroupMaster> chatGroupMaster { get; set; }
         public DbSet<chatGroupMasterEmployee> chatGroupMasterEmployee { get; set; }
         public DbSet<chatMessage> chatMessage { get; set; }
+        public DbSet<LegendColorMaster> LegendColorMaster { get; set; }
         public ContextClass(DbContextOptions<ContextClass> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -380,6 +381,10 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<item_OutHouseMaster>().HasKey(x => x.id);
             modelBuilder.Entity<item_OutHouseMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+
+
+            modelBuilder.Entity<LegendColorMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<LegendColorMaster>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<chatGroupMaster>().HasKey(x => x.groupMasterId);
             modelBuilder.Entity<chatGroupMaster>().Property(x => x.groupMasterId).ValueGeneratedOnAdd();

@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
@@ -659,6 +660,81 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetitemDetail(int ratetype, int itemId)
+        {
+
+            try
+            {
+                var result = await(from im in db.itemMaster
+                                   join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid
+                                   join stt in db.itemSampleTypeMapping on im.itemId equals stt.itemId
+                                   join st in db.sampletype_master on stt.sampleTypeId equals st.id
+                                   join ld in db.labDepartment on im.deptId equals ld.id
+                                   where rtt.rateTypeId == ratetype && im.itemId == itemId
+                                   select new
+                                   {
+                                       im.itemId,
+                                       im.itemName,
+                                       im.itemType,
+                                       im.sortName,
+                                       testcode=im.code,
+                                       im.deptId,
+                                       departmentname= ld.deptName,
+                                       im.gender,rtt.mrp,
+                                       Grosss=rtt.rate,
+                                       discount=0,
+                                       NetAmt= rtt.rate,
+                                       stt.sampleTypeId,
+                                       st.sampleTypeName,
+                                       im.defaultsampletype,
+                                       deliveryDate = DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")
+                                   }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetPackageTestDetail(int itemId)
+        {
+            try
+            {
+                var result = await (from im in db.itemMaster
+                                    join iom in db.ItemObservationMapping on im.itemId equals iom.observationID
+                                    where iom.itemId == itemId
+                                    group im by iom.itemId into grouped
+                                    select new
+                                    {
+                                        itemNames = string.Join(", ", grouped.Select(im => im.itemName))
+                                    }).ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
     }
 }
 

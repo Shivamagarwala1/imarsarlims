@@ -59,8 +59,8 @@ namespace iMARSARLIMS.Services
                                   tos.flag,
                                   tos.isHeader,
                                   tos.isBold,
-                                  SampleCollectionDate = tbi.sampleCollectionDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                  ResultDate = tbi.resultDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                  SampleCollectionDate = tbi.sampleCollectionDate,
+                                  ResultDate = tbi.resultDate
                               }).ToList();
 
             if (Reportdata.Count > 0)
@@ -304,8 +304,8 @@ namespace iMARSARLIMS.Services
                                   tos.isHeader,
                                   tbi.sampleTypeName,
                                   tos.isBold,
-                                  SampleCollectionDate = tbi.sampleCollectionDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                  ResultDate = tbi.resultDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                  SampleCollectionDate = tbi.sampleCollectionDate,
+                                  ResultDate = tbi.resultDate
                               }).ToList();
 
             if (Reportdata.Count > 0)
@@ -548,8 +548,8 @@ namespace iMARSARLIMS.Services
                                   tos.flag,
                                   tos.isHeader,
                                   tos.isBold,
-                                  SampleCollectionDate = tbi.sampleCollectionDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                  ResultDate = tbi.resultDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                  SampleCollectionDate = tbi.sampleCollectionDate,
+                                  ResultDate = tbi.resultDate
                               }).ToList();
 
             if (Reportdata.Count > 0)

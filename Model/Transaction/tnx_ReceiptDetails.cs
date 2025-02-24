@@ -7,6 +7,7 @@ namespace iMARSARLIMS.Model.Transaction
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
+        [ForeignKey("tnx_Booking")]
         public int? transactionId { get; set; }
         public string? transactionType { get; set; }
         public string? workOrderId { get; set; }

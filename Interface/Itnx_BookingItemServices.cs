@@ -15,6 +15,8 @@ namespace iMARSARLIMS.Interface
         Task<List<ResultEntryResponseModle>> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle);
         Task<ServiceStatusResponseModel> SaveTestObservations(List<ResultSaveRequestModle> resultSaveRequestModle);
         Task<ServiceStatusResponseModel> GetitemDetailRate(int ratetype);
+        Task<ServiceStatusResponseModel> GetitemDetail(int ratetype, int itemId);
+        Task<ServiceStatusResponseModel> GetPackageTestDetail(int itemId);
         Task<ActionResult<ServiceStatusResponseModel>> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle);
     }
 }

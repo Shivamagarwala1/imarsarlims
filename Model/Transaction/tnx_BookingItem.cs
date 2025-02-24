@@ -61,67 +61,67 @@ namespace iMARSARLIMS.Model.Transaction
         public int sampleTypeId { get; set; }
         [Required, MaxLength(50)]
         public string sampleTypeName { get; set; } = "";
-        public DateTime sampleCollectionDate { get; set; }
+        public DateTime? sampleCollectionDate { get; set; }
         [MaxLength(100)]
-        public string sampleCollectedby { get; set; } = "";
-        public int sampleCollectedID { get; set; } = 0;
-        public DateTime sampleReceiveDate { get; set; }
+        public string? sampleCollectedby { get; set; } = "";
+        public int? sampleCollectedID { get; set; } = 0;
+        public DateTime? sampleReceiveDate { get; set; }
         [MaxLength(100)]
-        public string sampleReceivedBY { get; set; } = "";
-        public DateTime resultDate { get; set; }
-        public int resultDoneByID { get; set; }
+        public string? sampleReceivedBY { get; set; } = "";
+        public DateTime? resultDate { get; set; }
+        public int? resultDoneByID { get; set; }
         [MaxLength(100)]
-        public string resutDoneBy { get; set; } = "";
-        public byte isResultDone { get; set; } = 0;
-        public byte isApproved { get; set; } = 0;
-        public DateTime approvedDate { get; set; }
-        public int approvedByID { get; set; } = 0;
+        public string?  resutDoneBy { get; set; } = "";
+        public byte? isResultDone { get; set; } = 0;
+        public byte? isApproved { get; set; } = 0;
+        public DateTime? approvedDate { get; set; }
+        public int? approvedByID { get; set; } = 0;
         [MaxLength(100)]
-        public string approvedbyName { get; set; } = "";
+        public string? approvedbyName { get; set; } = "";
         [MaxLength(100)]
-        public string notApprovedBy { get; set; } = "";
-        public DateTime notApprovedDate { get; set; }
-        public byte isReporting { get; set; } = 0;
-        public byte isCritical { get; set; }
+        public string? notApprovedBy { get; set; } = "";
+        public DateTime? notApprovedDate { get; set; }
+        public byte? isReporting { get; set; } = 0;
+        public byte? isCritical { get; set; }
         public DateTime deliveryDate { get; set; }
-        public byte isInvoiceCreated { get; set; } = 0;
-        public int invoiceNumber { get; set; } = 0;
+        public byte? isInvoiceCreated { get; set; } = 0;
+        public int? invoiceNumber { get; set; } = 0;
         public byte isUrgent { get; set; } = 0;
         [Required, MaxLength(2)]
-        public string isSampleCollected { get; set; } = "N";
+        public string? isSampleCollected { get; set; } = "N";
         [MaxLength(100)]
-        public string samplecollectionremarks { get; set; } = "";
+        public string? samplecollectionremarks { get; set; } = "";
         [MaxLength(100)]
-        public string departmentReceiveRemarks { get; set; } = "";
-        public DateTime departmentReceiveDate { get; set; }
+        public string? departmentReceiveRemarks { get; set; } = "";
+        public DateTime? departmentReceiveDate { get; set; }
         [MaxLength(100)]
-        public string departmentReceiveBy { get; set; } = "";
-        public int departmentReceiveByID { get; set; } = 0;
+        public string? departmentReceiveBy { get; set; } = "";
+        public int? departmentReceiveByID { get; set; } = 0;
         public byte isRemoveItem { get; set; } = 0;
-        public int sampleRejectionBy { get; set; } = 0;
-        [MaxLength(100)] public string sampleRejectionByName { get; set; } = "";
-        public DateTime sampleRejectionOn { get; set; }
-        public int interpretationId { get; set; } = 0;
-        public int approvalDoctor { get; set; } = 0;
-        public byte isOuthouse { get; set; } = 0;
-        public int outhouseLab { get; set; } = 0;
+        public int? sampleRejectionBy { get; set; } = 0;
+        [MaxLength(100)] public string? sampleRejectionByName { get; set; } = "";
+        public DateTime? sampleRejectionOn { get; set; }
+        public int? interpretationId { get; set; } = 0;
+        public int? approvalDoctor { get; set; } = 0;
+        public byte? isOuthouse { get; set; } = 0;
+        public int? outhouseLab { get; set; } = 0;
         [MaxLength(100)] 
-        public string labName { get; set; } = "";
-        public int outhouseDoneBy { get; set; } = 0;
-        public DateTime outhouseDoneOn { get; set; }
-        public int sampleRecollectedby { get; set; } = 0;
-        public DateTime sampleRecollectedDate { get; set; }
-        public byte isrerun { get; set; }
-        [MaxLength(100)] public string invoiceNo { get; set; } = "";
-        public DateTime invoiceDate { get; set; }
-        [MaxLength(100)] public string invoiceCycle { get; set; } = "";
-        public double invoiceAmount { get; set; } = 0;
-        public int invoiceCreatedBy { get; set; } = 0;
+        public string? labName { get; set; } = "";
+        public int? outhouseDoneBy { get; set; } = 0;
+        public DateTime? outhouseDoneOn { get; set; }
+        public int? sampleRecollectedby { get; set; } = 0;
+        public DateTime? sampleRecollectedDate { get; set; }
+        public byte? isrerun { get; set; }
+        [MaxLength(100)] public string? invoiceNo { get; set; } = "";
+        public DateTime? invoiceDate { get; set; }
+        [MaxLength(100)] public string? invoiceCycle { get; set; } = "";
+        public double? invoiceAmount { get; set; } = 0;
+        public int? invoiceCreatedBy { get; set; } = 0;
         [MaxLength(100)] 
-        public string invoiceNoOld { get; set; } = "";
+        public string? invoiceNoOld { get; set; } = "";
         [MaxLength(100)] 
-        public string remarks { get; set; } = "";
-        public DateTime showonReportdate { get; set; }
+        public string? remarks { get; set; } = "";
+        public DateTime? showonReportdate { get; set; }
 
 
     }

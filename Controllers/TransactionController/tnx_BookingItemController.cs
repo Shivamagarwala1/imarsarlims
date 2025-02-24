@@ -39,6 +39,40 @@ namespace iMARSARLIMS.Controllers.TransactionController
                 };
             }
         }
+        [HttpGet("GetitemDetail")]
+        public async Task<ServiceStatusResponseModel> GetitemDetail(int ratetype, int itemId)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetitemDetail(ratetype, itemId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetPackageTestDetail")]
+        public async Task<ServiceStatusResponseModel> GetPackageTestDetail(int itemId)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetPackageTestDetail(itemId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         [HttpPost("GetSampleProcessingData")]
         public async Task<ServiceStatusResponseModel> GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)

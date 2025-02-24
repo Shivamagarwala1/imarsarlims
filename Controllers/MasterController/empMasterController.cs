@@ -76,6 +76,33 @@ namespace iMARSARLIMS.Controllers.MasterController
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("GetEmployeeCode")]
+        public async Task<ServiceStatusResponseModel> GetEmployeeCode()
+        {
+            try
+            {
+                // Get the maximum empId from the empMaster table
+                var maxEmpId = await db.empMaster.MaxAsync(e => e.empId);
+
+                // Create the empCode by concatenating "Gen" with the incremented maxEmpId
+                var empCode = string.Concat("Ims", (maxEmpId + 1).ToString());
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = empCode
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
         [HttpGet("EmployeeWiseRole")]
         public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseRole(int EmplyeeId)
         {

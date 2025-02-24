@@ -1,7 +1,5 @@
-﻿using Google.Rpc;
-using iMARSARLIMS.Controllers;
+﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
-using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +29,7 @@ namespace iMARSARLIMS.Services
 
         public async Task<string> Getworkorderid(int centreId, string type)
         {
-            var result = _MySql_Function_Services.Getworkorderid(centreId, type);
+            var result =  _MySql_Function_Services.Getworkorderid(centreId, type);
             return result;
         }
         async Task<ServiceStatusResponseModel> Itnx_BookingPatientServices.SavePatientRegistration(tnx_BookingPatient tnxBookingPatient)
@@ -41,7 +39,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var TnxBookingData = tnxBookingPatient.addBooking.FirstOrDefault();
+                    var TnxBookingData =  tnxBookingPatient.addBooking.FirstOrDefault();
                     if (tnxBookingPatient.patientId == 0)
                     {
                         if (tnxBookingPatient.addBooking == null)
@@ -69,12 +67,14 @@ namespace iMARSARLIMS.Services
                         var transactionId = await SaveBooking(tnxBookingPatient.addBooking, patientId, workOrderId);
                         await SaveBookingStatus(TnxBookingData.addBookingStatus, patientId, transactionId);
                         await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
+                        await Savepaymentdeatil(TnxBookingData.addpaymentdetail, patientId, workOrderId, transactionId);
                         await transaction.CommitAsync();
                         var result = db.tnx_BookingPatient.Where(x => x.patientId == patientId).Include(b => b.addBooking).ThenInclude(b => b.addBookingItem)
                                   .ToList();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
+                            Message="Saved Successful",
                             Data = result
                         };
 
@@ -98,6 +98,8 @@ namespace iMARSARLIMS.Services
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
+
+                            Message = "Updated Successful",
                             Data = tnxBookingPatient
                         };
 
@@ -259,6 +261,20 @@ namespace iMARSARLIMS.Services
             };
 
         }
+        private async Task<ServiceStatusResponseModel> Savepaymentdeatil(IEnumerable<tnx_ReceiptDetails> PaymentDetail, int patientId, string workOrderId, int transactionId)
+        {
+            foreach (var payment in PaymentDetail)
+            {
+                var paymentdata = createpaymentData(payment, patientId, workOrderId, transactionId);
+                db.tnx_ReceiptDetails.Add(paymentdata);
+                await db.SaveChangesAsync();
+                
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true
+            };
+        }
 
         private async Task<ServiceStatusResponseModel> SaveBookingItem(IEnumerable<tnx_BookingItem> tnxBookingItems, int patientId, string workOrderId, int transactionId)
         {
@@ -318,7 +334,37 @@ namespace iMARSARLIMS.Services
                 Data = tnxBookingItems
             };
         }
+        private tnx_ReceiptDetails createpaymentData(tnx_ReceiptDetails Payment, int patientId, string workOrderId, int transactionId)
+        {
+            return new tnx_ReceiptDetails
+            {
+                id = Payment.id,
+                transactionId = transactionId,
+                transactionType = Payment.transactionType,
+                workOrderId = workOrderId,
+                receiptNo = Payment.receiptNo,
+                receivedAmt = Payment.receivedAmt,
+                cashAmt = Payment.cashAmt,
+                creditCardAmt = Payment.creditCardAmt,
+                creditCardNo = Payment.creditCardNo,
+                chequeAmt = Payment.chequeAmt,
+                chequeNo = Payment.chequeNo,
+                onlinewalletAmt = Payment.onlinewalletAmt,
+                walletno = Payment.walletno,
+                NEFTamt = Payment.NEFTamt,
+                BankName = Payment.BankName,
+                paymentModeId = Payment.paymentModeId,
+                isCancel = Payment.isCancel,
+                cancelDate = Payment.cancelDate,
+                canceledBy = Payment.canceledBy,
+                cancelReason = Payment.cancelReason,
+                bookingCentreId = Payment.bookingCentreId,
+                settlementCentreID = Payment.settlementCentreID,
+                receivedBy = Payment.receivedBy,
+                receivedID = Payment.receivedID,
 
+            };
+        }
         private tnx_BookingItem CreateBookingItem(tnx_BookingItem bookingItem, int patientId, string workOrderId, int transactionId)
         {
             return new tnx_BookingItem

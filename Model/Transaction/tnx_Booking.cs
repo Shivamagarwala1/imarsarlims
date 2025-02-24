@@ -54,7 +54,7 @@ namespace iMARSARLIMS.Model.Transaction
         public byte isCredit { get; set; }
         [Required, MaxLength(10)]
         public string paymentMode { get; set; }
-        [Required, MaxLength(50)]
+        [ MaxLength(50)]
         public string source { get; set; }
         public int discountType { get; set; }
         public int? discountid { get; set; } = 0;
@@ -86,5 +86,7 @@ namespace iMARSARLIMS.Model.Transaction
         public List<tnx_BookingStatus>? addBookingStatus { get; set; }
         [ForeignKey(nameof(transactionId))]
         public List<tnx_BookingItem>? addBookingItem { get; set; }
+        [ForeignKey(nameof(transactionId))]
+        public List<tnx_ReceiptDetails>? addpaymentdetail { get; set; }
     }
 }
