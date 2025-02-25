@@ -97,6 +97,10 @@ namespace iMARSARLIMS.Model.Master
         public int receptionarea { get; set; }
         public int waitingarea { get; set; }
         public int watercooler { get; set; }
+        public int? billingType { get; set; }
+        [MaxLength(20)]
+        public string? billingTypeName { get; set; }
+
         [ForeignKey(nameof(centreId))]
         public List<empCenterAccess> addEmpCenterAccess { get; set; }
     }

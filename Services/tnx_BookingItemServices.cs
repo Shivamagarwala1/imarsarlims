@@ -20,46 +20,40 @@ namespace iMARSARLIMS.Services
             this._MySql_Procedure_Services = MySql_Procedure_Services;
         }
 
-       async  Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetSampleProcessingData(SampleProcessingRequestModel sampleProcessingRequestModel)
         {
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                        join cm in db.centreMaster on tb.centreId equals cm.centreId
                         select new SampleProcessingResponseModel
                         {
+                            centreId = tbi.centreId,
+                            centreName = cm.companyName,
+                            deptId = tbi.deptId,
+                            departmentName = tbi.departmentName,
                             patientId = tb.patientId,
-                            transactionId = tb.transactionId,
                             workOrderId = tb.workOrderId,
-                            name = tb.name,
+                            PatientName = tb.name,
+                            Age = string.Concat(tb.ageYear, "Y", tb.ageMonth, "M", tb.ageDay, "D"),
                             itemId = tbi.itemId,
                             investigationName = tbi.investigationName,
+                            barcodeNo = tbi.barcodeNo ?? "",
                             sampleTypeId = tbi.sampleTypeId,
                             sampleTypeName = tbi.sampleTypeName,
                             isSampleCollected = tbi.isSampleCollected,
+                            Comment = tb.labRemarks,
+                            transactionId = tb.transactionId,
                             createdDateTime = tbi.createdDateTime,
-                            deptId = tbi.deptId,
-                            barcodeNo = tbi.barcodeNo,
-                            centreId = tbi.centreId
-                        };
+                            Urgent = tbi.isUrgent,
+                            rowcolor = tbi.isUrgent == 1 ? "#FF4E12" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#6699ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#F0466B")))
 
+                        };
             // Apply date filter
             if (sampleProcessingRequestModel.fromDate.HasValue && sampleProcessingRequestModel.toDate.HasValue)
             {
                 query = query.Where(q => q.createdDateTime >= sampleProcessingRequestModel.fromDate.Value && q.createdDateTime <= sampleProcessingRequestModel.toDate.Value);
             }
-            if (sampleProcessingRequestModel.patientId != 0)
-            {
-                query = query.Where(q => q.patientId == sampleProcessingRequestModel.patientId);
-            }
 
-            if (sampleProcessingRequestModel.transactionId != 0)
-            {
-                query = query.Where(q => q.transactionId == sampleProcessingRequestModel.transactionId);
-            }
-
-            if (sampleProcessingRequestModel.department != 0)
-            {
-                query = query.Where(q => q.deptId == sampleProcessingRequestModel.department);
-            }
 
             if (!string.IsNullOrEmpty(sampleProcessingRequestModel.barcodeNo))
             {
@@ -71,13 +65,14 @@ namespace iMARSARLIMS.Services
                 query = query.Where(q => q.centreId == sampleProcessingRequestModel.centreId);
             }
 
-            if (sampleProcessingRequestModel.investigationId != 0)
+            if (sampleProcessingRequestModel.Status != null)
             {
-                query = query.Where(q => q.itemId == sampleProcessingRequestModel.investigationId);
+                query = query.Where(q => q.isSampleCollected == sampleProcessingRequestModel.Status);
             }
 
+
             query = query.OrderBy(q => q.patientId).ThenBy(q => q.transactionId);
-            var result= await  query.ToListAsync();
+            var result = await query.ToListAsync();
 
             return new ServiceStatusResponseModel
             {
@@ -101,14 +96,15 @@ namespace iMARSARLIMS.Services
                 {
                     foreach (var SampleResponseModel in sampleProcessingResponseModels)
                     {
-                        var sampleStatus = await db.tnx_BookingItem
+                        var sampleStatus = db.tnx_BookingItem
                             .Where(bi => bi.itemId == SampleResponseModel.itemId && bi.transactionId == SampleResponseModel.transactionId)
-                            .SingleOrDefaultAsync();
+                            .FirstOrDefault();
 
                         if (sampleStatus != null)
                         {
                             UpdateSampleStatus(sampleStatus, SampleResponseModel);
                             db.tnx_BookingItem.Update(sampleStatus);
+
                         }
                         else
                         {
@@ -126,7 +122,7 @@ namespace iMARSARLIMS.Services
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Message = "All records saved successfully"
+                        Message = "Records saved successfully"
                     };
                 }
                 catch (Exception ex)
@@ -142,25 +138,25 @@ namespace iMARSARLIMS.Services
         }
         private void UpdateSampleStatus(tnx_BookingItem sampleStatus, SampleProcessingResponseModel sampleProcessingResponseModel)
         {
-            var empId = 1;
+
 
             switch (sampleProcessingResponseModel.isSampleCollected)
             {
                 case "S":
                     sampleStatus.isSampleCollected = "S";
-                    sampleStatus.sampleCollectedby = Convert.ToString(empId);
+                    sampleStatus.sampleCollectedby = Convert.ToString(sampleProcessingResponseModel.empId);
                     sampleStatus.sampleCollectionDate = DateTime.Now;
                     break;
 
                 case "Y":
                     sampleStatus.isSampleCollected = "Y";
-                    sampleStatus.sampleReceivedBY = Convert.ToString(empId);
+                    sampleStatus.sampleReceivedBY = Convert.ToString(sampleProcessingResponseModel.empId);
                     sampleStatus.sampleReceiveDate = DateTime.Now;
                     break;
 
                 case "R":
                     sampleStatus.isSampleCollected = "R";
-                    sampleStatus.sampleRejectionBy = empId;
+                    sampleStatus.sampleRejectionBy = sampleProcessingResponseModel.empId;
                     sampleStatus.sampleRejectionOn = DateTime.Now;
                     break;
 
@@ -514,7 +510,7 @@ namespace iMARSARLIMS.Services
             {
                 item.isSra = IsSra;
             }
-            
+
         }
         private tnx_BookingStatus TransferStatusData(tnx_Sra sra)
         {
@@ -523,7 +519,7 @@ namespace iMARSARLIMS.Services
                 id = 0,
                 transactionId = sra.transactionId,
                 barcodeNo = sra.barcodeNo,
-                status = "Sample Transfer Batch No"+ sra.batchNumber,
+                status = "Sample Transfer Batch No" + sra.batchNumber,
                 centreId = sra.fromCentreId,
                 createdById = sra.entryById,
                 createdDateTime = sra.entryDatetime,
@@ -570,7 +566,7 @@ namespace iMARSARLIMS.Services
                     var BookingStatusData = batchStatusRecieveRequestModel.Select(BatchRecieveData).ToList();
                     db.tnx_BookingStatus.AddRange(BookingStatusData);
                     await db.SaveChangesAsync();
-                   await transaction.CommitAsync();
+                    await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -617,7 +613,7 @@ namespace iMARSARLIMS.Services
                 id = 0,
                 transactionId = batchStatusRecieveRequestModel.transactionId,
                 barcodeNo = batchStatusRecieveRequestModel.barcodeNo,
-                status = "Batch No" + batchStatusRecieveRequestModel.batchNumber +" Received",
+                status = "Batch No" + batchStatusRecieveRequestModel.batchNumber + " Received",
                 centreId = batchStatusRecieveRequestModel.toCentreId,
                 createdById = batchStatusRecieveRequestModel.receivedBYId,
                 createdDateTime = DateTime.Now,
@@ -643,13 +639,13 @@ namespace iMARSARLIMS.Services
                                         im.sortName,
                                         im.gender,
                                         rtt.rate,
-                                        deliveryDate= DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")                                        
+                                        deliveryDate = DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")
                                     }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
                     Data = result
-                };                  
+                };
             }
             catch (Exception ex)
             {
@@ -666,30 +662,31 @@ namespace iMARSARLIMS.Services
 
             try
             {
-                var result = await(from im in db.itemMaster
-                                   join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid
-                                   join stt in db.itemSampleTypeMapping on im.itemId equals stt.itemId
-                                   join st in db.sampletype_master on stt.sampleTypeId equals st.id
-                                   join ld in db.labDepartment on im.deptId equals ld.id
-                                   where rtt.rateTypeId == ratetype && im.itemId == itemId
-                                   select new
-                                   {
-                                       im.itemId,
-                                       im.itemName,
-                                       im.itemType,
-                                       im.sortName,
-                                       testcode=im.code,
-                                       im.deptId,
-                                       departmentname= ld.deptName,
-                                       im.gender,rtt.mrp,
-                                       Grosss=rtt.rate,
-                                       discount=0,
-                                       NetAmt= rtt.rate,
-                                       stt.sampleTypeId,
-                                       st.sampleTypeName,
-                                       im.defaultsampletype,
-                                       deliveryDate = DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")
-                                   }).ToListAsync();
+                var result = await (from im in db.itemMaster
+                                    join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid
+                                    join stt in db.itemSampleTypeMapping on im.itemId equals stt.itemId
+                                    join st in db.sampletype_master on stt.sampleTypeId equals st.id
+                                    join ld in db.labDepartment on im.deptId equals ld.id
+                                    where rtt.rateTypeId == ratetype && im.itemId == itemId
+                                    select new
+                                    {
+                                        im.itemId,
+                                        im.itemName,
+                                        im.itemType,
+                                        im.sortName,
+                                        testcode = im.code,
+                                        im.deptId,
+                                        departmentname = ld.deptName,
+                                        im.gender,
+                                        rtt.mrp,
+                                        Grosss = rtt.rate,
+                                        discount = 0,
+                                        NetAmt = rtt.rate,
+                                        stt.sampleTypeId,
+                                        st.sampleTypeName,
+                                        im.defaultsampletype,
+                                        deliveryDate = DateTime.Now.AddHours(3).ToString("yyyy-MM-dd hh:mm tt")
+                                    }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
@@ -733,6 +730,456 @@ namespace iMARSARLIMS.Services
                     Message = ex.Message,
                 };
             }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetOldPatient(string searchValue)
+        {
+            try
+            {
+                var patientinfo = (from pb in db.tnx_BookingPatient
+                                   join b in db.tnx_Booking on pb.patientId equals b.patientId
+                                   where pb.mobileNo == searchValue || b.workOrderId == searchValue
+                                   || pb.name == searchValue
+                                   select new
+                                   {
+                                       b.patientId,
+                                       b.title_id,
+                                       b.name,
+                                       ageShow = string.Concat(b.ageYear, " Y ", b.ageMonth, " M ", b.ageDay, " D"),
+                                       b.ageDay,
+                                       b.ageMonth,
+                                       b.ageYear,
+                                       b.gender,
+                                       b.mobileNo,
+                                       pb.emailId,
+                                       b.bookingDate
+                                   }).FirstOrDefault();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = patientinfo
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetPatientEditInfo(string searchValue)
+        {
+            try
+            {
+                var patientinfo = (from pb in db.tnx_BookingPatient
+                                   join b in db.tnx_Booking on pb.patientId equals b.patientId
+                                   where b.workOrderId == searchValue
+                                   select new
+                                   {
+                                       b.mobileNo,
+                                       b.patientId,
+                                       b.workOrderId,
+                                       b.transactionId,
+                                       b.title_id,
+                                       b.name,
+                                       b.ageDay,
+                                       b.ageMonth,
+                                       b.ageYear,
+                                       b.dob,
+                                       b.gender,
+                                       pb.emailId,
+                                       b.refID1,
+                                       b.refID2,
+                                       pb.address,
+                                       pb.pinCode,
+                                       b.OtherLabReferID,
+                                       b.otherLabRefer,
+                                       b.uploadDocument
+                                   }).FirstOrDefault();
+                if (patientinfo != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = patientinfo
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "No data found"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetPatientEditTest(string searchValue)
+        {
+            try
+            {
+                var patientinfo = (from pb in db.tnx_BookingPatient
+                                   join b in db.tnx_Booking on pb.patientId equals b.patientId
+                                   join bi in db.tnx_BookingItem on b.transactionId equals bi.transactionId
+                                   where b.workOrderId == searchValue
+                                   select new
+                                   {
+                                       bi.id,
+                                       b.mobileNo,
+                                       b.patientId,
+                                       b.workOrderId,
+                                       b.transactionId,
+                                       b.title_id,
+                                       b.name,
+                                       b.ageDay,
+                                       b.ageMonth,
+                                       b.ageYear,
+                                       b.dob,
+                                       b.gender,
+                                       pb.emailId,
+                                       b.refID1,
+                                       b.refID2,
+                                       pb.address,
+                                       pb.pinCode,
+                                       b.OtherLabReferID,
+                                       b.otherLabRefer,
+                                       b.uploadDocument,
+                                       bi.itemId,
+                                       bi.investigationName,
+                                       bi.mrp,
+                                       bi.discount,
+                                       bi.netAmount,
+                                       bi.itemType,
+                                       bi.deliveryDate,
+                                       bi.isUrgent
+                                   }).ToList();
+                if (patientinfo != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = patientinfo
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "No data found"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.UpdatePatientinfo(UpdatePatientInfoRequestModel patientInfo)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var bookingPatient = await db.tnx_BookingPatient
+                                                  .Where(b => b.patientId == patientInfo.patientId)
+                                                  .FirstOrDefaultAsync();
+
+                    var booking = await db.tnx_Booking
+                                          .Where(b => b.patientId == patientInfo.patientId && b.workOrderId == patientInfo.workOrderId)
+                                          .FirstOrDefaultAsync();
+
+                    if (bookingPatient != null && booking != null)
+                    {
+                        // Updating bookingPatient
+                        bookingPatient.title_id = patientInfo.title_id;
+                        bookingPatient.name = patientInfo.name;
+                        bookingPatient.ageDays = patientInfo.ageDay;
+                        bookingPatient.ageMonth = patientInfo.ageMonth;
+                        bookingPatient.ageYear = patientInfo.ageYear;
+                        bookingPatient.dob = patientInfo.dob;
+                        bookingPatient.gender = patientInfo.gender;
+                        bookingPatient.emailId = patientInfo.emailId;
+                        bookingPatient.address = patientInfo.address;
+                        bookingPatient.pinCode = patientInfo.pinCode;
+                        bookingPatient.mobileNo = patientInfo.mobileno;
+
+                        // Updating booking
+                        booking.title_id = patientInfo.title_id;
+                        booking.name = patientInfo.name;
+                        booking.ageDay = patientInfo.ageDay;
+                        booking.ageMonth = patientInfo.ageMonth;
+                        booking.ageYear = patientInfo.ageYear;
+                        booking.dob = patientInfo.dob;
+                        booking.gender = patientInfo.gender;
+                        booking.refID1 = patientInfo.refID1;
+                        booking.refID2 = patientInfo.refID2;
+                        booking.OtherLabReferID = patientInfo.OtherLabReferID;
+                        booking.otherLabRefer = patientInfo.otherLabRefer;
+                        booking.uploadDocument = patientInfo.uploadDocument;
+                        booking.mobileNo = patientInfo.mobileno;
+
+                        // Update the entities in DB
+                        db.tnx_BookingPatient.Update(bookingPatient);
+                        db.tnx_Booking.Update(booking);
+
+                        // Save changes and commit transaction
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Record Updated Successfully"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No data found to update"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Consider logging the error for debugging purposes
+                    // log.Error("Error in UpdatePatientinfo", ex);
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "An error occurred: " + ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.UpdatePatientTest(List<tnx_BookingItem> Updatetestdetail)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                if (Updatetestdetail.Count > 0)
+                {
+                    foreach (var item in Updatetestdetail)
+                    {
+                        if (item.id == 0)
+                        {
+                            var data = CreateBookingItem(item);
+                            db.tnx_BookingItem.Add(data);
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                           
+                        }
+                        else
+                        {
+                            var tnxBookingItemData = await db.tnx_BookingItem.FirstOrDefaultAsync(bookingItem => bookingItem.id == item.id);
+                            if (tnxBookingItemData != null)
+                            {
+                                updateBookingItemDetail(tnxBookingItemData, item);
+                                var tnxBookingItem = db.tnx_BookingItem.Update(tnxBookingItemData);
+                                await db.SaveChangesAsync();
+                            }
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                        }
+                    }
+                }
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = "Updated Successful"
+                };
+            }
+        }
+      
+        private void updateBookingItemDetail(tnx_BookingItem tnxBookItem, tnx_BookingItem bookingItem)
+        {
+            //tnxBookItem.workOrderId = bookingItem.workOrderId;
+            //tnxBookItem.transactionId = bookingItem.transactionId;
+            //tnxBookItem.testcode = bookingItem.testcode;
+            //tnxBookItem.itemId = bookingItem.itemId;
+            //tnxBookItem.packageID = bookingItem.packageID;
+            //tnxBookItem.deptId = bookingItem.deptId;
+            //tnxBookItem.departmentName = bookingItem.departmentName;
+            //tnxBookItem.barcodeNo = bookingItem.barcodeNo;
+            //tnxBookItem.investigationName = bookingItem.investigationName;
+            //tnxBookItem.isPackage = bookingItem.isPackage;
+            //tnxBookItem.packageName = bookingItem.packageName;
+            //tnxBookItem.itemType = bookingItem.itemType;
+            //tnxBookItem.mrp = bookingItem.mrp;
+            //tnxBookItem.rate = bookingItem.rate;
+            //tnxBookItem.discount = bookingItem.discount;
+            //tnxBookItem.netAmount = bookingItem.netAmount;
+            //tnxBookItem.packMrp = bookingItem.packMrp;
+            //tnxBookItem.packItemNet = bookingItem.packItemNet;
+            //tnxBookItem.packItemRate = bookingItem.packItemRate;
+            //tnxBookItem.packItemDiscount = bookingItem.packItemDiscount;
+            //tnxBookItem.reportType = bookingItem.reportType;
+            //tnxBookItem.centreId = bookingItem.centreId;
+            //tnxBookItem.sessionCentreid = bookingItem.sessionCentreid;
+            //tnxBookItem.isSra = bookingItem.isSra;
+            //tnxBookItem.isMachineOrder = bookingItem.isMachineOrder;
+            //tnxBookItem.isEmailsent = bookingItem.isEmailsent;
+            //tnxBookItem.sampleTypeId = bookingItem.sampleTypeId;
+            //tnxBookItem.sampleTypeName = bookingItem.sampleTypeName;
+            //tnxBookItem.sampleCollectionDate = bookingItem.sampleCollectionDate;
+            //tnxBookItem.sampleCollectedby = bookingItem.sampleCollectedby;
+            //tnxBookItem.sampleCollectedID = bookingItem.sampleCollectedID;
+            //tnxBookItem.sampleReceiveDate = bookingItem.sampleReceiveDate;
+            //tnxBookItem.sampleReceivedBY = bookingItem.sampleReceivedBY;
+            //tnxBookItem.resultDate = bookingItem.resultDate;
+            //tnxBookItem.resultDoneByID = bookingItem.resultDoneByID;
+            //tnxBookItem.resutDoneBy = bookingItem.resutDoneBy;
+            //tnxBookItem.isApproved = bookingItem.isApproved;
+            //tnxBookItem.approvedDate = bookingItem.approvedDate;
+            //tnxBookItem.approvedByID = bookingItem.approvedByID;
+            //tnxBookItem.approvedbyName = bookingItem.approvedbyName;
+            //tnxBookItem.notApprovedBy = bookingItem.notApprovedBy;
+            //tnxBookItem.notApprovedDate = bookingItem.notApprovedDate;
+            //tnxBookItem.isActive = bookingItem.isActive;
+            //tnxBookItem.isReporting = bookingItem.isReporting;
+            //tnxBookItem.isCritical = bookingItem.isCritical;
+            //tnxBookItem.deliveryDate = bookingItem.deliveryDate;
+            //tnxBookItem.isInvoiceCreated = bookingItem.isInvoiceCreated;
+            //tnxBookItem.invoiceNumber = bookingItem.invoiceNumber;
+            //tnxBookItem.isUrgent = bookingItem.isUrgent;
+            //tnxBookItem.isSampleCollected = bookingItem.isSampleCollected;
+            //tnxBookItem.samplecollectionremarks = bookingItem.samplecollectionremarks;
+            //tnxBookItem.departmentReceiveRemarks = bookingItem.departmentReceiveRemarks;
+            //tnxBookItem.departmentReceiveDate = bookingItem.departmentReceiveDate;
+            //tnxBookItem.departmentReceiveBy = bookingItem.departmentReceiveBy;
+            //tnxBookItem.departmentReceiveByID = bookingItem.departmentReceiveByID;
+            tnxBookItem.isRemoveItem = bookingItem.isRemoveItem;
+            //tnxBookItem.sampleRejectionBy = bookingItem.sampleRejectionBy;
+            //tnxBookItem.sampleRejectionByName = bookingItem.sampleRejectionByName;
+            //tnxBookItem.sampleRejectionOn = bookingItem.sampleRejectionOn;
+            //tnxBookItem.interpretationId = bookingItem.interpretationId;
+            //tnxBookItem.approvalDoctor = bookingItem.approvalDoctor;
+            //tnxBookItem.isOuthouse = bookingItem.isOuthouse;
+            //tnxBookItem.outhouseLab = bookingItem.outhouseLab;
+            //tnxBookItem.labName = bookingItem.labName;
+            //tnxBookItem.outhouseDoneBy = bookingItem.outhouseDoneBy;
+            //tnxBookItem.outhouseDoneOn = bookingItem.outhouseDoneOn;
+            //tnxBookItem.sampleRecollectedby = bookingItem.sampleRecollectedby;
+            //tnxBookItem.sampleRecollectedDate = bookingItem.sampleRecollectedDate;
+            //tnxBookItem.isrerun = bookingItem.isrerun;
+            //tnxBookItem.invoiceNo = bookingItem.invoiceNo;
+            //tnxBookItem.invoiceDate = bookingItem.invoiceDate;
+            //tnxBookItem.invoiceCycle = bookingItem.invoiceCycle;
+            //tnxBookItem.invoiceAmount = bookingItem.invoiceAmount;
+            //tnxBookItem.invoiceCreatedBy = bookingItem.invoiceCreatedBy;
+            //tnxBookItem.invoiceNoOld = bookingItem.invoiceNoOld;
+            //tnxBookItem.remarks = bookingItem.remarks;
+            //tnxBookItem.showonReportdate = bookingItem.showonReportdate;
+            tnxBookItem.isActive = bookingItem.isActive;
+            tnxBookItem.updateById = bookingItem.updateById;
+            tnxBookItem.updateDateTime = bookingItem.updateDateTime;
+        }
+
+        private tnx_BookingItem CreateBookingItem(tnx_BookingItem bookingItem)
+        {
+            return new tnx_BookingItem
+            {
+                id = bookingItem.id,
+                workOrderId = bookingItem.workOrderId,
+                transactionId = bookingItem.transactionId,
+                testcode = bookingItem.testcode,
+                itemId = bookingItem.itemId,
+                packageID = bookingItem.packageID,
+                deptId = bookingItem.deptId,
+                departmentName = bookingItem.departmentName,
+                barcodeNo = bookingItem.barcodeNo,
+                investigationName = bookingItem.investigationName,
+                isPackage = bookingItem.isPackage,
+                packageName = bookingItem.packageName,
+                itemType = bookingItem.itemType,
+                mrp = bookingItem.mrp,
+                rate = bookingItem.rate,
+                discount = bookingItem.discount,
+                netAmount = bookingItem.netAmount,
+                packMrp = bookingItem.packMrp,
+                packItemNet = bookingItem.packItemNet,
+                packItemRate = bookingItem.packItemRate,
+                packItemDiscount = bookingItem.packItemDiscount,
+                reportType = bookingItem.reportType,
+                centreId = bookingItem.centreId,
+                sessionCentreid = bookingItem.sessionCentreid,
+                isSra = bookingItem.isSra,
+                isMachineOrder = bookingItem.isMachineOrder,
+                isEmailsent = bookingItem.isEmailsent,
+                sampleTypeId = bookingItem.sampleTypeId,
+                sampleTypeName = bookingItem.sampleTypeName,
+                sampleCollectionDate = bookingItem.sampleCollectionDate,
+                sampleCollectedby = bookingItem.sampleCollectedby,
+                sampleCollectedID = bookingItem.sampleCollectedID,
+                sampleReceiveDate = bookingItem.sampleReceiveDate,
+                sampleReceivedBY = bookingItem.sampleReceivedBY,
+                resultDate = bookingItem.resultDate,
+                resultDoneByID = bookingItem.resultDoneByID,
+                resutDoneBy = bookingItem.resutDoneBy,
+                isApproved = bookingItem.isApproved,
+                approvedDate = bookingItem.approvedDate,
+                approvedByID = bookingItem.approvedByID,
+                approvedbyName = bookingItem.approvedbyName,
+                notApprovedBy = bookingItem.notApprovedBy,
+                notApprovedDate = bookingItem.notApprovedDate,
+                isReporting = bookingItem.isReporting,
+                isCritical = bookingItem.isCritical,
+                deliveryDate = bookingItem.deliveryDate,
+                isInvoiceCreated = bookingItem.isInvoiceCreated,
+                invoiceNumber = bookingItem.invoiceNumber,
+                isUrgent = bookingItem.isUrgent,
+                isSampleCollected = bookingItem.isSampleCollected,
+                samplecollectionremarks = bookingItem.samplecollectionremarks,
+                departmentReceiveRemarks = bookingItem.departmentReceiveRemarks,
+                departmentReceiveDate = bookingItem.departmentReceiveDate,
+                departmentReceiveBy = bookingItem.departmentReceiveBy,
+                departmentReceiveByID = bookingItem.departmentReceiveByID,
+                isRemoveItem = bookingItem.isRemoveItem,
+                sampleRejectionBy = bookingItem.sampleRejectionBy,
+                sampleRejectionByName = bookingItem.sampleRejectionByName,
+                sampleRejectionOn = bookingItem.sampleRejectionOn,
+                interpretationId = bookingItem.interpretationId,
+                approvalDoctor = bookingItem.approvalDoctor,
+                isOuthouse = bookingItem.isOuthouse,
+                outhouseLab = bookingItem.outhouseLab,
+                labName = bookingItem.labName,
+                outhouseDoneBy = bookingItem.outhouseDoneBy,
+                outhouseDoneOn = bookingItem.outhouseDoneOn,
+                sampleRecollectedby = bookingItem.sampleRecollectedby,
+                sampleRecollectedDate = bookingItem.sampleRecollectedDate,
+                isrerun = bookingItem.isrerun,
+                invoiceNo = bookingItem.invoiceNo,
+                invoiceDate = bookingItem.invoiceDate,
+                invoiceCycle = bookingItem.invoiceCycle,
+                invoiceAmount = bookingItem.invoiceAmount,
+                invoiceCreatedBy = bookingItem.invoiceCreatedBy,
+                invoiceNoOld = bookingItem.invoiceNoOld,
+                remarks = bookingItem.remarks,
+                showonReportdate = bookingItem.showonReportdate,
+                isActive = bookingItem.isActive,
+                createdById = bookingItem.createdById,
+                createdDateTime = bookingItem.createdDateTime,
+            };
+
         }
 
     }

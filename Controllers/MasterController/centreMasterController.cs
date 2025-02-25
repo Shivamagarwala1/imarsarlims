@@ -73,6 +73,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpGet("GetCentreType")]
+        public async Task<ServiceStatusResponseModel> GetCentreType(int billingtype)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetCentreType(billingtype);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
 
         [HttpGet("GetProcesiongLab")]
         public async Task<ServiceStatusResponseModel> GetProcesiongLab()

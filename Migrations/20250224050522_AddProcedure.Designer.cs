@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250224050522_AddProcedure")]
+    partial class AddProcedure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,42 +290,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("ItemObservationMapping");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.LabRemarkMaster", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("remark")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("LabRemarkMaster");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.LegendColorMaster", b =>
@@ -615,24 +582,6 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("centerTypeMaster");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.centreBillingType", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("billingTypeName")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<int>("isActive")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("centreBillingType");
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Master.centreLedgerRemarks", b =>
                 {
                     b.Property<int>("id")
@@ -737,13 +686,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<int?>("barcodeYPosition")
                         .HasColumnType("int");
-
-                    b.Property<int?>("billingType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("billingTypeName")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
 
                     b.Property<int>("bookingLock")
                         .HasColumnType("int");
@@ -4628,19 +4570,19 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("WorkOrderId")
-                        .HasColumnType("longtext");
-
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("createdDateTime")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int?>("customerID")
+                        .HasColumnType("int");
+
                     b.Property<string>("invRemarks")
                         .HasColumnType("longtext");
 
-                    b.Property<byte>("isActive")
+                    b.Property<byte?>("isActive")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte?>("isInternal")

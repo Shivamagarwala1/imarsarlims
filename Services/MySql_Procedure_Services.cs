@@ -28,15 +28,6 @@ namespace iMARSARLIMS.Services
             return result;
         }
 
-        public async Task<List<PackageItemDetailResponseModle>> GetPackageItem(int ItemId, int centreId)
-        {
-            string sql = "call GetPackageItemDetails({0},{1});";
-            int param1 = ItemId;
-            int param2 = centreId;
-            var result = db.Set<PackageItemDetailResponseModle>()
-           .FromSqlRaw(sql, param1, param2)
-           .AsEnumerable().ToList();
-            return result;
-        }
+       
     }
 }

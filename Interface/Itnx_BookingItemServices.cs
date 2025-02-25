@@ -18,5 +18,10 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetitemDetail(int ratetype, int itemId);
         Task<ServiceStatusResponseModel> GetPackageTestDetail(int itemId);
         Task<ActionResult<ServiceStatusResponseModel>> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle);
+        Task<ServiceStatusResponseModel> GetOldPatient(string searchValue);
+        Task<ServiceStatusResponseModel> GetPatientEditInfo(string searchValue);
+        Task<ServiceStatusResponseModel> GetPatientEditTest(string searchValue);
+        Task<ServiceStatusResponseModel> UpdatePatientinfo(UpdatePatientInfoRequestModel patientInfo);
+        Task<ServiceStatusResponseModel> UpdatePatientTest(List<tnx_BookingItem> Updatetestdetail);
     }
 }

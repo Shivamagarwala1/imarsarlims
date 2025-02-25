@@ -101,12 +101,14 @@ namespace iMARSARLIMS
         public DbSet<menuIconMaster> menuIconMaster { get; set; }
         public DbSet<itemTemplate> itemTemplate { get; set; }
         public DbSet<item_OutHouseMaster> item_OutHouseMaster { get; set; }
+        public DbSet<LabRemarkMaster> LabRemarkMaster { get; set; }
         public DbSet<Testing> Testing { get; set; }
 
         public DbSet<chatGroupMaster> chatGroupMaster { get; set; }
         public DbSet<chatGroupMasterEmployee> chatGroupMasterEmployee { get; set; }
         public DbSet<chatMessage> chatMessage { get; set; }
         public DbSet<LegendColorMaster> LegendColorMaster { get; set; }
+        public DbSet<centreBillingType> centreBillingType { get; set; }
         public ContextClass(DbContextOptions<ContextClass> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -346,6 +348,9 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<machine_result>().HasKey(x => x.id);
             modelBuilder.Entity<machine_result>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<LabRemarkMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<LabRemarkMaster>().Property(x => x.id).ValueGeneratedOnAdd();
             
             modelBuilder.Entity<observationReferenceRanges>().HasKey(x => x.id);
             modelBuilder.Entity<observationReferenceRanges>().Property(x => x.id).ValueGeneratedOnAdd();
@@ -382,6 +387,8 @@ namespace iMARSARLIMS
             modelBuilder.Entity<item_OutHouseMaster>().HasKey(x => x.id);
             modelBuilder.Entity<item_OutHouseMaster>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<centreBillingType>().HasKey(x => x.id);
+            modelBuilder.Entity<centreBillingType>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<LegendColorMaster>().HasKey(x => x.id);
             modelBuilder.Entity<LegendColorMaster>().Property(x => x.id).ValueGeneratedOnAdd();

@@ -4,6 +4,7 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
 
 namespace iMARSARLIMS.Services
 {
@@ -156,6 +157,8 @@ namespace iMARSARLIMS.Services
             return new centreMaster
             {
                 centreId = centremaster.centreId,
+                billingType = centremaster.billingType,
+                billingTypeName = centremaster.billingTypeName,
                 centretype = centremaster.centretype,
                 centretypeid = centremaster.centretypeid,
                 centrecode = centremaster.centrecode,
@@ -704,6 +707,43 @@ namespace iMARSARLIMS.Services
                 {
                     Success = false,
                     Message = ex.Message,
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetCentreType(int billingtype)
+        {
+            try
+            {
+                var query = from tb in db.centerTypeMaster
+                            select new 
+                            {
+                               tb.id,tb.centerTypeName
+                            };
+                // Apply date filter
+                if (billingtype==1 || billingtype==3 || billingtype==4)
+                {
+                    query = query.Where(q => q.id >=3);
+                }
+                if ( billingtype == 2)
+                {
+                    query = query.Where(q => q.id==2);
+                }
+
+                var result = await query.ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
                 };
             }
         }

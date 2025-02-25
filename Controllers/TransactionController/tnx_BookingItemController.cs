@@ -4,6 +4,7 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.ModelBuilder;
 
 namespace iMARSARLIMS.Controllers.TransactionController
 {
@@ -39,6 +40,61 @@ namespace iMARSARLIMS.Controllers.TransactionController
                 };
             }
         }
+
+
+        [HttpGet("GetOldPatient")]
+        public async Task<ServiceStatusResponseModel> GetOldPatient(string searchValue)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetOldPatient(searchValue);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetPatientEditInfo")]
+        public async Task<ServiceStatusResponseModel> GetPatientEditInfo(string searchValue)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetPatientEditInfo(searchValue);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetPatientEditTest")]
+        public async Task<ServiceStatusResponseModel> GetPatientEditTest(string searchValue)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetPatientEditTest(searchValue);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
         [HttpGet("GetitemDetail")]
         public async Task<ServiceStatusResponseModel> GetitemDetail(int ratetype, int itemId)
         {
@@ -92,7 +148,7 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
         }
         [HttpPost("UpdateSampleStatus")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> UpdateSampleStatus(List<SampleProcessingResponseModel> sampleProcessingResponseModel)
+        public async Task<ServiceStatusResponseModel> UpdateSampleStatus(List<SampleProcessingResponseModel> sampleProcessingResponseModel)
         {
             try
             {
@@ -101,7 +157,11 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
         [HttpPost("UpdateSampletransfer")]
@@ -177,7 +237,40 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
         }
 
-
+        [HttpPost("UpdatePatientinfo")]
+        public async Task<ServiceStatusResponseModel> UpdatePatientinfo(UpdatePatientInfoRequestModel patientInfo)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.UpdatePatientinfo(patientInfo);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("UpdatePatientTest")]
+        public async Task<ServiceStatusResponseModel> UpdatePatientTest(List<tnx_BookingItem> Updatetestdetail)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.UpdatePatientTest(Updatetestdetail);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
     }
 }

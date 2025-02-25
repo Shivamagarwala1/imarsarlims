@@ -179,6 +179,7 @@ builder.Services.AddScoped<IchatMessageServices, chatMessageServices>();
 builder.Services.AddScoped<IdoctorReferalServices, doctorReferalServices>();
 builder.Services.AddScoped<IcentreInvoiceServices, centreInvoiceServices>();
 builder.Services.AddScoped<ICentrePaymentServices, CentrePaymentServices>();
+builder.Services.AddScoped<ItnxInvestigationRemarksService, tnxInvestigationRemarksService>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

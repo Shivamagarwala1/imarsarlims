@@ -9,10 +9,9 @@ namespace iMARSARLIMS.Model.Transaction
         public int id { get; set; }
         public string? invRemarks { get; set; }
         public int? transactionId { get; set; }
-        public int? customerID { get; set; }
+        public string? WorkOrderId { get; set; }
         public int? itemId { get; set; }
         public string? itemName { get; set; }
-        public byte? isActive { get; set; }
         public byte? isInternal { get; set; }
     }
 }
