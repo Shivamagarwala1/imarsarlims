@@ -76,6 +76,24 @@ namespace iMARSARLIMS.Controllers.MasterController
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("BillingTypeWiseCentre")]
+        public async Task<ServiceStatusResponseModel> BillingTypeWiseCentre(int EmplyeeId,int Billingtype)
+        {
+            try
+            {
+                var result = await _empMasterServices.BillingTypeWiseCentre(EmplyeeId,Billingtype);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
         [HttpGet("GetEmployeeCode")]
         public async Task<ServiceStatusResponseModel> GetEmployeeCode()
         {

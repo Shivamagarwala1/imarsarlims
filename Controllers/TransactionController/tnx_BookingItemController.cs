@@ -193,7 +193,7 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
 
 
-        [HttpPost("GetTestObservations")]
+        [HttpGet("GetTestObservations")]
         public async Task<List<ResultEntryResponseModle>> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
         {
             try
@@ -260,6 +260,24 @@ namespace iMARSARLIMS.Controllers.TransactionController
             try
             {
                 var result = await _tnx_BookingItemServices.UpdatePatientTest(Updatetestdetail);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("GetResultEntryAllData")]
+        public async Task<ServiceStatusResponseModel> GetResultEntryAllData(ResultEntryAllDataRequestModel resultentrydata)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.GetResultEntryAllData(resultentrydata);
                 return result;
             }
             catch (Exception ex)

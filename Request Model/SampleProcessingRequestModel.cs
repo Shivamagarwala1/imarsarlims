@@ -7,6 +7,7 @@
         public int? centreId { get; set; }
         public string?  barcodeNo { get; set; }
         public string? Status { get; set; }
+        public int? empId { get; set; }
 
     }
 }

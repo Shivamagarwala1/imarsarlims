@@ -6,6 +6,7 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Buffers;
 
 namespace iMARSARLIMS.Services
 {
@@ -24,28 +25,33 @@ namespace iMARSARLIMS.Services
         {
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                        join im in db.itemMaster on tbi.itemId equals im.itemId
+                        
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
                         select new SampleProcessingResponseModel
                         {
                             centreId = tbi.centreId,
-                            centreName = cm.companyName,
+                            centreName = cm.centrecode,
                             deptId = tbi.deptId,
                             departmentName = tbi.departmentName,
                             patientId = tb.patientId,
                             workOrderId = tb.workOrderId,
                             PatientName = tb.name,
-                            Age = string.Concat(tb.ageYear, "Y", tb.ageMonth, "M", tb.ageDay, "D"),
+                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
                             itemId = tbi.itemId,
                             investigationName = tbi.investigationName,
                             barcodeNo = tbi.barcodeNo ?? "",
                             sampleTypeId = tbi.sampleTypeId,
                             sampleTypeName = tbi.sampleTypeName,
+                            sampletypedata = db.itemSampleTypeMapping.Where(s => s.itemId == tbi.itemId).Select(s => new { s.sampleTypeId, s.sampleTypeName }).ToList(),
                             isSampleCollected = tbi.isSampleCollected,
                             Comment = tb.labRemarks,
                             transactionId = tb.transactionId,
                             createdDateTime = tbi.createdDateTime,
                             Urgent = tbi.isUrgent,
-                            rowcolor = tbi.isUrgent == 1 ? "#FF4E12" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#6699ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#F0466B")))
+                            containercolor= "#FF0000",
+                            isremark= db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId== tbi.transactionId).Count(),
+                            rowcolor = tbi.isUrgent == 1 ? "#ff8960" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#8fb4ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#FF6865")))
 
                         };
             // Apply date filter
@@ -64,12 +70,20 @@ namespace iMARSARLIMS.Services
             {
                 query = query.Where(q => q.centreId == sampleProcessingRequestModel.centreId);
             }
+            else
+            {
+                List<int> CentreIds= db.empCenterAccess.Where(e=>e.empId== sampleProcessingRequestModel.empId).Select(e=> e.centreId).ToList();
+                query = query.Where(q => CentreIds.Contains(q.centreId));
+            }
 
-            if (sampleProcessingRequestModel.Status != null)
+            if (sampleProcessingRequestModel.Status!="U")
             {
                 query = query.Where(q => q.isSampleCollected == sampleProcessingRequestModel.Status);
             }
-
+            else
+            {
+                query = query.Where(q => q.Urgent == 1);
+            }
 
             query = query.OrderBy(q => q.patientId).ThenBy(q => q.transactionId);
             var result = await query.ToListAsync();
@@ -104,7 +118,7 @@ namespace iMARSARLIMS.Services
                         {
                             UpdateSampleStatus(sampleStatus, SampleResponseModel);
                             db.tnx_BookingItem.Update(sampleStatus);
-
+                            await db.SaveChangesAsync();
                         }
                         else
                         {
@@ -115,10 +129,7 @@ namespace iMARSARLIMS.Services
                             };
                         }
                     }
-
-                    await db.SaveChangesAsync();
                     await transaction.CommitAsync();
-
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -754,11 +765,22 @@ namespace iMARSARLIMS.Services
                                        pb.emailId,
                                        b.bookingDate
                                    }).FirstOrDefault();
-                return new ServiceStatusResponseModel
+                if (patientinfo != null)
                 {
-                    Success = true,
-                    Data = patientinfo
-                };
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = patientinfo
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "No data found"
+                    };
+                }
             }
             catch (Exception ex)
             {
@@ -859,6 +881,7 @@ namespace iMARSARLIMS.Services
                                        bi.itemId,
                                        bi.investigationName,
                                        bi.mrp,
+                                       bi.rate,
                                        bi.discount,
                                        bi.netAmount,
                                        bi.itemType,
@@ -978,15 +1001,57 @@ namespace iMARSARLIMS.Services
             {
                 if (Updatetestdetail.Count > 0)
                 {
+                    var mrp = 0.0;
+                    var gross = 0.0;
+                    var discount = 0.0;
+                    var net = 0.0;
+                    var transactionId = 0;
                     foreach (var item in Updatetestdetail)
                     {
+                        mrp = mrp + item.mrp;
+                        gross = gross + item.rate;
+                        discount = discount + item.discount;
+                        net = net + item.netAmount;
+                        transactionId = item.transactionId;
                         if (item.id == 0)
                         {
                             var data = CreateBookingItem(item);
                             db.tnx_BookingItem.Add(data);
-                            await db.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                           
+                            if (item.isPackage == 1)
+                            {
+                                //var itemdetails = _MySql_Procedure_Services.GetPackageItem(BookingItems.itemId, BookingItems.centreId);
+                                var itemdetails = (from iom in db.ItemObservationMapping
+                                                   join im in db.itemMaster on iom.observationID equals im.itemId
+                                                   where iom.itemId == 3
+                                                   join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
+                                                   from rtr in rtrJoin.DefaultIfEmpty() // Left Join
+                                                   join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
+                                                   from rtt in rttJoin.DefaultIfEmpty() // Left Join
+                                                   where rtt.centreId == 1 // Filter for centreId
+                                                   select new
+                                                   {
+                                                       testcode = im.code,
+                                                       itemid = im.itemId,
+                                                       im.deptId,
+                                                       departmentname = "", // Empty string as per SQL
+                                                       investigationName = im.itemName,
+                                                       im.itemType,
+                                                       rtr.mrp,
+                                                       rtr.rate,
+                                                       rtr.discount,
+                                                       netAmount = rtr.rate // netAmount equivalent to rtr.Rate in SQL
+                                                   }).ToList();
+                                if (itemdetails != null)
+                                {
+                                    foreach (var packageitem in itemdetails)
+                                    {
+                                        var createPackageItemDetail = createPackageItemData(item, packageitem);
+                                        db.tnx_BookingItem.Add(createPackageItemDetail);
+                                    }
+                                }
+
+                            }
+                            await db.SaveChangesAsync();                          
                         }
                         else
                         {
@@ -998,9 +1063,20 @@ namespace iMARSARLIMS.Services
                                 await db.SaveChangesAsync();
                             }
                             await db.SaveChangesAsync();
-                            await transaction.CommitAsync();
+
                         }
                     }
+                    var booking = db.tnx_Booking.Where(b => b.transactionId == transactionId).FirstOrDefault();
+                    if(booking!=null)
+                    {
+                        booking.mrp = mrp;
+                        booking.grossAmount = gross;
+                        booking.discount = discount;
+                        booking.netAmount = net;
+                        db.tnx_Booking.Update(booking);
+                        await db.SaveChangesAsync();
+                    }
+                    await transaction.CommitAsync();
                 }
                 return new ServiceStatusResponseModel
                 {
@@ -1009,7 +1085,94 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
-      
+        private tnx_BookingItem createPackageItemData(tnx_BookingItem bookingItem, dynamic packageItem)
+        {
+            return new tnx_BookingItem
+            {
+                id = bookingItem.id,
+                workOrderId = bookingItem.workOrderId,
+                transactionId = bookingItem.transactionId,
+                testcode = packageItem.testCode,
+                itemId = packageItem.itemId,
+                packageID = bookingItem.packageID,
+                deptId = packageItem.deptId,
+                departmentName = packageItem.departmentName,
+                barcodeNo = bookingItem.barcodeNo,
+                investigationName = packageItem.investigationName,
+                isPackage = bookingItem.isPackage,
+                packageName = bookingItem.packageName,
+                itemType = packageItem.itemType,
+                mrp = packageItem.mrp,
+                rate = packageItem.rate,
+                discount = packageItem.discount,
+                netAmount = packageItem.netAmount,
+                packMrp = bookingItem.packMrp,
+                packItemNet = bookingItem.packItemNet,
+                packItemRate = bookingItem.packItemRate,
+                packItemDiscount = bookingItem.packItemDiscount,
+                reportType = bookingItem.reportType,
+                centreId = bookingItem.centreId,
+                sessionCentreid = bookingItem.sessionCentreid,
+                isSra = bookingItem.isSra,
+                isMachineOrder = bookingItem.isMachineOrder,
+                isEmailsent = bookingItem.isEmailsent,
+                sampleTypeId = bookingItem.sampleTypeId,
+                sampleTypeName = bookingItem.sampleTypeName,
+                sampleCollectionDate = bookingItem.sampleCollectionDate,
+                sampleCollectedby = bookingItem.sampleCollectedby,
+                sampleCollectedID = bookingItem.sampleCollectedID,
+                sampleReceiveDate = bookingItem.sampleReceiveDate,
+                sampleReceivedBY = bookingItem.sampleReceivedBY,
+                resultDate = bookingItem.resultDate,
+                resultDoneByID = bookingItem.resultDoneByID,
+                resutDoneBy = bookingItem.resutDoneBy,
+                isApproved = bookingItem.isApproved,
+                approvedDate = bookingItem.approvedDate,
+                approvedByID = bookingItem.approvedByID,
+                approvedbyName = bookingItem.approvedbyName,
+                notApprovedBy = bookingItem.notApprovedBy,
+                notApprovedDate = bookingItem.notApprovedDate,
+                isReporting = bookingItem.isReporting,
+                isCritical = bookingItem.isCritical,
+                deliveryDate = bookingItem.deliveryDate,
+                isInvoiceCreated = bookingItem.isInvoiceCreated,
+                invoiceNumber = bookingItem.invoiceNumber,
+                isUrgent = bookingItem.isUrgent,
+                isSampleCollected = bookingItem.isSampleCollected,
+                samplecollectionremarks = bookingItem.samplecollectionremarks,
+                departmentReceiveRemarks = bookingItem.departmentReceiveRemarks,
+                departmentReceiveDate = bookingItem.departmentReceiveDate,
+                departmentReceiveBy = bookingItem.departmentReceiveBy,
+                departmentReceiveByID = bookingItem.departmentReceiveByID,
+                isRemoveItem = bookingItem.isRemoveItem,
+                sampleRejectionBy = bookingItem.sampleRejectionBy,
+                sampleRejectionByName = bookingItem.sampleRejectionByName,
+                sampleRejectionOn = bookingItem.sampleRejectionOn,
+                interpretationId = bookingItem.interpretationId,
+                approvalDoctor = bookingItem.approvalDoctor,
+                isOuthouse = bookingItem.isOuthouse,
+                outhouseLab = bookingItem.outhouseLab,
+                labName = bookingItem.labName,
+                outhouseDoneBy = bookingItem.outhouseDoneBy,
+                outhouseDoneOn = bookingItem.outhouseDoneOn,
+                sampleRecollectedby = bookingItem.sampleRecollectedby,
+                sampleRecollectedDate = bookingItem.sampleRecollectedDate,
+                isrerun = bookingItem.isrerun,
+                invoiceNo = bookingItem.invoiceNo,
+                invoiceDate = bookingItem.invoiceDate,
+                invoiceCycle = bookingItem.invoiceCycle,
+                invoiceAmount = bookingItem.invoiceAmount,
+                invoiceCreatedBy = bookingItem.invoiceCreatedBy,
+                invoiceNoOld = bookingItem.invoiceNoOld,
+                remarks = bookingItem.remarks,
+                showonReportdate = bookingItem.showonReportdate,
+                isActive = bookingItem.isActive,
+                createdById = bookingItem.createdById,
+                createdDateTime = bookingItem.createdDateTime,
+            };
+
+        }
+
         private void updateBookingItemDetail(tnx_BookingItem tnxBookItem, tnx_BookingItem bookingItem)
         {
             //tnxBookItem.workOrderId = bookingItem.workOrderId;
@@ -1182,6 +1345,124 @@ namespace iMARSARLIMS.Services
 
         }
 
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetResultEntryAllData(ResultEntryAllDataRequestModel resultentrydata)
+        {
+            var query = from tb in db.tnx_Booking
+                        join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                        join im in db.itemMaster on tbi.itemId equals im.itemId
+                        join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        select new                         
+                        {
+                            tb.bookingDate,
+                            tb.patientId,
+                            tb.workOrderId,
+                            SampleRecievedDateShow= tbi.sampleReceiveDate,
+                            PatientName = tb.name,
+                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
+                            tb.gender,
+                            tbi.barcodeNo,
+                            tbi.itemId,
+                            investigationName= im.sortName != "" ?im.sortName: im.itemName,
+                            Comment = tb.labRemarks,
+                            ApprovedDateShow= tbi.approvedDate,
+                            tbi.centreId,
+                            cm.centrecode,
+                            centreName = cm.companyName,
+                            tbi.deptId,
+                            tbi.departmentName,
+                            tbi.isSampleCollected,
+                            tb.transactionId,
+                            tbi.createdDateTime,
+                            tbi.approvedDate,
+                            tbi.sampleReceiveDate,
+                            tbi.sampleCollectionDate,
+                            isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count(),
+                            im.reportType,
+                            Urgent = tbi.isUrgent,
+                            resultdone= tbi.isResultDone,
+                            Approved=tbi.isApproved,
+                            Eerun= tbi.isrerun,
+                            rowcolor = tbi.isUrgent == 1 ? "#FF4E12" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#6699ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#F0466B")))
+
+                        };
+            if (resultentrydata.Datetype != "")
+            {
+                if (resultentrydata.Datetype == "tb.bookingDate")
+                {
+                    query = query.Where(q => q.bookingDate >= resultentrydata.FromDate && q.bookingDate <= resultentrydata.ToDate);
+                }
+                else if (resultentrydata.searchvalue == "tbi.approvedDate")
+                {
+                    query = query.Where(q => q.approvedDate >= resultentrydata.FromDate && q.approvedDate <= resultentrydata.ToDate);
+                }
+                else if (resultentrydata.searchvalue == "tbi.sampleReceiveDate")
+                {
+                    query = query.Where(q => q.sampleReceiveDate >= resultentrydata.FromDate && q.sampleReceiveDate <= resultentrydata.ToDate);
+                }
+                else 
+                {
+                    query = query.Where(q => q.sampleCollectionDate >= resultentrydata.FromDate && q.sampleCollectionDate <= resultentrydata.ToDate);
+                }
+            }
+            if (resultentrydata.searchvalue!="")
+            {
+                query = query.Where(q => q.barcodeNo == resultentrydata.searchvalue || q.workOrderId == resultentrydata.searchvalue);
+            }
+            if (resultentrydata.ItemIds.Count > 0)
+            {
+                query = query.Where(q => resultentrydata.ItemIds.Contains(q.itemId));
+            }
+            if (resultentrydata.centreIds.Count>0 )
+            {
+                query = query.Where(q => resultentrydata.centreIds.Contains(q.centreId));
+            }
+            else
+            {
+                List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == resultentrydata.empid).Select(e => e.centreId).ToList();
+                query = query.Where(q => CentreIds.Contains(q.centreId));
+            }
+
+            if (resultentrydata.departmentIds.Count>0)
+            {
+                query = query.Where(q => resultentrydata.departmentIds.Contains(q.deptId));
+            }
+            if (resultentrydata.status != "")
+            {
+                if(resultentrydata.status=="Pending")
+                {
+                    query = query.Where(q => q.isSampleCollected == "N");
+                }
+                else if (resultentrydata.status == "Tested")
+                {
+                    query = query.Where(q => q.resultdone == 1);
+                }
+                else if (resultentrydata.status == "Approved")
+                {
+                    query = query.Where(q => q.Approved == 1);
+                }
+                else if (resultentrydata.status == "Rejected")
+                {
+                    query = query.Where(q => q.isSampleCollected == "R");
+                }
+                else if (resultentrydata.status == "Received")
+                {
+                    query = query.Where(q => q.isSampleCollected == "Y");
+                }
+                else 
+                {
+                    query = query.Where(q => q.isSampleCollected == "S");
+                }
+            }
+            // query = query.Where(q => q.reportType >= 2).OrderBy(q => resultentrydata.orderby);
+            query = query.OrderBy(q => q.workOrderId).ThenBy(q=> q.deptId);
+            var result = await query.ToListAsync();
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = result,Message=query.ToString()
+                
+            };
+        }
     }
 }
 

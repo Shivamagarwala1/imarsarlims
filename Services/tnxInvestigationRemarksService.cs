@@ -75,7 +75,7 @@ namespace iMARSARLIMS.Services
                                   {
                                       sr.id,
                                       sr.transactionId, sr.itemId,
-                                      sr.invRemarks, sr.isActive, sr.itemName
+                                      sr.invRemarks, sr.isActive, sr.itemName,sr.isInternal
                                   }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {

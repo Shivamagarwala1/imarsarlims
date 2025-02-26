@@ -23,5 +23,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetPatientEditTest(string searchValue);
         Task<ServiceStatusResponseModel> UpdatePatientinfo(UpdatePatientInfoRequestModel patientInfo);
         Task<ServiceStatusResponseModel> UpdatePatientTest(List<tnx_BookingItem> Updatetestdetail);
+        Task<ServiceStatusResponseModel> GetResultEntryAllData(ResultEntryAllDataRequestModel resultentrydata);
     }
 }

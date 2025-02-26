@@ -1,12 +1,10 @@
-﻿using System.Linq;
-using iMARSARLIMS.Controllers;
+﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static Google.Cloud.Dialogflow.V2.MessageEntry.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -771,6 +769,38 @@ namespace iMARSARLIMS.Services
                         Message = ex.Message
                     };
                 }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IempMasterServices.BillingTypeWiseCentre(int EmplyeeId, int Billingtype)
+        {
+            try
+            {
+                var Centres = await(from eca in db.empCenterAccess
+                                    join cm in db.centreMaster on eca.centreId equals cm.centreId
+                                    where eca.empId == EmplyeeId && cm.billingType == Billingtype
+                                    orderby eca.centreId
+                                    select new
+                                    {
+                                        CentreId = cm.centreId,
+                                        CentreName = cm.companyName,
+                                        cm.paymentMode,
+                                        cm.paymentModeId,cm.isPrePrintedBarcode
+                                    }).ToListAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = Centres                 
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
     }

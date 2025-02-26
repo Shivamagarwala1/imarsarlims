@@ -721,9 +721,13 @@ namespace iMARSARLIMS.Services
                                tb.id,tb.centerTypeName
                             };
                 // Apply date filter
-                if (billingtype==1 || billingtype==3 || billingtype==4)
+                if (billingtype==1 )
                 {
                     query = query.Where(q => q.id >=3);
+                }
+                if ( billingtype == 3 || billingtype == 4)
+                {
+                    query = query.Where(q => q.id == 3);
                 }
                 if ( billingtype == 2)
                 {

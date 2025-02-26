@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Response_Model
 {
@@ -27,6 +28,9 @@ namespace iMARSARLIMS.Response_Model
         public int Urgent { get; set; }
         public string? rowcolor { get;set; }
         public int? isRemoveItem { get; set; }
-
+        [NotMapped]
+        public object? sampletypedata { get; set; }
+        public string? containercolor { get; set; }
+        public int isremark { get; set; }
     }
 }
