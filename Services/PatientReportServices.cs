@@ -6,6 +6,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using IronBarCode;
+using iMARSARLIMS.Response_Model;
 
 
 namespace iMARSARLIMS.Services
@@ -751,7 +752,57 @@ namespace iMARSARLIMS.Services
             }
         }
 
+        async Task<ServiceStatusResponseModel> IPatientReportServices.ReportHoldUnHold(string TestId, int isHold, int holdBy, string holdReason)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var testIds = TestId.Split(',').Select(int.Parse).ToList();
+                    var testdata= db.tnx_BookingItem.Where(b=> testIds.Contains(b.id)).ToList();
+                    if (testIds.Count == 0)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No data found to hold"
+                        };
+                    }
+                    foreach (var test in testdata)
+                    {
+                        if(isHold==1)
+                        {
+                            test.hold = isHold;
+                            test.holdById= holdBy;
+                            test.holdDate= DateTime.Now;
+                            test.holdReason= holdReason;
+                        }
+                        else
+                        {
+                            test.hold = isHold;
+                            test.UnholdById = holdBy;
+                            test.unHoldDate = DateTime.Now;
+                        }
+                    }
+                    db.tnx_BookingItem.UpdateRange(testdata);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Updated Successful"
+                    };
 
-
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message,
+                    };
+                }
+            }
+        }
     }
 }

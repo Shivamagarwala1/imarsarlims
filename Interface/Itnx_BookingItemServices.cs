@@ -12,12 +12,13 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> UpdateSampleStatus(List<SampleProcessingResponseModel> sampleProcessingResponseModel);
         Task<ActionResult<ServiceStatusResponseModel>> UpdateSampletransfer(List<tnx_Sra> SRA);
         Task<ActionResult<ServiceStatusResponseModel>> UpdateBatchReceive(List<BatchStatusRecieveRequestModel> batchStatusRecieveRequestModel);
-        Task<List<ResultEntryResponseModle>> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle);
+        Task<ServiceStatusResponseModel> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle);
         Task<ServiceStatusResponseModel> SaveTestObservations(List<ResultSaveRequestModle> resultSaveRequestModle);
         Task<ServiceStatusResponseModel> GetitemDetailRate(int ratetype);
         Task<ServiceStatusResponseModel> GetitemDetail(int ratetype, int itemId);
         Task<ServiceStatusResponseModel> GetPackageTestDetail(int itemId);
-        Task<ActionResult<ServiceStatusResponseModel>> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle);
+        Task<ServiceStatusResponseModel> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle);
+        Task<ServiceStatusResponseModel> SaveMicroResult(MicroResultSaveRequestModel microFlowcyto);
         Task<ServiceStatusResponseModel> GetOldPatient(string searchValue);
         Task<ServiceStatusResponseModel> GetPatientEditInfo(string searchValue);
         Task<ServiceStatusResponseModel> GetPatientEditTest(string searchValue);

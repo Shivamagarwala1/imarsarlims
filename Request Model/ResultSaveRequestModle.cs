@@ -32,6 +32,7 @@ namespace iMARSARLIMS.Request_Model
         public string createdBy { get; set; }
         public int createdById  { get; set; }
         public DateTime createdDate { get; set; }
+        public int? appcovaldoctorId { get; set; }
 
     }
 }

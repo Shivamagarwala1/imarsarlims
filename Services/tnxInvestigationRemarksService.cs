@@ -14,56 +14,52 @@ namespace iMARSARLIMS.Services
         {
             db = context;
         }
-        async Task<ServiceStatusResponseModel> ItnxInvestigationRemarksService.AddSampleRemark(tnx_InvestigationRemarks remark)
+        async Task<ServiceStatusResponseModel> ItnxInvestigationRemarksService.AddSampleRemark(List<tnx_InvestigationRemarks> remarks)
         {
+            if (remarks == null || remarks.Count == 0)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "Invalid Data"
+                };
+            }
+
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    if (remark == null)
+                    foreach (var item in remarks)
                     {
-                        return new ServiceStatusResponseModel
+                        if (item.id == 0)
                         {
-                            Success = true,
-                            Message = "Invalid Data"
-                        };
-                    }
-                    else
-                    {
-                        if (remark.id == 0)
-                        {
-                            db.tnx_InvestigationRemarks.Add(remark);
-                            await db.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                            return new ServiceStatusResponseModel
-                            {
-                               Success = true,
-                               Message= "Saved Successful"
-                            };
+                            db.tnx_InvestigationRemarks.Add(item);
                         }
                         else
-                        {
-                            db.tnx_InvestigationRemarks.Update(remark);
-                            await db.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                            return new ServiceStatusResponseModel
-                            {
-                                Success = true,
-                                Message = "Updated Successful"
-                            };
+                        { 
+                            db.tnx_InvestigationRemarks.Update(item);
                         }
                     }
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Saved Successful"
+                    };
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
+
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
                         Message = ex.Message
                     };
                 }
-            } 
-
+            }
         }
         async Task<ServiceStatusResponseModel> ItnxInvestigationRemarksService.GetSampleremark(int transacctionId, string WorkOrderId, int itemId)
         {

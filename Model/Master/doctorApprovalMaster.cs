@@ -23,5 +23,6 @@ namespace iMARSARLIMS.Model.Master
         public byte unHold { get; set; }
         [Required]
         public int doctorId { get; set; }
+        public int? isSign { get; set; }
     }
 }

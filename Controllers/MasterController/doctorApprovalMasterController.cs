@@ -72,5 +72,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
+        [HttpGet("Doctorcenterwise")]
+        public async Task<ServiceStatusResponseModel> Doctorcenterwise(int empid,int centreid)
+        {
+            try
+            {
+                var result = await _doctorApprovalmasterservices.Doctorcenterwise(empid,centreid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }

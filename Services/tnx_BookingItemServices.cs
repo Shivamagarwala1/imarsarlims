@@ -6,7 +6,13 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
+using OfficeOpenXml.Table.PivotTable;
 using System.Buffers;
+using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
 
 namespace iMARSARLIMS.Services
 {
@@ -95,7 +101,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<List<ResultEntryResponseModle>> Itnx_BookingItemServices.GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
         {
 
             var result = await _MySql_Procedure_Services.GetTestObservation(resultEntryRequestModle.testId, resultEntryRequestModle.gender, resultEntryRequestModle.fromAge, resultEntryRequestModle.toAge, resultEntryRequestModle.centreId);
@@ -321,7 +327,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<ActionResult<ServiceStatusResponseModel>> Itnx_BookingItemServices.SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle)
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
@@ -886,7 +892,9 @@ namespace iMARSARLIMS.Services
                                        bi.netAmount,
                                        bi.itemType,
                                        bi.deliveryDate,
-                                       bi.isUrgent
+                                       bi.isUrgent,
+                                       bi.centreId,
+                                       b.rateId
                                    }).ToList();
                 if (patientinfo != null)
                 {
@@ -1356,13 +1364,17 @@ namespace iMARSARLIMS.Services
                             tb.bookingDate,
                             tb.patientId,
                             tb.workOrderId,
-                            SampleRecievedDateShow= tbi.sampleReceiveDate,
+                            SampleRecievedDateShow = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt"): "",
+                            ApproveDateShow = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+
                             PatientName = tb.name,
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
                             tb.gender,
                             tbi.barcodeNo,
+                            testid=tbi.id,
                             tbi.itemId,
-                            investigationName= im.sortName != "" ?im.sortName: im.itemName,
+                            investigationName= im.itemName,
+                            investigationSortName= im.sortName,
                             Comment = tb.labRemarks,
                             ApprovedDateShow= tbi.approvedDate,
                             tbi.centreId,
@@ -1430,7 +1442,7 @@ namespace iMARSARLIMS.Services
             {
                 if(resultentrydata.status=="Pending")
                 {
-                    query = query.Where(q => q.isSampleCollected == "N");
+                    query = query.Where(q => q.isSampleCollected == "Y");
                 }
                 else if (resultentrydata.status == "Tested")
                 {
@@ -1453,15 +1465,162 @@ namespace iMARSARLIMS.Services
                     query = query.Where(q => q.isSampleCollected == "S");
                 }
             }
-            // query = query.Where(q => q.reportType >= 2).OrderBy(q => resultentrydata.orderby);
+            if(resultentrydata.reporttype<3)
+                query = query.Where(q => q.reportType <= resultentrydata.reporttype);
+            else
+                query = query.Where(q => q.reportType == resultentrydata.reporttype);
+
             query = query.OrderBy(q => q.workOrderId).ThenBy(q=> q.deptId);
             var result = await query.ToListAsync();
             return new ServiceStatusResponseModel
             {
                 Success = true,
-                Data = result,Message=query.ToString()
-                
+                Data = result
             };
+        }
+
+        async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.SaveMicroResult(MicroResultSaveRequestModel microFlowcyto)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (microFlowcyto.id == 0)
+                    {
+                        var HistoResultsave = CreateMicroResult(microFlowcyto);
+                        db.tnx_Observations_Micro_Flowcyto.Add(HistoResultsave);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        var Microresult = await db.tnx_Observations_Micro_Flowcyto.Where(b => b.id == microFlowcyto.id).FirstOrDefaultAsync();
+                        if (Microresult != null)
+                        {
+                           // var historesultlog = createMicroesultLog(Microresult);
+                           // db.tnx_Observations_Histo_Log.Add(historesultlog);
+                           // await db.SaveChangesAsync();
+                            UpdateMicroResult(Microresult, microFlowcyto);
+                            db.tnx_Observations_Micro_Flowcyto.Update(Microresult);
+                        }
+                        await db.SaveChangesAsync();
+
+                    }
+                    var sampleStatus = await db.tnx_BookingItem
+                        .Where(bi => bi.id == microFlowcyto.testId)
+                        .SingleOrDefaultAsync();
+                    var TestStatus = "";
+                    if (sampleStatus != null)
+                    {
+                        if (microFlowcyto.isApproved.ToString() == "1")
+                        {
+                            TestStatus = "Result Save and Approved";
+                            sampleStatus.isResultDone = 1;
+                            sampleStatus.isApproved = 1;
+                            sampleStatus.resultDoneByID = microFlowcyto.createdById;
+                            sampleStatus.approvedByID = microFlowcyto.createdById;
+                            sampleStatus.resutDoneBy = microFlowcyto.createdBy;
+                            sampleStatus.approvedbyName = microFlowcyto.createdBy;
+                        }
+                        else
+                        {
+                            TestStatus = "Result Saved";
+                            sampleStatus.isResultDone = 1;
+                            sampleStatus.resultDoneByID = microFlowcyto.createdById;
+                            sampleStatus.resutDoneBy = microFlowcyto.createdBy;
+                        }
+                        db.tnx_BookingItem.Update(sampleStatus);
+                        await db.SaveChangesAsync();
+                        tnx_BookingStatus bookingStatus = new tnx_BookingStatus
+                        {
+                            id = 0,
+                            transactionId = microFlowcyto.transactionId,
+                           
+                            status = TestStatus,
+                            testId = (int)microFlowcyto.testId,
+                            createdById = microFlowcyto.createdById,
+                            createdDateTime = DateTime.Now,
+                        };
+                        db.tnx_BookingStatus.Add(bookingStatus);
+                        await db.SaveChangesAsync();
+                    }
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "All records saved successfully"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.InnerException?.Message ?? "An error occurred."
+                    };
+                }
+            }
+
+        }
+
+
+
+        private tnx_Observations_Micro_Flowcyto CreateMicroResult(MicroResultSaveRequestModel Microresult)
+        {
+            return new tnx_Observations_Micro_Flowcyto
+            {
+                id = Microresult.id,
+                testId = Microresult.testId,
+                labTestId = Microresult.labTestId,
+                transactionId = Microresult.transactionId,
+                observationName = Microresult.observationName,
+                result = Microresult.result,
+                machineID = Microresult.machineID,
+                flag = Microresult.flag,
+                isBold = Microresult.isBold,
+                reportType = Microresult.reportType,
+                organismId = Microresult.organismId,
+                organismName = Microresult.organismName,
+                antibiticId = Microresult.antibiticId,
+                antibitiName = Microresult.antibitiName,
+                colonyCount = Microresult.colonyCount,
+                interpretation = Microresult.interpretation,
+                mic = Microresult.mic,
+                positivity = Microresult.positivity,
+                intensity = Microresult.intensity,
+                reportStatus = Microresult.reportStatus,
+                approvedBy = Microresult.approvedBy,
+                approvedName = Microresult.approvedName,
+                comments = Microresult.comments
+            };
+
+        }
+
+        private void UpdateMicroResult(tnx_Observations_Micro_Flowcyto historesult, MicroResultSaveRequestModel Microresult)
+        {
+            historesult.testId = Microresult.testId;
+            historesult.labTestId = Microresult.labTestId;
+            historesult.transactionId = Microresult.transactionId;
+            historesult.observationName = Microresult.observationName;
+            historesult.result = Microresult.result;
+            historesult.machineID = Microresult.machineID;
+            historesult.flag = Microresult.flag;
+            historesult.isBold = Microresult.isBold;
+            historesult.reportType = Microresult.reportType;
+            historesult.organismId = Microresult.organismId;
+            historesult.organismName = Microresult.organismName;
+            historesult.antibiticId = Microresult.antibiticId;
+            historesult.antibitiName = Microresult.antibitiName;
+            historesult.colonyCount = Microresult.colonyCount;
+            historesult.interpretation = Microresult.interpretation;
+            historesult.mic = Microresult.mic;
+            historesult.positivity = Microresult.positivity;
+            historesult.intensity = Microresult.intensity;
+            historesult.reportStatus = Microresult.reportStatus;
+            historesult.approvedBy = Microresult.approvedBy;
+            historesult.approvedName = Microresult.approvedName;
+            historesult.comments = Microresult.comments;
+
         }
     }
 }

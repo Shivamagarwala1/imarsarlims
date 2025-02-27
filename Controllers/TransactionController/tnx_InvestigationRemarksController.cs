@@ -21,7 +21,7 @@ namespace iMARSARLIMS.Controllers.TransactionController
         protected override IQueryable<tnx_InvestigationRemarks> DbSet => db.tnx_InvestigationRemarks.AsNoTracking().OrderBy(o => o.id);
 
         [HttpPost("AddSampleremark")]
-        public async Task<ServiceStatusResponseModel> AddSampleRemark(tnx_InvestigationRemarks remark)
+        public async Task<ServiceStatusResponseModel> AddSampleRemark(List<tnx_InvestigationRemarks> remark)
         {
             try
             {

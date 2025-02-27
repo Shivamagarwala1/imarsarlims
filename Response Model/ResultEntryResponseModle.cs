@@ -35,5 +35,6 @@ namespace iMARSARLIMS.Response_Model
         public string? machineName { get; set; }
         public int? showInReport { get; set; }
         public string method { get; set; }
+        public string oldreading { get; set; }
     }
 }

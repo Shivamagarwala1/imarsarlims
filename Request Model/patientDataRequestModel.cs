@@ -8,5 +8,6 @@
         public string? SearchValue { get; set; }
         public int? UserId { get; set; }
         public string? status {  get; set; }
+        public int? empId { get; set; }
     }
 }

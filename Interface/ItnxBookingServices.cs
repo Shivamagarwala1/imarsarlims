@@ -6,5 +6,6 @@ namespace iMARSARLIMS.Interface
     public interface ItnxBookingServices
     {
         Task<ServiceStatusResponseModel> GetPatientData(patientDataRequestModel patientdata);
+        string GetPatientDocumnet(string workOrderId);
     }
 }

@@ -12,7 +12,7 @@ namespace iMARSARLIMS.Services
         {
             db = context;
         }
-        public async Task<List<ResultEntryResponseModle>> GetTestObservation(int testId, string Gender, int fromAge, int toAge, int centreId)
+        public async Task<ServiceStatusResponseModel> GetTestObservation(int testId, string Gender, int fromAge, int toAge, int centreId)
         {
 
             string sql = "call GetTestObservationTestIdWise({0},{1},{2},{3},{4});";
@@ -25,7 +25,22 @@ namespace iMARSARLIMS.Services
             var result = db.Set<ResultEntryResponseModle>()
            .FromSqlRaw(sql, param1, param2, param3, param4, param5)
            .AsEnumerable().ToList();
-            return result;
+            if (result.Count > 0)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            else
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "No observation mapped"
+                };
+            }
         }
 
        

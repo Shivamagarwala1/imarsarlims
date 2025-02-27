@@ -23,13 +23,13 @@ namespace iMARSARLIMS.Model.Transaction
         [MaxLength(12)]
         public string? barcodeNo { get; set; }
         [Required, MaxLength(30)]
-        public string departmentName { get; set; } 
+        public string departmentName { get; set; }
         [Required, MaxLength(100)]
-        public string investigationName { get; set; } 
+        public string investigationName { get; set; }
         [Required]
         public int isPackage { get; set; }
         [MaxLength(100)]
-        public string packageName { get; set; } 
+        public string packageName { get; set; }
         [Required]
         public int itemType { get; set; }
         [Range(0.000000, 999999999999.000000)]
@@ -54,9 +54,9 @@ namespace iMARSARLIMS.Model.Transaction
         public int centreId { get; set; }
         [Required]
         public int sessionCentreid { get; set; }
-        public byte isSra { get; set; } 
-        public byte isMachineOrder { get; set; } 
-        public byte isEmailsent { get; set; } 
+        public byte isSra { get; set; }
+        public byte isMachineOrder { get; set; }
+        public byte isEmailsent { get; set; }
         [Required]
         public int sampleTypeId { get; set; }
         [Required, MaxLength(50)]
@@ -71,7 +71,7 @@ namespace iMARSARLIMS.Model.Transaction
         public DateTime? resultDate { get; set; }
         public int? resultDoneByID { get; set; }
         [MaxLength(100)]
-        public string?  resutDoneBy { get; set; } = "";
+        public string? resutDoneBy { get; set; } = "";
         public byte? isResultDone { get; set; } = 0;
         public byte? isApproved { get; set; } = 0;
         public DateTime? approvedDate { get; set; }
@@ -105,7 +105,7 @@ namespace iMARSARLIMS.Model.Transaction
         public int? approvalDoctor { get; set; } = 0;
         public byte? isOuthouse { get; set; } = 0;
         public int? outhouseLab { get; set; } = 0;
-        [MaxLength(100)] 
+        [MaxLength(100)]
         public string? labName { get; set; } = "";
         public int? outhouseDoneBy { get; set; } = 0;
         public DateTime? outhouseDoneOn { get; set; }
@@ -117,12 +117,18 @@ namespace iMARSARLIMS.Model.Transaction
         [MaxLength(100)] public string? invoiceCycle { get; set; } = "";
         public double? invoiceAmount { get; set; } = 0;
         public int? invoiceCreatedBy { get; set; } = 0;
-        [MaxLength(100)] 
+        [MaxLength(100)]
         public string? invoiceNoOld { get; set; } = "";
-        [MaxLength(100)] 
+        [MaxLength(100)]
         public string? remarks { get; set; } = "";
         public DateTime? showonReportdate { get; set; }
-
-
+        public int? hold { get; set; }
+        public int? holdById { get; set; }
+        public DateTime? holdDate { get; set; }
+        public int? UnholdById { get; set; }
+        public DateTime? unHoldDate { get; set; }
+        public int? DoctorSignId { get; set; }
+        [MaxLength(50)]
+        public string? holdReason { get; set; }
     }
 }

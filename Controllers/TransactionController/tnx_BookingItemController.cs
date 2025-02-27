@@ -193,8 +193,8 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
 
 
-        [HttpGet("GetTestObservations")]
-        public async Task<List<ResultEntryResponseModle>> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
+        [HttpPost("GetTestObservations")]
+        public async Task<ServiceStatusResponseModel> GetTestObservations(ResultEntryRequestModle resultEntryRequestModle)
         {
             try
             {
@@ -203,8 +203,11 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
             catch (Exception ex)
             {
-                return new List<ResultEntryResponseModle>();
-                //return BadRequest(ex.Message);
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
 
@@ -224,7 +227,7 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
         //histo result entry
         [HttpPost("SaveHistoResult")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle)
+        public async Task<ServiceStatusResponseModel> SaveHistoResult(HistoResultSaveRequestModle histoResultSaveRequestModle)
         {
             try
             {
@@ -233,9 +236,31 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
+        [HttpPost("SaveMicroResult")]
+        public async Task<ServiceStatusResponseModel> SaveMicroResult(MicroResultSaveRequestModel microFlowcyto)
+        {
+            try
+            {
+                var result = await _tnx_BookingItemServices.SaveMicroResult(microFlowcyto);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
 
         [HttpPost("UpdatePatientinfo")]
         public async Task<ServiceStatusResponseModel> UpdatePatientinfo(UpdatePatientInfoRequestModel patientInfo)

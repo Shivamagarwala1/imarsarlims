@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Transaction;
+using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,9 +40,8 @@ namespace iMARSARLIMS.Controllers.TransactionController
             {
                 return BadRequest(ex.Message);
             }
-
-
         }
+
 
         [HttpGet("GetPatientReportType2")]
         public IActionResult GetPatientReportType2(string TestId)
@@ -83,6 +83,24 @@ namespace iMARSARLIMS.Controllers.TransactionController
             }
 
 
+        }
+
+        [HttpGet("ReportHoldUnHold")]
+        public async Task<ServiceStatusResponseModel> ReportHoldUnHold(string TestId,int isHold,int holdBy,string holdReason)
+        {
+            try
+            {
+                var result = await _PatientReportServices.ReportHoldUnHold(TestId,isHold,holdBy,holdReason);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
         }
     }
 }

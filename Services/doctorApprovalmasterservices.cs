@@ -69,7 +69,7 @@ namespace iMARSARLIMS.Services
                     var msg = "";
                     if (doctorApproval.id == 0)
                     {
-                        var count = db.doctorApprovalMaster.Where(d=> d.empId == doctorApproval.empId  &&  d.doctorId== doctorApproval.doctorId).Count();
+                        var count = db.doctorApprovalMaster.Where(d => d.empId == doctorApproval.empId && d.doctorId == doctorApproval.doctorId && d.isActive==1).Count();
                         if (count > 0)
                         {
                             return new ServiceStatusResponseModel
@@ -78,15 +78,18 @@ namespace iMARSARLIMS.Services
                                 Message = "Appproval rights already Available"
                             };
                         }
-                        db.doctorApprovalMaster.Add(doctorApproval);
+                        var DoctorApprovalData = db.doctorApprovalMaster.Add(doctorApproval);
                         await db.SaveChangesAsync();
+                        var approvalId = DoctorApprovalData.Entity.id;
+                        var signdata = createSignData(approvalId, doctorApproval.empId, doctorApproval.doctorId, doctorApproval.signature,(int)doctorApproval.createdById);
+                        db.DoctorApprovalSign.Add(signdata);
                         await transaction.CommitAsync();
                         msg = "saved Successful";
                     }
                     else
                     {
                         var data = db.doctorApprovalMaster.Where(d => d.id == doctorApproval.id).FirstOrDefault();
-                        if(data!=null)
+                        if (data != null)
                         {
                             data.centreId = doctorApproval.centreId;
                             data.doctorId = doctorApproval.id;
@@ -103,6 +106,8 @@ namespace iMARSARLIMS.Services
 
                             db.doctorApprovalMaster.Update(data);
                             await db.SaveChangesAsync();
+                            var signdata = createSignData(doctorApproval.id, doctorApproval.empId, doctorApproval.doctorId, doctorApproval.signature, (int)doctorApproval.updateById);
+                            db.DoctorApprovalSign.Add(signdata);
                             await transaction.CommitAsync();
                             msg = "Updated Successful";
                         }
@@ -124,33 +129,91 @@ namespace iMARSARLIMS.Services
                 }
             }
         }
-
+        private DoctorApprovalSign createSignData(int approvalid, int empid, int doctorid, string sign,int createdby)
+        {
+            return new DoctorApprovalSign
+            {
+                id=0,
+                DoctorId=doctorid,
+                DoctorSign=sign,
+                empid=empid,
+                isActive=1,
+                createdById=createdby,
+                createdDateTime= DateTime.Now
+            };
+        }
         async Task<ServiceStatusResponseModel> IdoctorApprovalmasterservices.DoctorApprovalData()
         {
-            var result= await (from da in db.doctorApprovalMaster
-                         join cm in db.centreMaster on da.centreId equals cm.centreId
-                         select new
-                         {
-                             da.id,
-                             da.centreId,
-                             da.empId,
-                             da.empName,
-                             da.doctorName,
-                             da.signature,
-                             da.approve,
-                             da.notApprove,
-                             da.hold,
-                             da.unHold,
-                             da.doctorId,
-                             da.isActive,
-                             cm.companyName
-                         }).ToListAsync();
+            var result = await (from da in db.doctorApprovalMaster
+                                join cm in db.centreMaster on da.centreId equals cm.centreId
+                                select new
+                                {
+                                    da.id,
+                                    da.centreId,
+                                    da.empId,
+                                    da.empName,
+                                    da.doctorName,
+                                    da.signature,
+                                    da.approve,
+                                    da.notApprove,
+                                    da.hold,
+                                    da.unHold,
+                                    da.doctorId,
+                                    da.isActive,
+                                    cm.companyName
+                                }).ToListAsync();
 
             return new ServiceStatusResponseModel
             {
                 Success = true,
                 Data = result
             };
+        }
+
+        async Task<ServiceStatusResponseModel> IdoctorApprovalmasterservices.Doctorcenterwise(int empid, int centreid)
+        {
+            try
+            {
+                var result = await (from da in db.doctorApprovalMaster
+                                    join cm in db.centreMaster on da.centreId equals cm.centreId
+                                    where da.empId == empid && da.centreId == centreid && da.isActive == 1
+                                    select new
+                                    {
+                                        da.id,
+                                        da.doctorId,
+                                        da.doctorName,
+                                        da.signature,
+                                        da.approve,
+                                        da.notApprove,
+                                        da.hold,
+                                        da.unHold
+                                    }).ToListAsync();
+                if (result != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = result
+                    };
+                }
+                else
+                {
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "No Approval Right",
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
     }
 }

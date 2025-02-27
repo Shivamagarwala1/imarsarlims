@@ -8,5 +8,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> saveupdateDoctorApproval(doctorApprovalMaster doctorApproval);
         Task<ServiceStatusResponseModel> updateDoctorApprovalStatus(int id, byte status, int userid);
         Task<ServiceStatusResponseModel> DoctorApprovalData();
+        Task<ServiceStatusResponseModel> Doctorcenterwise(int empid, int centreid);
     }
 }

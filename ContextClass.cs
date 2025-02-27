@@ -9,6 +9,7 @@ namespace iMARSARLIMS
 {
     public class ContextClass : DbContext
     {
+        public DbSet<DoctorApprovalSign> DoctorApprovalSign { get; set; }
         public DbSet<area_master> area_master {  get; set; }
         public DbSet<centreMaster> centreMaster {  get; set; }
         public DbSet<tnx_Booking> tnx_Booking { get; set; }
@@ -347,7 +348,10 @@ namespace iMARSARLIMS
             modelBuilder.Entity<itemSampleTypeMapping>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<machine_result>().HasKey(x => x.id);
-            modelBuilder.Entity<machine_result>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<machine_result>().Property(x => x.id).ValueGeneratedOnAdd(); 
+
+            modelBuilder.Entity<DoctorApprovalSign>().HasKey(x => x.id);
+            modelBuilder.Entity<DoctorApprovalSign>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<LabRemarkMaster>().HasKey(x => x.id);
             modelBuilder.Entity<LabRemarkMaster>().Property(x => x.id).ValueGeneratedOnAdd();
