@@ -804,5 +804,50 @@ namespace iMARSARLIMS.Services
                 }
             }
         }
+
+        async Task<ServiceStatusResponseModel> IPatientReportServices.ReportNotApprove(string TestId,string userid)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var testIds = TestId.Split(',').Select(int.Parse).ToList();
+                    var testdata = db.tnx_BookingItem.Where(b => testIds.Contains(b.id) && b.isApproved==1).ToList();
+                    if (testIds.Count == 0)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No data found to unApprove"
+                        };
+                    }
+                    foreach (var test in testdata)
+                    {
+                        test.isApproved = 0;
+                        test.notApprovedBy = userid;
+                        test.notApprovedDate = DateTime.Now;
+
+                    }
+                    db.tnx_BookingItem.UpdateRange(testdata);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "UnApproved Successful"
+                    };
+
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message,
+                    };
+                }
+            }
+
+        }
     }
 }

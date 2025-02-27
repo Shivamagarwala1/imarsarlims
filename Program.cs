@@ -182,6 +182,7 @@ builder.Services.AddScoped<ICentrePaymentServices, CentrePaymentServices>();
 builder.Services.AddScoped<ItnxInvestigationRemarksService, tnxInvestigationRemarksService>();
 builder.Services.AddScoped<ItnxBookingServices, tnxBookingServices>();
 builder.Services.AddScoped<Ihistoreportservices, histoReportServices>();
+builder.Services.AddScoped<ItnxInvestigationAttachmentService, tnxInvestigationAttachmentService>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

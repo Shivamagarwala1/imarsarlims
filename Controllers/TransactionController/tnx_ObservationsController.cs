@@ -85,12 +85,29 @@ namespace iMARSARLIMS.Controllers.TransactionController
 
         }
 
-        [HttpGet("ReportHoldUnHold")]
+        [HttpPost("ReportHoldUnHold")]
         public async Task<ServiceStatusResponseModel> ReportHoldUnHold(string TestId,int isHold,int holdBy,string holdReason)
         {
             try
             {
                 var result = await _PatientReportServices.ReportHoldUnHold(TestId,isHold,holdBy,holdReason);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("ReportNotApprove")]
+        public async Task<ServiceStatusResponseModel> ReportNotApprove(string TestId,string userid)
+        {
+            try
+            {
+                var result = await _PatientReportServices.ReportNotApprove(TestId,userid);
                 return result;
             }
             catch (Exception ex)

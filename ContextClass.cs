@@ -10,6 +10,7 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<DoctorApprovalSign> DoctorApprovalSign { get; set; }
+        public DbSet<tnx_InvestigationAttchment> tnx_InvestigationAttchment { get; set; }
         public DbSet<area_master> area_master {  get; set; }
         public DbSet<centreMaster> centreMaster {  get; set; }
         public DbSet<tnx_Booking> tnx_Booking { get; set; }
@@ -130,6 +131,9 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<tnx_InvestigationRemarks>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_InvestigationRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<tnx_InvestigationAttchment>().HasKey(x => x.id);
+            modelBuilder.Entity<tnx_InvestigationAttchment>().Property(x => x.id).ValueGeneratedOnAdd();  
 
             modelBuilder.Entity<tnx_Observations>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_Observations>().Property(x => x.id).ValueGeneratedOnAdd();

@@ -368,6 +368,7 @@ namespace iMARSARLIMS.Services
                             sampleStatus.approvedByID = histoResultSaveRequestModle.createdById;
                             sampleStatus.resutDoneBy = histoResultSaveRequestModle.createdBy;
                             sampleStatus.approvedbyName = histoResultSaveRequestModle.createdBy;
+                            sampleStatus.approvalDoctor = histoResultSaveRequestModle.approvaldoctorId;
                         }
                         else
                         {

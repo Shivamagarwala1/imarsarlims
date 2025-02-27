@@ -8,5 +8,6 @@ namespace iMARSARLIMS.Interface
         byte[] GetPatientReportType2(string TestId);
         byte[] GetPatientReportType3(string TestId);
         Task<ServiceStatusResponseModel> ReportHoldUnHold(string TestId, int isHold, int holdBy, string holdReason);
+        Task<ServiceStatusResponseModel> ReportNotApprove(string TestId,string userid);
     }
 }

@@ -39,6 +39,76 @@ namespace iMARSARLIMS.Controllers.transactionController
                 };
             }
         }
+        [HttpGet("GetHistoresult")]
+        public async Task<ServiceStatusResponseModel> GetHistoresult(int testid)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetHistoresult(testid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetMicroresult")]
+        public async Task<ServiceStatusResponseModel> GetMicroresult(int testid)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetMicroresult(testid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetPaymentDetails")]
+        public async Task<ServiceStatusResponseModel> GetPaymentDetails(string workOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetPaymentDetails(workOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("SaveSettelmentDetail")]
+        public async Task<ServiceStatusResponseModel> SaveSettelmentDetail(List<settelmentRequestModel> settelments)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.SaveSettelmentDetail(settelments);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         [HttpPost("GetPatientDocumnet")]
         public IActionResult GetPatientDocumnet(string workOrderId)
