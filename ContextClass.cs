@@ -11,6 +11,7 @@ namespace iMARSARLIMS
     {
         public DbSet<DoctorApprovalSign> DoctorApprovalSign { get; set; }
         public DbSet<tnx_InvestigationAttchment> tnx_InvestigationAttchment { get; set; }
+        public DbSet<tnx_InvestigationAddReport> tnx_InvestigationAddReport { get; set; }
         public DbSet<area_master> area_master {  get; set; }
         public DbSet<centreMaster> centreMaster {  get; set; }
         public DbSet<tnx_Booking> tnx_Booking { get; set; }
@@ -127,7 +128,11 @@ namespace iMARSARLIMS
             modelBuilder.Entity<tnx_BookingStatus>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_BookingItem>().HasKey(x => x.id);
-            modelBuilder.Entity<tnx_BookingItem>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<tnx_BookingItem>().Property(x => x.id).ValueGeneratedOnAdd(); 
+
+
+            modelBuilder.Entity<tnx_InvestigationAddReport>().HasKey(x => x.id);
+            modelBuilder.Entity<tnx_InvestigationAddReport>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_InvestigationRemarks>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_InvestigationRemarks>().Property(x => x.id).ValueGeneratedOnAdd();

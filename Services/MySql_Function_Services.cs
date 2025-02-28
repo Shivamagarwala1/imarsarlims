@@ -24,6 +24,17 @@ namespace iMARSARLIMS.Services
            .FirstOrDefault()?.Value;
             return result;
         }
+        public string GetBarcodeno(int centreId)
+        {
+            string sql = "Get_barcodeSeries();";
+            
+
+            var result = db.Set<SingleStringResponseModel>()
+           .FromSqlRaw(sql)
+           .AsEnumerable()
+           .FirstOrDefault()?.Value;
+            return result;
+        }
 
     }
 }

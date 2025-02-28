@@ -59,6 +59,7 @@ namespace iMARSARLIMS.Services
                             };
 
                         }
+                       
                         var bookingPatientData = CreateBookingPatient(tnxBookingPatient);
                         var bookingPatient = db.tnx_BookingPatient.Add(bookingPatientData);
                         await db.SaveChangesAsync();
@@ -66,6 +67,16 @@ namespace iMARSARLIMS.Services
                         var workOrderId = _MySql_Function_Services.Getworkorderid(tnxBookingPatient.centreId, "W");
                         var transactionId = await SaveBooking(tnxBookingPatient.addBooking, patientId, workOrderId);
                         await SaveBookingStatus(TnxBookingData.addBookingStatus, patientId, transactionId);
+                        var preprintedbarcode = db.centreMaster.Where(c => c.centreId == tnxBookingPatient.centreId).Select(c => c.isPrePrintedBarcode).FirstOrDefault();
+                        var barcodeno = "";
+                        if (preprintedbarcode == 0)
+                        {
+                            barcodeno = _MySql_Function_Services.GetBarcodeno(tnxBookingPatient.centreId);
+                          //  foreach(var item in TnxBookingData.addBookingItem)
+                          //  {
+                          //      item.barcodeNo= barcodeno;
+                          //  }
+                        }
                         await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
                         await Savepaymentdeatil(TnxBookingData.addpaymentdetail, patientId, workOrderId, transactionId);
                         await transaction.CommitAsync();

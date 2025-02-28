@@ -6,7 +6,7 @@ using iMARSARLIMS.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace iMARSARLIMS.Controllers
+namespace iMARSARLIMS.Controllers.TransactionController
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -17,16 +17,33 @@ namespace iMARSARLIMS.Controllers
         public tnx_InvestigationAttchmentController(ContextClass context, ILogger<BaseController<tnx_InvestigationAttchment>> logger, ItnxInvestigationAttachmentService tnxInvestigationAttachmentService) : base(context, logger)
         {
             db = context;
-            this._tnxInvestigationAttachmentService = tnxInvestigationAttachmentService;
+            _tnxInvestigationAttachmentService = tnxInvestigationAttachmentService;
         }
         protected override IQueryable<tnx_InvestigationAttchment> DbSet => db.tnx_InvestigationAttchment.AsNoTracking().OrderBy(o => o.id);
 
         [HttpPost("AddReport")]
-        public async Task<ServiceStatusResponseModel> AddReport(tnx_InvestigationAttchment attchment)
+        public async Task<ServiceStatusResponseModel> AddReport(tnx_InvestigationAddReport Report)
         {
             try
             {
-                var result = await _tnxInvestigationAttachmentService.AddReport(attchment);
+                var result = await _tnxInvestigationAttachmentService.AddReport(Report);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("AddAttchment")]
+        public async Task<ServiceStatusResponseModel> AddAttchment(tnx_InvestigationAttchment attchment)
+        {
+            try
+            {
+                var result = await _tnxInvestigationAttachmentService.AddAttchment(attchment);
                 return result;
             }
             catch (Exception ex)
