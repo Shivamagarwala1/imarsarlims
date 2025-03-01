@@ -148,5 +148,52 @@ namespace iMARSARLIMS.Controllers.transactionController
                 return BadRequest(ex.Message);
             }
         }
+
+
+        [HttpGet("PrintBarcode")]
+        public async Task<ServiceStatusResponseModel> PrintBarcode(string BarcodeNO)
+        {
+            try
+            {
+                var barcodedata = await (from tbi in db.tnx_BookingItem
+                                   join tb in db.tnx_Booking on tbi.workOrderId equals tb.workOrderId
+                                   where tbi.barcodeNo == BarcodeNO
+                                   select new
+                                   {
+                                       tb.name,
+                                       age = string.Concat(tb.ageYear, " Y ", tb.gender),
+                                       tbi.barcodeNo,
+                                       tb.workOrderId,
+                                       tbi.sampleTypeName,
+                                       bookingDate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                   }).ToListAsync();
+
+                string returnStr = "";
+                foreach (var item in barcodedata)
+                {
+                    returnStr += (returnStr == "" ? "" : "^") + item.name + "," +
+                                item.age + ",a," + item.barcodeNo +
+                                 "" + "," +
+                                 item.workOrderId + "," + item.sampleTypeName
+                                  + "," + item.bookingDate;
+                }
+
+                //  Window.location = "barcode://?cmd=" + returnStr;
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = returnStr
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }

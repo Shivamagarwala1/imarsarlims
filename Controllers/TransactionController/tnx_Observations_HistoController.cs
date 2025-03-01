@@ -41,5 +41,26 @@ namespace iMARSARLIMS.Controllers.TransactionController
                 return StatusCode(500, $"An error occurred while processing the request: {ex.Message}");
             }
         }
+        [HttpGet("GetMicroReport")]
+        public IActionResult GetMicroReport(string testId)
+        {
+            try
+            {
+                var result = _historeportservices.GetMicroReport(testId);
+                if (result == null || result.Length == 0)
+                {
+                    return NotFound($"test ID '{testId}' not found or no report data available.");
+                }
+                MemoryStream ms = new MemoryStream(result);
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = $"Microreport_{testId}.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while processing the request: {ex.Message}");
+            }
+        }
     }
 }

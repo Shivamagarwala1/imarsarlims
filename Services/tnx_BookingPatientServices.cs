@@ -72,10 +72,10 @@ namespace iMARSARLIMS.Services
                         if (preprintedbarcode == 0)
                         {
                             barcodeno = _MySql_Function_Services.GetBarcodeno(tnxBookingPatient.centreId);
-                          //  foreach(var item in TnxBookingData.addBookingItem)
-                          //  {
-                          //      item.barcodeNo= barcodeno;
-                          //  }
+                            foreach(var item in TnxBookingData.addBookingItem)
+                            {
+                                item.barcodeNo= barcodeno;
+                            }
                         }
                         await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
                         await Savepaymentdeatil(TnxBookingData.addpaymentdetail, patientId, workOrderId, transactionId);
@@ -297,12 +297,12 @@ namespace iMARSARLIMS.Services
                 {
                     var itemdetails = (from iom in db.ItemObservationMapping
                                        join im in db.itemMaster on iom.observationID equals im.itemId
-                                       where iom.itemId == 3
+                                       where iom.itemId == bookingItem.itemId
                                        join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
                                        from rtr in rtrJoin.DefaultIfEmpty() // Left Join
                                        join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
                                        from rtt in rttJoin.DefaultIfEmpty() // Left Join
-                                       where rtt == null || rtt.centreId == 1 // Allow null rtt or filter by centreId
+                                       where rtt == null || rtt.centreId == bookingItem.centreId // Allow null rtt or filter by centreId
                                        select new
                                        {
                                            testCode = im.code,

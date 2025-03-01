@@ -14,11 +14,7 @@
         public byte? reportType { get; set; }
         public short organismId { get; set; }
         public string? organismName { get; set; }
-        public short antibiticId { get; set; }
-        public string? antibitiName { get; set; }
         public string? colonyCount { get; set; }
-        public string? interpretation { get; set; }
-        public string? mic { get; set; }
         public string? positivity { get; set; }
         public string? intensity { get; set; }
         public byte? reportStatus { get; set; }
@@ -29,5 +25,15 @@
         public string createdBy { get; set; }
         public int createdById { get; set; }
         public int? appcovaldoctorId { get; set; }
+        public List<antibioticData> selectedAntibiotic {  get; set; }
+    }
+
+    public class antibioticData
+    {
+        public short antibiticId { get; set; }
+        public string? antibitiName { get; set; }
+        public string? interpretation { get; set; }
+        public string? mic { get; set; }
+        
     }
 }

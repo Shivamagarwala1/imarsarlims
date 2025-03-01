@@ -232,7 +232,7 @@ namespace iMARSARLIMS.Services
             {
                 var data = await (from tbi in db.tnx_BookingItem
                                   join tr in db.tnx_Observations_Micro_Flowcyto on tbi.id equals tr.testId into trJoin
-                                  from tr in trJoin.DefaultIfEmpty()  // Left join: if no matching receipt detail, it will be null
+                                  from tr in trJoin.DefaultIfEmpty()
                                   where tbi.id == testid
                                   select new
                                   {
@@ -242,24 +242,70 @@ namespace iMARSARLIMS.Services
                                       tbi.approvedByID,
                                       testId = tbi.id,
                                       antibiticId = tr != null ? tr.antibiticId : 0,
-                                      antibitiName = !string.IsNullOrEmpty(tr.antibitiName) ? tr.antibitiName : "",
-                                      mic = !string.IsNullOrEmpty(tr.mic) ? tr.mic : "",
-                                      interpretation = !string.IsNullOrEmpty(tr.interpretation) ? tr.interpretation : "",
-                                      colonyCount = !string.IsNullOrEmpty(tr.colonyCount) ? tr.colonyCount : "",
-                                      positivity = !string.IsNullOrEmpty(tr.positivity) ? tr.positivity : "",
+                                      antibitiName = tr != null && !string.IsNullOrEmpty(tr.antibitiName) ? tr.antibitiName : "",
+                                      mic = tr != null && !string.IsNullOrEmpty(tr.mic) ? tr.mic : "",
+                                      interpretation = tr != null && !string.IsNullOrEmpty(tr.interpretation) ? tr.interpretation : "",
+                                      colonyCount = tr != null && !string.IsNullOrEmpty(tr.colonyCount) ? tr.colonyCount : "",
+                                      positivity = tr != null && !string.IsNullOrEmpty(tr.positivity) ? tr.positivity : "",
                                       organismId = tr != null ? tr.organismId : 0,
-                                      organismName = !string.IsNullOrEmpty(tr.organismName) ? tr.organismName : "",
-                                      intensity = !string.IsNullOrEmpty(tr.intensity) ? tr.intensity : "",
-                                      comments = !string.IsNullOrEmpty(tr.comments) ? tr.comments : ""
-
+                                      organismName = tr != null && !string.IsNullOrEmpty(tr.organismName) ? tr.organismName : "",
+                                      intensity = tr != null && !string.IsNullOrEmpty(tr.intensity) ? tr.intensity : "",
+                                      comments = tr != null && !string.IsNullOrEmpty(tr.comments) ? tr.comments : "",
+                                      intrim = tr != null ? tr.reportStatus : null,
+                                      result = tr != null && !string.IsNullOrEmpty(tr.result) ? tr.result : "",
                                   }).ToListAsync();
+
+                var groupedData = data.GroupBy(m => new
+                {
+                    m.isApproved,
+                    m.hold,
+                    m.approvalDoctor,
+                    m.approvedByID,
+                    m.testId,
+                    m.colonyCount,
+                    m.positivity,
+                    m.organismId,
+                    m.organismName,
+                    m.intensity,
+                    m.comments,
+                    m.intrim,
+                    m.result,
+                })
+                .Select(group => new
+                {
+                    isApproved = group.Key.isApproved,
+                    hold = group.Key.hold,
+                    approvalDoctor = group.Key.approvalDoctor,
+                    approvedByID = group.Key.approvedByID,
+                    testId = group.Key.testId,
+                    colonyCount = group.Key.colonyCount,
+                    positivity = group.Key.positivity,
+                    organismId = group.Key.organismId,
+                    organismName = group.Key.organismName,
+                    intensity = group.Key.intensity,
+                    comments = group.Key.comments,
+                    intrim = group.Key.intrim,
+                    result = group.Key.result,
+                    AntibiticMapped = group
+                        .Where(child => child.antibiticId != 0)
+                        .Select(child => new
+                        {
+                            antibiticId = child.antibiticId,
+                            antibitiName = child.antibitiName,
+                            mic = child.mic,
+                            interpretation = child.interpretation,
+                        }).ToList()
+                })
+                .OrderBy(parent => parent.organismId)
+                .ToList();
+
 
                 if (data != null)
                 {
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Data = data
+                        Data = groupedData
                     };
                 }
                 else

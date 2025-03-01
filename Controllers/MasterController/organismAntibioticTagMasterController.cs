@@ -71,6 +71,35 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
+        [HttpGet("OrganismAntibioticeTagging")]
+        public async Task<ServiceStatusResponseModel> OrganismAntibioticeTagging(int OrganismId)
+        {
+            try
+            {
+                var data =await  (from otm in db.organismAntibioticTagMaster
+                                  join om in db.organismAntibioticMaster on otm.antibiticId equals om.id
+                                  where otm.organismId == OrganismId
+                                  select new
+                            {
+                                om.id,
+                                Antibiotic = om.organismAntibiotic,
+                            }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }
  

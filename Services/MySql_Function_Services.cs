@@ -26,7 +26,7 @@ namespace iMARSARLIMS.Services
         }
         public string GetBarcodeno(int centreId)
         {
-            string sql = "Get_barcodeSeries();";
+            string sql = "select Get_barcodeSeries();";
             
 
             var result = db.Set<SingleStringResponseModel>()

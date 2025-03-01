@@ -55,5 +55,26 @@ namespace iMARSARLIMS.Controllers.TransactionController
                 };
             }
         }
+
+        [HttpGet("ViewDocument")]
+        public async Task<IActionResult> ViewDocument(string Documentpath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(Documentpath) || !System.IO.File.Exists(Documentpath))
+                {
+                    return NotFound("Document not found.");
+                }
+
+                var fileBytes = await System.IO.File.ReadAllBytesAsync(Documentpath);
+
+                return File(fileBytes, "application/pdf", Path.GetFileName(Documentpath));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

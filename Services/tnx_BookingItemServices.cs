@@ -1,18 +1,10 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
-using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MySqlX.XDevAPI.Common;
-using OfficeOpenXml.Table.PivotTable;
-using System.Buffers;
-using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
 
 namespace iMARSARLIMS.Services
 {
@@ -63,7 +55,10 @@ namespace iMARSARLIMS.Services
             // Apply date filter
             if (sampleProcessingRequestModel.fromDate.HasValue && sampleProcessingRequestModel.toDate.HasValue)
             {
-                query = query.Where(q => q.createdDateTime >= sampleProcessingRequestModel.fromDate.Value && q.createdDateTime <= sampleProcessingRequestModel.toDate.Value);
+                var fromDate = sampleProcessingRequestModel.fromDate.Value.Date; // Strip the time portion
+                var toDate = sampleProcessingRequestModel.toDate.Value.Date.AddDays(1).AddSeconds(-1); // Include the entire end date
+
+                query = query.Where(q => q.createdDateTime >= fromDate && q.createdDateTime <= toDate);
             }
 
 
@@ -161,7 +156,7 @@ namespace iMARSARLIMS.Services
             {
                 case "S":
                     sampleStatus.isSampleCollected = "S";
-                    sampleStatus.sampleCollectedby = Convert.ToString(sampleProcessingResponseModel.empId);
+                    sampleStatus.sampleCollectedID = sampleProcessingResponseModel.empId;
                     sampleStatus.sampleCollectionDate = DateTime.Now;
                     break;
 
@@ -859,13 +854,13 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var patientinfo = (from pb in db.tnx_BookingPatient
+                var patientinfo = await (from pb in db.tnx_BookingPatient
                                    join b in db.tnx_Booking on pb.patientId equals b.patientId
-                                   join bi in db.tnx_BookingItem on b.transactionId equals bi.transactionId
+
                                    where b.workOrderId == searchValue
                                    select new
                                    {
-                                       bi.id,
+
                                        b.mobileNo,
                                        b.patientId,
                                        b.workOrderId,
@@ -885,18 +880,10 @@ namespace iMARSARLIMS.Services
                                        b.OtherLabReferID,
                                        b.otherLabRefer,
                                        b.uploadDocument,
-                                       bi.itemId,
-                                       bi.investigationName,
-                                       bi.mrp,
-                                       bi.rate,
-                                       bi.discount,
-                                       bi.netAmount,
-                                       bi.itemType,
-                                       bi.deliveryDate,
-                                       bi.isUrgent,
-                                       bi.centreId,
-                                       b.rateId
-                                   }).ToList();
+                                       b.centreId,
+                                       b.rateId,
+                                       itemdetail = (db.tnx_BookingItem.Where(bi => bi.workOrderId == b.workOrderId && bi.transactionId == b.transactionId && bi.isRemoveItem==0).ToList())
+                                   }).FirstOrDefaultAsync();
                 if (patientinfo != null)
                 {
                     return new ServiceStatusResponseModel
@@ -1184,83 +1171,83 @@ namespace iMARSARLIMS.Services
 
         private void updateBookingItemDetail(tnx_BookingItem tnxBookItem, tnx_BookingItem bookingItem)
         {
-            //tnxBookItem.workOrderId = bookingItem.workOrderId;
-            //tnxBookItem.transactionId = bookingItem.transactionId;
-            //tnxBookItem.testcode = bookingItem.testcode;
-            //tnxBookItem.itemId = bookingItem.itemId;
-            //tnxBookItem.packageID = bookingItem.packageID;
-            //tnxBookItem.deptId = bookingItem.deptId;
-            //tnxBookItem.departmentName = bookingItem.departmentName;
-            //tnxBookItem.barcodeNo = bookingItem.barcodeNo;
-            //tnxBookItem.investigationName = bookingItem.investigationName;
-            //tnxBookItem.isPackage = bookingItem.isPackage;
-            //tnxBookItem.packageName = bookingItem.packageName;
-            //tnxBookItem.itemType = bookingItem.itemType;
-            //tnxBookItem.mrp = bookingItem.mrp;
-            //tnxBookItem.rate = bookingItem.rate;
-            //tnxBookItem.discount = bookingItem.discount;
-            //tnxBookItem.netAmount = bookingItem.netAmount;
-            //tnxBookItem.packMrp = bookingItem.packMrp;
-            //tnxBookItem.packItemNet = bookingItem.packItemNet;
-            //tnxBookItem.packItemRate = bookingItem.packItemRate;
-            //tnxBookItem.packItemDiscount = bookingItem.packItemDiscount;
-            //tnxBookItem.reportType = bookingItem.reportType;
-            //tnxBookItem.centreId = bookingItem.centreId;
-            //tnxBookItem.sessionCentreid = bookingItem.sessionCentreid;
-            //tnxBookItem.isSra = bookingItem.isSra;
-            //tnxBookItem.isMachineOrder = bookingItem.isMachineOrder;
-            //tnxBookItem.isEmailsent = bookingItem.isEmailsent;
-            //tnxBookItem.sampleTypeId = bookingItem.sampleTypeId;
-            //tnxBookItem.sampleTypeName = bookingItem.sampleTypeName;
-            //tnxBookItem.sampleCollectionDate = bookingItem.sampleCollectionDate;
-            //tnxBookItem.sampleCollectedby = bookingItem.sampleCollectedby;
-            //tnxBookItem.sampleCollectedID = bookingItem.sampleCollectedID;
-            //tnxBookItem.sampleReceiveDate = bookingItem.sampleReceiveDate;
-            //tnxBookItem.sampleReceivedBY = bookingItem.sampleReceivedBY;
-            //tnxBookItem.resultDate = bookingItem.resultDate;
-            //tnxBookItem.resultDoneByID = bookingItem.resultDoneByID;
-            //tnxBookItem.resutDoneBy = bookingItem.resutDoneBy;
-            //tnxBookItem.isApproved = bookingItem.isApproved;
-            //tnxBookItem.approvedDate = bookingItem.approvedDate;
-            //tnxBookItem.approvedByID = bookingItem.approvedByID;
-            //tnxBookItem.approvedbyName = bookingItem.approvedbyName;
-            //tnxBookItem.notApprovedBy = bookingItem.notApprovedBy;
-            //tnxBookItem.notApprovedDate = bookingItem.notApprovedDate;
-            //tnxBookItem.isActive = bookingItem.isActive;
-            //tnxBookItem.isReporting = bookingItem.isReporting;
-            //tnxBookItem.isCritical = bookingItem.isCritical;
-            //tnxBookItem.deliveryDate = bookingItem.deliveryDate;
-            //tnxBookItem.isInvoiceCreated = bookingItem.isInvoiceCreated;
-            //tnxBookItem.invoiceNumber = bookingItem.invoiceNumber;
-            //tnxBookItem.isUrgent = bookingItem.isUrgent;
-            //tnxBookItem.isSampleCollected = bookingItem.isSampleCollected;
-            //tnxBookItem.samplecollectionremarks = bookingItem.samplecollectionremarks;
-            //tnxBookItem.departmentReceiveRemarks = bookingItem.departmentReceiveRemarks;
-            //tnxBookItem.departmentReceiveDate = bookingItem.departmentReceiveDate;
-            //tnxBookItem.departmentReceiveBy = bookingItem.departmentReceiveBy;
-            //tnxBookItem.departmentReceiveByID = bookingItem.departmentReceiveByID;
+            tnxBookItem.workOrderId = bookingItem.workOrderId;
+            tnxBookItem.transactionId = bookingItem.transactionId;
+            tnxBookItem.testcode = bookingItem.testcode;
+            tnxBookItem.itemId = bookingItem.itemId;
+            tnxBookItem.packageID = bookingItem.packageID;
+            tnxBookItem.deptId = bookingItem.deptId;
+            tnxBookItem.departmentName = bookingItem.departmentName;
+            tnxBookItem.barcodeNo = bookingItem.barcodeNo;
+            tnxBookItem.investigationName = bookingItem.investigationName;
+            tnxBookItem.isPackage = bookingItem.isPackage;
+            tnxBookItem.packageName = bookingItem.packageName;
+            tnxBookItem.itemType = bookingItem.itemType;
+            tnxBookItem.mrp = bookingItem.mrp;
+            tnxBookItem.rate = bookingItem.rate;
+            tnxBookItem.discount = bookingItem.discount;
+            tnxBookItem.netAmount = bookingItem.netAmount;
+            tnxBookItem.packMrp = bookingItem.packMrp;
+            tnxBookItem.packItemNet = bookingItem.packItemNet;
+            tnxBookItem.packItemRate = bookingItem.packItemRate;
+            tnxBookItem.packItemDiscount = bookingItem.packItemDiscount;
+            tnxBookItem.reportType = bookingItem.reportType;
+            tnxBookItem.centreId = bookingItem.centreId;
+            tnxBookItem.sessionCentreid = bookingItem.sessionCentreid;
+            tnxBookItem.isSra = bookingItem.isSra;
+            tnxBookItem.isMachineOrder = bookingItem.isMachineOrder;
+            tnxBookItem.isEmailsent = bookingItem.isEmailsent;
+            tnxBookItem.sampleTypeId = bookingItem.sampleTypeId;
+            tnxBookItem.sampleTypeName = bookingItem.sampleTypeName;
+            tnxBookItem.sampleCollectionDate = bookingItem.sampleCollectionDate;
+            tnxBookItem.sampleCollectedby = bookingItem.sampleCollectedby;
+            tnxBookItem.sampleCollectedID = bookingItem.sampleCollectedID;
+            tnxBookItem.sampleReceiveDate = bookingItem.sampleReceiveDate;
+            tnxBookItem.sampleReceivedBY = bookingItem.sampleReceivedBY;
+            tnxBookItem.resultDate = bookingItem.resultDate;
+            tnxBookItem.resultDoneByID = bookingItem.resultDoneByID;
+            tnxBookItem.resutDoneBy = bookingItem.resutDoneBy;
+            tnxBookItem.isApproved = bookingItem.isApproved;
+            tnxBookItem.approvedDate = bookingItem.approvedDate;
+            tnxBookItem.approvedByID = bookingItem.approvedByID;
+            tnxBookItem.approvedbyName = bookingItem.approvedbyName;
+            tnxBookItem.notApprovedBy = bookingItem.notApprovedBy;
+            tnxBookItem.notApprovedDate = bookingItem.notApprovedDate;
+            tnxBookItem.isActive = bookingItem.isActive;
+            tnxBookItem.isReporting = bookingItem.isReporting;
+            tnxBookItem.isCritical = bookingItem.isCritical;
+            tnxBookItem.deliveryDate = bookingItem.deliveryDate;
+            tnxBookItem.isInvoiceCreated = bookingItem.isInvoiceCreated;
+            tnxBookItem.invoiceNumber = bookingItem.invoiceNumber;
+            tnxBookItem.isUrgent = bookingItem.isUrgent;
+            tnxBookItem.isSampleCollected = bookingItem.isSampleCollected;
+            tnxBookItem.samplecollectionremarks = bookingItem.samplecollectionremarks;
+            tnxBookItem.departmentReceiveRemarks = bookingItem.departmentReceiveRemarks;
+            tnxBookItem.departmentReceiveDate = bookingItem.departmentReceiveDate;
+            tnxBookItem.departmentReceiveBy = bookingItem.departmentReceiveBy;
+            tnxBookItem.departmentReceiveByID = bookingItem.departmentReceiveByID;
             tnxBookItem.isRemoveItem = bookingItem.isRemoveItem;
-            //tnxBookItem.sampleRejectionBy = bookingItem.sampleRejectionBy;
-            //tnxBookItem.sampleRejectionByName = bookingItem.sampleRejectionByName;
-            //tnxBookItem.sampleRejectionOn = bookingItem.sampleRejectionOn;
-            //tnxBookItem.interpretationId = bookingItem.interpretationId;
-            //tnxBookItem.approvalDoctor = bookingItem.approvalDoctor;
-            //tnxBookItem.isOuthouse = bookingItem.isOuthouse;
-            //tnxBookItem.outhouseLab = bookingItem.outhouseLab;
-            //tnxBookItem.labName = bookingItem.labName;
-            //tnxBookItem.outhouseDoneBy = bookingItem.outhouseDoneBy;
-            //tnxBookItem.outhouseDoneOn = bookingItem.outhouseDoneOn;
-            //tnxBookItem.sampleRecollectedby = bookingItem.sampleRecollectedby;
-            //tnxBookItem.sampleRecollectedDate = bookingItem.sampleRecollectedDate;
-            //tnxBookItem.isrerun = bookingItem.isrerun;
-            //tnxBookItem.invoiceNo = bookingItem.invoiceNo;
-            //tnxBookItem.invoiceDate = bookingItem.invoiceDate;
-            //tnxBookItem.invoiceCycle = bookingItem.invoiceCycle;
-            //tnxBookItem.invoiceAmount = bookingItem.invoiceAmount;
-            //tnxBookItem.invoiceCreatedBy = bookingItem.invoiceCreatedBy;
-            //tnxBookItem.invoiceNoOld = bookingItem.invoiceNoOld;
-            //tnxBookItem.remarks = bookingItem.remarks;
-            //tnxBookItem.showonReportdate = bookingItem.showonReportdate;
+            tnxBookItem.sampleRejectionBy = bookingItem.sampleRejectionBy;
+            tnxBookItem.sampleRejectionByName = bookingItem.sampleRejectionByName;
+            tnxBookItem.sampleRejectionOn = bookingItem.sampleRejectionOn;
+            tnxBookItem.interpretationId = bookingItem.interpretationId;
+            tnxBookItem.approvalDoctor = bookingItem.approvalDoctor;
+            tnxBookItem.isOuthouse = bookingItem.isOuthouse;
+            tnxBookItem.outhouseLab = bookingItem.outhouseLab;
+            tnxBookItem.labName = bookingItem.labName;
+            tnxBookItem.outhouseDoneBy = bookingItem.outhouseDoneBy;
+            tnxBookItem.outhouseDoneOn = bookingItem.outhouseDoneOn;
+            tnxBookItem.sampleRecollectedby = bookingItem.sampleRecollectedby;
+            tnxBookItem.sampleRecollectedDate = bookingItem.sampleRecollectedDate;
+            tnxBookItem.isrerun = bookingItem.isrerun;
+            tnxBookItem.invoiceNo = bookingItem.invoiceNo;
+            tnxBookItem.invoiceDate = bookingItem.invoiceDate;
+            tnxBookItem.invoiceCycle = bookingItem.invoiceCycle;
+            tnxBookItem.invoiceAmount = bookingItem.invoiceAmount;
+            tnxBookItem.invoiceCreatedBy = bookingItem.invoiceCreatedBy;
+            tnxBookItem.invoiceNoOld = bookingItem.invoiceNoOld;
+            tnxBookItem.remarks = bookingItem.remarks;
+            tnxBookItem.showonReportdate = bookingItem.showonReportdate;
             tnxBookItem.isActive = bookingItem.isActive;
             tnxBookItem.updateById = bookingItem.updateById;
             tnxBookItem.updateDateTime = bookingItem.updateDateTime;
@@ -1482,147 +1469,111 @@ namespace iMARSARLIMS.Services
 
         async Task<ServiceStatusResponseModel> Itnx_BookingItemServices.SaveMicroResult(MicroResultSaveRequestModel microFlowcyto)
         {
-            using (var transaction = await db.Database.BeginTransactionAsync())
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            try
             {
-                try
-                {
-                    if (microFlowcyto.id == 0)
-                    {
-                        var HistoResultsave = CreateMicroResult(microFlowcyto);
-                        db.tnx_Observations_Micro_Flowcyto.Add(HistoResultsave);
-                        await db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        var Microresult = await db.tnx_Observations_Micro_Flowcyto.Where(b => b.id == microFlowcyto.id).FirstOrDefaultAsync();
-                        if (Microresult != null)
-                        {
-                           // var historesultlog = createMicroesultLog(Microresult);
-                           // db.tnx_Observations_Histo_Log.Add(historesultlog);
-                           // await db.SaveChangesAsync();
-                            UpdateMicroResult(Microresult, microFlowcyto);
-                            db.tnx_Observations_Micro_Flowcyto.Update(Microresult);
-                        }
-                        await db.SaveChangesAsync();
+                // Remove old data
+                var dataOld = db.tnx_Observations_Micro_Flowcyto
+                                .Where(t => t.testId == microFlowcyto.testId)
+                                .ToList();
+                db.tnx_Observations_Micro_Flowcyto.RemoveRange(dataOld);
 
-                    }
-                    var sampleStatus = await db.tnx_BookingItem
-                        .Where(bi => bi.id == microFlowcyto.testId)
-                        .SingleOrDefaultAsync();
-                    var TestStatus = "";
-                    if (sampleStatus != null)
-                    {
-                        if (microFlowcyto.isApproved.ToString() == "1")
-                        {
-                            TestStatus = "Result Save and Approved";
-                            sampleStatus.isResultDone = 1;
-                            sampleStatus.isApproved = 1;
-                            sampleStatus.resultDoneByID = microFlowcyto.createdById;
-                            sampleStatus.approvedByID = microFlowcyto.createdById;
-                            sampleStatus.resutDoneBy = microFlowcyto.createdBy;
-                            sampleStatus.approvedbyName = microFlowcyto.createdBy;
-                        }
-                        else
-                        {
-                            TestStatus = "Result Saved";
-                            sampleStatus.isResultDone = 1;
-                            sampleStatus.resultDoneByID = microFlowcyto.createdById;
-                            sampleStatus.resutDoneBy = microFlowcyto.createdBy;
-                        }
-                        db.tnx_BookingItem.Update(sampleStatus);
-                        await db.SaveChangesAsync();
-                        tnx_BookingStatus bookingStatus = new tnx_BookingStatus
-                        {
-                            id = 0,
-                            transactionId = microFlowcyto.transactionId,
-                           
-                            status = TestStatus,
-                            testId = (int)microFlowcyto.testId,
-                            createdById = microFlowcyto.createdById,
-                            createdDateTime = DateTime.Now,
-                        };
-                        db.tnx_BookingStatus.Add(bookingStatus);
-                        await db.SaveChangesAsync();
-                    }
-                    await transaction.CommitAsync();
-                    return new ServiceStatusResponseModel
-                    {
-                        Success = true,
-                        Message = "All records saved successfully"
-                    };
-                }
-                catch (Exception ex)
+                // Ensure selectedAntibiotic is not null
+                microFlowcyto.selectedAntibiotic ??= new List<antibioticData>();
+
+                // Add new data
+                var itemsToAdd = microFlowcyto.selectedAntibiotic
+                                    .ConvertAll(item => CreateMicroResult(item, microFlowcyto));
+
+                db.tnx_Observations_Micro_Flowcyto.AddRange(itemsToAdd);
+
+                // Update booking item status
+                var sampleStatus = await db.tnx_BookingItem
+                                           .Where(bi => bi.id == microFlowcyto.testId)
+                                           .SingleOrDefaultAsync();
+
+                if (sampleStatus != null)
                 {
-                    await transaction.RollbackAsync();
-                    return new ServiceStatusResponseModel
+                    string testStatus = microFlowcyto.isApproved == 1 ?
+                                        "Result Save and Approved" : "Result Saved";
+
+                    sampleStatus.isResultDone = 1;
+                    sampleStatus.resultDoneByID = microFlowcyto.createdById;
+                    sampleStatus.resutDoneBy = microFlowcyto.createdBy;
+
+                    if (microFlowcyto.isApproved == 1)
                     {
-                        Success = false,
-                        Message = ex.InnerException?.Message ?? "An error occurred."
+                        sampleStatus.isApproved = 1;
+                        sampleStatus.approvedByID = microFlowcyto.createdById;
+                        sampleStatus.approvedbyName = microFlowcyto.createdBy;
+                    }
+
+                    db.tnx_BookingItem.Update(sampleStatus);
+
+                    // Log booking status
+                    var bookingStatus = new tnx_BookingStatus
+                    {
+                        id = 0,
+                        transactionId = microFlowcyto.transactionId,
+                        status = testStatus,
+                        testId = microFlowcyto.testId,
+                        createdById = microFlowcyto.createdById,
+                        createdDateTime = DateTime.Now
                     };
+
+                    db.tnx_BookingStatus.Add(bookingStatus);
                 }
+
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = "All records saved successfully"
+                };
             }
-
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.ToString() // Logs full exception details
+                };
+            }
         }
 
-
-
-        private tnx_Observations_Micro_Flowcyto CreateMicroResult(MicroResultSaveRequestModel Microresult)
+        private tnx_Observations_Micro_Flowcyto CreateMicroResult(antibioticData antibioticdata, MicroResultSaveRequestModel microResult)
         {
             return new tnx_Observations_Micro_Flowcyto
             {
-                id = Microresult.id,
-                testId = Microresult.testId,
-                labTestId = Microresult.labTestId,
-                transactionId = Microresult.transactionId,
-                observationName = Microresult.observationName,
-                result = Microresult.result,
-                machineID = Microresult.machineID,
-                flag = Microresult.flag,
-                isBold = Microresult.isBold,
-                reportType = Microresult.reportType,
-                organismId = Microresult.organismId,
-                organismName = Microresult.organismName,
-                antibiticId = Microresult.antibiticId,
-                antibitiName = Microresult.antibitiName,
-                colonyCount = Microresult.colonyCount,
-                interpretation = Microresult.interpretation,
-                mic = Microresult.mic,
-                positivity = Microresult.positivity,
-                intensity = Microresult.intensity,
-                reportStatus = Microresult.reportStatus,
-                approvedBy = Microresult.approvedBy,
-                approvedName = Microresult.approvedName,
-                comments = Microresult.comments
+                testId = microResult.testId,
+                labTestId = microResult.labTestId,
+                transactionId = microResult.transactionId,
+                observationName = microResult.observationName,
+                result = microResult.result,
+                machineID = microResult.machineID,
+                flag = microResult.flag,
+                isBold = microResult.isBold,
+                reportType = microResult.reportType,
+                organismId = microResult.organismId,
+                organismName = microResult.organismName,
+                antibiticId = antibioticdata.antibiticId,
+                antibitiName = antibioticdata.antibitiName,
+                colonyCount = microResult.colonyCount,
+                interpretation = antibioticdata.interpretation,
+                mic = antibioticdata.mic,
+                positivity = microResult.positivity,
+                intensity = microResult.intensity,
+                reportStatus = microResult.reportStatus,
+                approvedBy = microResult.approvedBy,
+                approvedName = microResult.approvedName,
+                comments = microResult.comments
             };
-
         }
 
-        private void UpdateMicroResult(tnx_Observations_Micro_Flowcyto historesult, MicroResultSaveRequestModel Microresult)
-        {
-            historesult.testId = Microresult.testId;
-            historesult.labTestId = Microresult.labTestId;
-            historesult.transactionId = Microresult.transactionId;
-            historesult.observationName = Microresult.observationName;
-            historesult.result = Microresult.result;
-            historesult.machineID = Microresult.machineID;
-            historesult.flag = Microresult.flag;
-            historesult.isBold = Microresult.isBold;
-            historesult.reportType = Microresult.reportType;
-            historesult.organismId = Microresult.organismId;
-            historesult.organismName = Microresult.organismName;
-            historesult.antibiticId = Microresult.antibiticId;
-            historesult.antibitiName = Microresult.antibitiName;
-            historesult.colonyCount = Microresult.colonyCount;
-            historesult.interpretation = Microresult.interpretation;
-            historesult.mic = Microresult.mic;
-            historesult.positivity = Microresult.positivity;
-            historesult.intensity = Microresult.intensity;
-            historesult.reportStatus = Microresult.reportStatus;
-            historesult.approvedBy = Microresult.approvedBy;
-            historesult.approvedName = Microresult.approvedName;
-            historesult.comments = Microresult.comments;
 
-        }
     }
 }
 
