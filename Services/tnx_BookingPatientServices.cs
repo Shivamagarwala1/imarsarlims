@@ -77,7 +77,16 @@ namespace iMARSARLIMS.Services
                                 item.barcodeNo= barcodeno;
                             }
                         }
-                        await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
+                        var resultitemadd = await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
+                        if (!resultitemadd.Success)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = true,
+                                Message = resultitemadd.Message,
+                            };
+
+                        }
                         await Savepaymentdeatil(TnxBookingData.addpaymentdetail, patientId, workOrderId, transactionId);
                         await transaction.CommitAsync();
                         var result = db.tnx_BookingPatient.Where(x => x.patientId == patientId).Include(b => b.addBooking).ThenInclude(b => b.addBookingItem)
@@ -321,15 +330,15 @@ namespace iMARSARLIMS.Services
                     {
                         foreach (var item in itemdetails)
                         {
-                            //if(item.rate== null || item.rate==0 || item.mrp == null || item.mrp == 0)
-                            //{
-                            //    return new ServiceStatusResponseModel
-                            //    {
-                            //        Success = false,
-                            //        Message = "Rate not Available for " + item.investigationName
-                            //
-                            //    }; 
-                            //}
+                            if(item.rate== null || item.rate==0 || item.mrp == null || item.mrp == 0)
+                            {
+                                return new ServiceStatusResponseModel
+                                {
+                                    Success = false,
+                                    Message = "Rate not Available for " + item.investigationName
+                            
+                                }; 
+                            }
                             var createPackageItemDetail = createPackageItemData(bookingItem, patientId, workOrderId, transactionId, item);
                             db.tnx_BookingItem.Add(createPackageItemDetail);
                         }
