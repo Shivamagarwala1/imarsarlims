@@ -1479,13 +1479,16 @@ namespace iMARSARLIMS.Services
                 db.tnx_Observations_Micro_Flowcyto.RemoveRange(dataOld);
 
                 // Ensure selectedAntibiotic is not null
-                microFlowcyto.selectedAntibiotic ??= new List<antibioticData>();
+                microFlowcyto.selectedorganism ??= new List<organismdata>();
 
-                // Add new data
-                var itemsToAdd = microFlowcyto.selectedAntibiotic
-                                    .ConvertAll(item => CreateMicroResult(item, microFlowcyto));
+                foreach (var item in microFlowcyto.selectedorganism)
+                {
+                    var organismId = item.organismId;
+                    var OrganismName = item.organismName;
+                var itemsToAdd = item.selectedAntibiotic.ConvertAll(item => CreateMicroResult(item, microFlowcyto,organismId,OrganismName));
 
                 db.tnx_Observations_Micro_Flowcyto.AddRange(itemsToAdd);
+                }
 
                 // Update booking item status
                 var sampleStatus = await db.tnx_BookingItem
@@ -1544,7 +1547,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        private tnx_Observations_Micro_Flowcyto CreateMicroResult(antibioticData antibioticdata, MicroResultSaveRequestModel microResult)
+        private tnx_Observations_Micro_Flowcyto CreateMicroResult(antibioticData antibioticdata, MicroResultSaveRequestModel microResult,short organismId, string OrganismName)
         {
             return new tnx_Observations_Micro_Flowcyto
             {
@@ -1557,8 +1560,8 @@ namespace iMARSARLIMS.Services
                 flag = microResult.flag,
                 isBold = microResult.isBold,
                 reportType = microResult.reportType,
-                organismId = microResult.organismId,
-                organismName = microResult.organismName,
+                organismId = organismId,
+                organismName = OrganismName,
                 antibiticId = antibioticdata.antibiticId,
                 antibitiName = antibioticdata.antibitiName,
                 colonyCount = microResult.colonyCount,

@@ -255,7 +255,7 @@ namespace iMARSARLIMS.Services
                                       result = tr != null && !string.IsNullOrEmpty(tr.result) ? tr.result : "",
                                   }).ToListAsync();
 
-                var groupedData = data.GroupBy(m => new
+                var groupedDataOrganismWise = data.GroupBy(m => new
                 {
                     m.isApproved,
                     m.hold,
@@ -300,12 +300,51 @@ namespace iMARSARLIMS.Services
                 .ToList();
 
 
+                var groupedDatatestid = groupedDataOrganismWise.GroupBy(m => new
+                {
+                    m.isApproved,
+                    m.hold,
+                    m.approvalDoctor,
+                    m.approvedByID,
+                    m.testId,
+                    m.colonyCount,
+                    m.positivity,
+
+                    m.intensity,
+                    m.comments,
+                    m.intrim,
+                    m.result,
+                })
+                .Select(group => new
+                {
+                    isApproved = group.Key.isApproved,
+                    hold = group.Key.hold,
+                    approvalDoctor = group.Key.approvalDoctor,
+                    approvedByID = group.Key.approvedByID,
+                    testId = group.Key.testId,
+                    colonyCount = group.Key.colonyCount,
+                    positivity = group.Key.positivity,
+
+                    intensity = group.Key.intensity,
+                    comments = group.Key.comments,
+                    intrim = group.Key.intrim,
+                    result = group.Key.result,
+                    OrganismMapped = group
+                        .Where(child => child.organismId != 0)
+                        .Select(child => new
+                        {
+                            organismId = child.organismId,
+                            organismName = child.organismName,
+                            AntibiticMapped = child.AntibiticMapped
+                        }).ToList()
+                })
+                .OrderBy(parent => parent.testId).FirstOrDefault();
                 if (data != null)
                 {
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
-                        Data = groupedData
+                        Data = groupedDatatestid
                     };
                 }
                 else
