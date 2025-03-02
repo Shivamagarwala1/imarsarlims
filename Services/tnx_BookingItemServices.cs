@@ -24,8 +24,9 @@ namespace iMARSARLIMS.Services
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
                         join im in db.itemMaster on tbi.itemId equals im.itemId
-                        
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        join tm in db.titleMaster on tb.title_id equals tm.id
+                        where tbi.itemType!=3
                         select new SampleProcessingResponseModel
                         {
                             centreId = tbi.centreId,
@@ -34,10 +35,10 @@ namespace iMARSARLIMS.Services
                             departmentName = tbi.departmentName,
                             patientId = tb.patientId,
                             workOrderId = tb.workOrderId,
-                            PatientName = tb.name,
+                            PatientName  = string.Concat(tm.title, " ", tb.name),
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
                             itemId = tbi.itemId,
-                            investigationName = tbi.investigationName,
+                            investigationName = tbi.isPackage==1? string.Concat(tbi.packageName,"<br>",tbi.investigationName): tbi.investigationName,
                             barcodeNo = tbi.barcodeNo ?? "",
                             sampleTypeId = tbi.sampleTypeId,
                             sampleTypeName = tbi.sampleTypeName,
@@ -56,7 +57,7 @@ namespace iMARSARLIMS.Services
             if (sampleProcessingRequestModel.fromDate.HasValue && sampleProcessingRequestModel.toDate.HasValue)
             {
                 var fromDate = sampleProcessingRequestModel.fromDate.Value.Date; // Strip the time portion
-                var toDate = sampleProcessingRequestModel.toDate.Value.Date.AddDays(1).AddSeconds(-1); // Include the entire end date
+                var toDate = sampleProcessingRequestModel.toDate.Value.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
 
                 query = query.Where(q => q.createdDateTime >= fromDate && q.createdDateTime <= toDate);
             }
@@ -723,10 +724,11 @@ namespace iMARSARLIMS.Services
                 var result = await (from im in db.itemMaster
                                     join iom in db.ItemObservationMapping on im.itemId equals iom.observationID
                                     where iom.itemId == itemId
-                                    group im by iom.itemId into grouped
+                                   // group im by iom.itemId into grouped
                                     select new
                                     {
-                                        itemNames = string.Join(", ", grouped.Select(im => im.itemName))
+                                          itemNames = im.itemName
+                                      //  itemNames = string.Join(", ", grouped.Select(im => im.itemName))
                                     }).ToListAsync();
 
                 return new ServiceStatusResponseModel
@@ -1347,6 +1349,7 @@ namespace iMARSARLIMS.Services
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
                         join im in db.itemMaster on tbi.itemId equals im.itemId
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        join tm in db.titleMaster on tb.title_id equals tm.id
                         select new                         
                         {
                             tb.bookingDate,
@@ -1354,15 +1357,14 @@ namespace iMARSARLIMS.Services
                             tb.workOrderId,
                             SampleRecievedDateShow = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt"): "",
                             ApproveDateShow = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
-
-                            PatientName = tb.name,
+                            PatientName = string.Concat(tm.title," ",tb.name),
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
                             tb.gender,
                             tbi.barcodeNo,
                             testid=tbi.id,
                             tbi.itemId,
-                            investigationName= im.itemName,
-                            investigationSortName= im.sortName,
+                            investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "<br>", tbi.investigationName) : tbi.investigationName,
+                            investigationSortName = im.sortName,
                             Comment = tb.labRemarks,
                             ApprovedDateShow= tbi.approvedDate,
                             tbi.centreId,
@@ -1387,21 +1389,24 @@ namespace iMARSARLIMS.Services
                         };
             if (resultentrydata.Datetype != "")
             {
+                var fromDate = resultentrydata.FromDate.Date; // Strip the time portion
+                var toDate = resultentrydata.ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+
                 if (resultentrydata.Datetype == "tb.bookingDate")
                 {
-                    query = query.Where(q => q.bookingDate >= resultentrydata.FromDate && q.bookingDate <= resultentrydata.ToDate);
+                    query = query.Where(q => q.bookingDate >= fromDate && q.bookingDate <= toDate);
                 }
                 else if (resultentrydata.searchvalue == "tbi.approvedDate")
                 {
-                    query = query.Where(q => q.approvedDate >= resultentrydata.FromDate && q.approvedDate <= resultentrydata.ToDate);
+                    query = query.Where(q => q.approvedDate >= fromDate && q.approvedDate <= toDate);
                 }
                 else if (resultentrydata.searchvalue == "tbi.sampleReceiveDate")
                 {
-                    query = query.Where(q => q.sampleReceiveDate >= resultentrydata.FromDate && q.sampleReceiveDate <= resultentrydata.ToDate);
+                    query = query.Where(q => q.sampleReceiveDate >= fromDate && q.sampleReceiveDate <= toDate);
                 }
                 else 
                 {
-                    query = query.Where(q => q.sampleCollectionDate >= resultentrydata.FromDate && q.sampleCollectionDate <= resultentrydata.ToDate);
+                    query = query.Where(q => q.sampleCollectionDate >= fromDate && q.sampleCollectionDate <= toDate);
                 }
             }
             if (resultentrydata.searchvalue!="")

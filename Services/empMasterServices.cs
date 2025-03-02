@@ -557,12 +557,12 @@ namespace iMARSARLIMS.Services
                                NavigationURL = mm1.navigationUrl,
                                ChildDisplayOrder = mm1.displaySequence,
                                ChildIcon = childIcon,
-                               mm.MenuType
+                               mm.isHide
                            };
 
             if (MenuType == 2)
             {
-                menuData = menuData.Where(m => m.ParentMenuId == m.ParentMenuId && m.MenuType == MenuType);
+                menuData = menuData.Where(m => m.ParentMenuId == m.ParentMenuId && m.isHide == true);
             }
             // Materialize data to allow client-side operations
             var menuDataList = await menuData.ToListAsync();
