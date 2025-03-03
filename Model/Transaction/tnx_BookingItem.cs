@@ -130,5 +130,7 @@ namespace iMARSARLIMS.Model.Transaction
         public int? DoctorSignId { get; set; }
         [MaxLength(50)]
         public string? holdReason { get; set; }
+        [MaxLength(100)]
+        public string? RejectedReason { get; set; }
     }
 }

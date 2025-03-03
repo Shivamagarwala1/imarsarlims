@@ -100,6 +100,8 @@ namespace iMARSARLIMS.Model.Master
         public int? billingType { get; set; }
         [MaxLength(20)]
         public string? billingTypeName { get; set; }
+        public string? waterMarkImage { get; set; }
+        public string? NablImage { get; set; }
 
         [ForeignKey(nameof(centreId))]
         public List<empCenterAccess> addEmpCenterAccess { get; set; }

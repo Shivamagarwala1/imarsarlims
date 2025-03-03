@@ -19,6 +19,8 @@
         public string? reportHeader { get; set; }
         public string? reciptHeader { get; set; }
         public string? reciptFooter { get; set; }
+        public string? WaterMarkImage { get; set; }
+        public string? NablImage { get; set; }
 
     }
 }

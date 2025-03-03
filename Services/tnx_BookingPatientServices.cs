@@ -29,7 +29,7 @@ namespace iMARSARLIMS.Services
 
         public async Task<string> Getworkorderid(int centreId, string type)
         {
-            var result =  _MySql_Function_Services.Getworkorderid(centreId, type);
+            var result = _MySql_Function_Services.Getworkorderid(centreId, type);
             return result;
         }
         async Task<ServiceStatusResponseModel> Itnx_BookingPatientServices.SavePatientRegistration(tnx_BookingPatient tnxBookingPatient)
@@ -39,7 +39,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var TnxBookingData =  tnxBookingPatient.addBooking.FirstOrDefault();
+                    var TnxBookingData = tnxBookingPatient.addBooking.FirstOrDefault();
                     if (tnxBookingPatient.patientId == 0)
                     {
                         if (tnxBookingPatient.addBooking == null)
@@ -59,7 +59,7 @@ namespace iMARSARLIMS.Services
                             };
 
                         }
-                       
+
                         var bookingPatientData = CreateBookingPatient(tnxBookingPatient);
                         var bookingPatient = db.tnx_BookingPatient.Add(bookingPatientData);
                         await db.SaveChangesAsync();
@@ -72,9 +72,9 @@ namespace iMARSARLIMS.Services
                         if (preprintedbarcode == 0)
                         {
                             barcodeno = _MySql_Function_Services.GetBarcodeno(tnxBookingPatient.centreId);
-                            foreach(var item in TnxBookingData.addBookingItem)
+                            foreach (var item in TnxBookingData.addBookingItem)
                             {
-                                item.barcodeNo= barcodeno;
+                                item.barcodeNo = barcodeno;
                             }
                         }
                         var resultitemadd = await SaveBookingItem(TnxBookingData.addBookingItem, patientId, workOrderId, transactionId);
@@ -94,7 +94,7 @@ namespace iMARSARLIMS.Services
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
-                            Message="Saved Successful",
+                            Message = "Saved Successful",
                             Data = result
                         };
 
@@ -204,7 +204,7 @@ namespace iMARSARLIMS.Services
                 ageDay = bookingData.ageDay,
                 totalAge = bookingData.totalAge,
                 clientCode = bookingData.clientCode,
-                bookingDate = bookingData.bookingDate,
+                bookingDate = DateTime.Now,
                 mobileNo = bookingData.mobileNo,
                 mrp = bookingData.mrp,
                 grossAmount = bookingData.grossAmount,
@@ -232,16 +232,11 @@ namespace iMARSARLIMS.Services
                 refID2 = bookingData.refID2,
                 tempDOCID = bookingData.tempDOCID,
                 tempDoctroName = bookingData.tempDoctroName,
-                updateById = bookingData.updateById,
-                updateDateTime = bookingData.updateDateTime,
                 uploadDocument = bookingData.uploadDocument,
                 invoiceNo = bookingData.invoiceNo,
                 createdById = bookingData.createdById,
                 salesExecutiveID = bookingData.salesExecutiveID,
                 createdDateTime = bookingData.createdDateTime
-
-
-
             };
         }
 
@@ -252,7 +247,6 @@ namespace iMARSARLIMS.Services
                 var tnxbookingStatus = CreateBookingStatus(bookingStatus, patientId, transactionId);
                 var tnxBooking = db.tnx_BookingStatus.Add(tnxbookingStatus);
                 await db.SaveChangesAsync();
-
             }
             return new ServiceStatusResponseModel
             {
@@ -288,7 +282,6 @@ namespace iMARSARLIMS.Services
                 var paymentdata = createpaymentData(payment, patientId, workOrderId, transactionId);
                 db.tnx_ReceiptDetails.Add(paymentdata);
                 await db.SaveChangesAsync();
-                
             }
             return new ServiceStatusResponseModel
             {
@@ -306,6 +299,7 @@ namespace iMARSARLIMS.Services
                 {
                     var itemdetails = (from iom in db.ItemObservationMapping
                                        join im in db.itemMaster on iom.observationID equals im.itemId
+                                       join ld in db.labDepartment on im.deptId equals ld.id
                                        where iom.itemId == bookingItem.itemId
                                        join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
                                        from rtr in rtrJoin.DefaultIfEmpty() // Left Join
@@ -317,7 +311,7 @@ namespace iMARSARLIMS.Services
                                            testCode = im.code,
                                            itemId = im.itemId,
                                            im.deptId,
-                                           departmentName = "", // Empty string as per SQL
+                                           departmentName = ld.deptName, // Empty string as per SQL
                                            investigationName = im.itemName,
                                            im.itemType,
                                            mrp = rtr != null ? rtr.mrp : (double?)null, // Explicit null check for rtr.mrp
@@ -330,23 +324,20 @@ namespace iMARSARLIMS.Services
                     {
                         foreach (var item in itemdetails)
                         {
-                            if(item.rate== null || item.rate==0 || item.mrp == null || item.mrp == 0)
+                            if (item.rate == null || item.rate == 0 || item.mrp == null || item.mrp == 0)
                             {
                                 return new ServiceStatusResponseModel
                                 {
                                     Success = false,
                                     Message = "Rate not Available for " + item.investigationName
-                            
-                                }; 
+                                };
                             }
                             var createPackageItemDetail = createPackageItemData(bookingItem, patientId, workOrderId, transactionId, item);
                             db.tnx_BookingItem.Add(createPackageItemDetail);
                         }
                     }
-
                 }
                 await db.SaveChangesAsync();
-
             }
             return new ServiceStatusResponseModel
             {
@@ -382,7 +373,6 @@ namespace iMARSARLIMS.Services
                 settlementCentreID = Payment.settlementCentreID,
                 receivedBy = Payment.receivedBy,
                 receivedID = Payment.receivedID,
-
             };
         }
         private tnx_BookingItem CreateBookingItem(tnx_BookingItem bookingItem, int patientId, string workOrderId, int transactionId)
@@ -470,7 +460,6 @@ namespace iMARSARLIMS.Services
                 createdById = bookingItem.createdById,
                 createdDateTime = bookingItem.createdDateTime,
             };
-
         }
         private tnx_BookingItem createPackageItemData(tnx_BookingItem bookingItem, int patientId, string workOrderId, int transactionId, dynamic packageItem)
         {
@@ -557,7 +546,6 @@ namespace iMARSARLIMS.Services
                 createdById = bookingItem.createdById,
                 createdDateTime = bookingItem.createdDateTime,
             };
-
         }
         private void UpdateBookingPatient(tnx_BookingPatient tnxBookingPatients, tnx_BookingPatient tnxBookingPatient)
         {
@@ -587,9 +575,7 @@ namespace iMARSARLIMS.Services
             tnxBookingPatients.updateDateTime = tnxBookingPatient.updateDateTime;
             tnxBookingPatients.updateById = tnxBookingPatient.updateById;
             tnxBookingPatients.password = tnxBookingPatient.password;
-
         }
-
         private async Task<ServiceStatusResponseModel> UpdateBooking(IEnumerable<tnx_Booking> tnxBookings, int patientId, string workOrderId)
         {
             foreach (var bookings in tnxBookings)
@@ -612,7 +598,6 @@ namespace iMARSARLIMS.Services
                     var tnxbooking = db.tnx_Booking.Add(tnxbookingData);
                     await db.SaveChangesAsync();
                 }
-
             }
             return new ServiceStatusResponseModel
             {
@@ -664,7 +649,6 @@ namespace iMARSARLIMS.Services
             tnxBooking.invoiceNo = bookingData.invoiceNo;
             tnxBooking.salesExecutiveID = bookingData.salesExecutiveID;
         }
-
         private async Task<ServiceStatusResponseModel> UpdateBookingStatus(IEnumerable<tnx_BookingStatus> tnxBookingStatus, int patientId, int transactionId)
         {
             foreach (var bookingStatus in tnxBookingStatus)
@@ -686,7 +670,6 @@ namespace iMARSARLIMS.Services
                     var tnxbooking = db.tnx_BookingStatus.Add(tnxbookingStatusData);
                     await db.SaveChangesAsync();
                 }
-
             }
             return new ServiceStatusResponseModel
             {
@@ -708,8 +691,6 @@ namespace iMARSARLIMS.Services
             tnxBookingStatus.updateById = bookingStatus.updateById;
             tnxBookingStatus.updateDateTime = bookingStatus.updateDateTime;
         }
-
-
         private async Task<ServiceStatusResponseModel> UpdateBookingItem(IEnumerable<tnx_BookingItem> tnxBookingItems, int patientId, string workOrderId, int transactionId)
         {
             foreach (var BookingItems in tnxBookingItems)
@@ -722,9 +703,7 @@ namespace iMARSARLIMS.Services
                         updateBookingItemDetail(tnxBookingItemData, BookingItems);
                         var tnxBookingItem = db.tnx_BookingItem.Update(tnxBookingItemData);
                         await db.SaveChangesAsync();
-
                     }
-
                 }
                 else
                 {
@@ -733,27 +712,27 @@ namespace iMARSARLIMS.Services
                     if (tnxbookingitem.isPackage == 1)
                     {
                         //var itemdetails = _MySql_Procedure_Services.GetPackageItem(BookingItems.itemId, BookingItems.centreId);
-                        var itemdetails= (from iom in db.ItemObservationMapping
-                                                      join im in db.itemMaster on iom.observationID equals im.itemId
-                                                      where iom.itemId == 3
-                                                      join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
-                                                      from rtr in rtrJoin.DefaultIfEmpty() // Left Join
-                                                      join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
-                                                      from rtt in rttJoin.DefaultIfEmpty() // Left Join
-                                                      where rtt.centreId == 1 // Filter for centreId
-                                                      select new
-                                                      {
-                                                          testcode = im.code,
-                                                          itemid = im.itemId,
-                                                          im.deptId,
-                                                          departmentname = "", // Empty string as per SQL
-                                                          investigationName = im.itemName,
-                                                          im.itemType,
-                                                          rtr.mrp,
-                                                          rtr.rate,
-                                                          rtr.discount,
-                                                          netAmount = rtr.rate // netAmount equivalent to rtr.Rate in SQL
-                                                      }).ToList();
+                        var itemdetails = (from iom in db.ItemObservationMapping
+                                           join im in db.itemMaster on iom.observationID equals im.itemId
+                                           where iom.itemId == 3
+                                           join rtr in db.rateTypeWiseRateList on iom.observationID equals rtr.itemid into rtrJoin
+                                           from rtr in rtrJoin.DefaultIfEmpty() // Left Join
+                                           join rtt in db.rateTypeTagging on rtr.rateTypeId equals rtt.rateTypeId into rttJoin
+                                           from rtt in rttJoin.DefaultIfEmpty() // Left Join
+                                           where rtt.centreId == 1 // Filter for centreId
+                                           select new
+                                           {
+                                               testcode = im.code,
+                                               itemid = im.itemId,
+                                               im.deptId,
+                                               departmentname = "", // Empty string as per SQL
+                                               investigationName = im.itemName,
+                                               im.itemType,
+                                               rtr.mrp,
+                                               rtr.rate,
+                                               rtr.discount,
+                                               netAmount = rtr.rate // netAmount equivalent to rtr.Rate in SQL
+                                           }).ToList();
                         if (itemdetails != null)
                         {
                             foreach (var item in itemdetails)
@@ -762,11 +741,9 @@ namespace iMARSARLIMS.Services
                                 db.tnx_BookingItem.Add(createPackageItemDetail);
                             }
                         }
-
                     }
                     await db.SaveChangesAsync();
                 }
-
             }
             return new ServiceStatusResponseModel
             {
@@ -774,7 +751,6 @@ namespace iMARSARLIMS.Services
                 Data = tnxBookingItems
             };
         }
-
         private void updateBookingItemDetail(tnx_BookingItem tnxBookItem, tnx_BookingItem bookingItem)
         {
             tnxBookItem.workOrderId = bookingItem.workOrderId;
@@ -858,7 +834,6 @@ namespace iMARSARLIMS.Services
             tnxBookItem.updateById = bookingItem.updateById;
             tnxBookItem.updateDateTime = bookingItem.updateDateTime;
         }
-
         byte[] Itnx_BookingPatientServices.GetPatientReceipt(string workorderid)
         {
             var Receiptdata = (from tb in db.tnx_Booking
@@ -866,14 +841,52 @@ namespace iMARSARLIMS.Services
                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                join tm in db.titleMaster on tb.title_id equals tm.id
                                join cm in db.centreMaster on tb.centreId equals cm.centreId
-                               where tb.workOrderId == workorderid
+                               where tb.workOrderId == workorderid && (tbi.packageName == "" || tbi.packageName == tbi.investigationName)
                                select new
                                {
-                                   tb.workOrderId, BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),tbp.address,tb.patientId,
-                                   tm.title,tb.name,Age= tb.ageYear+ "Y " + tb.ageMonth + "M "+ tb.ageDay +"D" , tb.mrp, tb.grossAmount, tb.discount, tb.netAmount,
-                                   tb.paidAmount, cm.companyName, CentreAddress = cm.address, CentreMobile = cm.mobileNo, tbp.mobileNo, tb.gender, tbi.barcodeNo,
-                                   tbi.departmentName, tbi.investigationName, ItemMRP = tbi.mrp, ItemRate = tbi.rate, ItemDiscount = tbi.discount, ItemNetAmount = tbi.netAmount }).ToList();
-            if (Receiptdata.Count>0)
+                                   tb.workOrderId,
+                                   BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                   tbp.address,
+                                   tb.patientId,
+                                   tm.title,
+                                   tb.name,
+                                   Age = tb.ageYear + "Y " + tb.ageMonth + "M " + tb.ageDay + "D",
+                                   tb.mrp,
+                                   tb.grossAmount,
+                                   tb.discount,
+                                   tb.netAmount,
+                                   tb.paidAmount,
+                                   cm.companyName,
+                                   CentreAddress = cm.address,
+                                   CentreMobile = cm.mobileNo,
+                                   tbp.mobileNo,
+                                   tb.gender,
+                                   tbi.barcodeNo,
+                                   tbi.departmentName,
+                                   tbi.investigationName,
+                                   ItemMRP = tbi.mrp,
+                                   ItemRate = tbi.rate,
+                                   ItemDiscount = tbi.discount,
+                                   ItemNetAmount = tbi.netAmount
+                               }).ToList();
+            var paymentdetail = (from rd in db.tnx_ReceiptDetails
+                                 join em in db.empMaster on rd.receivedID equals em.empId
+                                 where rd.workOrderId == workorderid
+                                       && (rd.cashAmt > 0 || rd.creditCardAmt > 0 || rd.onlinewalletAmt > 0)
+                                 select new
+                                 {
+                                     RecievedBy = em.fName + " " + em.lName,
+                                     PaymentMode = rd.cashAmt > 0 ? "Cash" :
+                                                   rd.creditCardAmt > 0 ? "Creditcard" :
+                                                   "Online",
+                                     TransactionId = rd.transactionId,
+                                     Amount = rd.cashAmt > 0 ? rd.cashAmt :
+                                             rd.creditCardAmt > 0 ? rd.creditCardAmt :
+                                             rd.onlinewalletAmt
+                                 }).ToList();
+
+            if (Receiptdata.Count > 0)
+
             {
                 QuestPDF.Settings.License = LicenseType.Community;
                 var image1 = _configuration["FileBase64:CompanyLogo1"];
@@ -895,23 +908,23 @@ namespace iMARSARLIMS.Services
                             column.Item()
                              .Table(table =>
                              {
-                                    table.ColumnsDefinition(columns =>
-                                    {
-                                        columns.RelativeColumn();
-                                        columns.RelativeColumn();
-                                        columns.RelativeColumn();
-                                        columns.RelativeColumn();
-                                        columns.RelativeColumn();
-                                        columns.RelativeColumn();
-                                    });
-                                    table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
-                                    table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
-                                 table.Cell().ColumnSpan(2).AlignCenter().Text( Receiptdata[0].companyName ).Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).AlignCenter().Text(Receiptdata[0].CentreMobile).Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(6).AlignCenter().Text("MONEY RECEIPT / BILL").Style(TextStyle.Default.FontSize(10).Bold().Underline());
-                                    table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
-                                });
+                                 table.ColumnsDefinition(columns =>
+                                 {
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                     columns.RelativeColumn();
+                                 });
+                                 table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text(Receiptdata[0].companyName).Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().ColumnSpan(2).AlignCenter().Text(Receiptdata[0].CentreMobile).Style(TextStyle.Default.FontSize(10));
+                                 table.Cell().ColumnSpan(6).AlignCenter().Text("MONEY RECEIPT / BILL").Style(TextStyle.Default.FontSize(10).Bold().Underline());
+                                 table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
+                             });
                             // Product table header
                             column.Item()
                                 .Table(table =>
@@ -929,7 +942,7 @@ namespace iMARSARLIMS.Services
                                     table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(2).Text(Receiptdata[0].name).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Text("Age/Gender").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).Text( Receiptdata[0].Age.ToString() ).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(2).Text(Receiptdata[0].Age.ToString()).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Text("Address").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(2).Text(Receiptdata[0].address).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Text("Email Id").Style(TextStyle.Default.FontSize(10));
@@ -948,8 +961,8 @@ namespace iMARSARLIMS.Services
                                     table.Cell().ColumnSpan(2).Text(Receiptdata[0].BookingDate).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Text("Barcode No").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(2).Text(Receiptdata[0].barcodeNo).Style(TextStyle.Default.FontSize(10));
-                                   // table.Cell().Text("").Style(TextStyle.Default.FontSize(10));
-                                   // table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
+                                    // table.Cell().Text("").Style(TextStyle.Default.FontSize(10));
+                                    // table.Cell().ColumnSpan(2).Text("").Style(TextStyle.Default.FontSize(10));
                                 });
                             column.Item()
                                 .Table(table =>
@@ -982,52 +995,49 @@ namespace iMARSARLIMS.Services
                                         rowNumber++; // Increment the serial number
                                     }
 
-                                    // table.Cell().ColumnSpan(4).BorderTop(0.8f,Unit.Point).BorderBottom(0.8f, Unit.Point).Text("Settelment Table").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(3).Element(innerTable =>
-                                 {
-                                        innerTable.Table(subTable =>
+                                    if (paymentdetail.Count > 0)
+                                    {
+                                        table.Cell().ColumnSpan(3).Element(innerTable =>
                                         {
-                                            subTable.ColumnsDefinition(columns =>
-                                            {
-                                                columns.RelativeColumn();
-                                                columns.RelativeColumn();
-                                                columns.RelativeColumn();
-                                                columns.RelativeColumn();
-                                                columns.RelativeColumn();
-                                                columns.RelativeColumn();
-                                            });
+                                             innerTable.Table(subTable =>
+                                             {
+                                                 subTable.ColumnsDefinition(columns =>
+                                                 {
+                                                     
+                                                     columns.RelativeColumn();
+                                                     columns.RelativeColumn();
+                                                     columns.RelativeColumn();
+                                                     columns.RelativeColumn();
+                                                 });
 
-                                            // Header for the new embedded table
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Settelment").Style(TextStyle.Default.FontSize(10).Bold());
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Payment").Style(TextStyle.Default.FontSize(10).Bold());
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Reciept No.").Style(TextStyle.Default.FontSize(10).Bold());
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Mode").Style(TextStyle.Default.FontSize(10).Bold());
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Amount").Style(TextStyle.Default.FontSize(10).Bold());
-                                            subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Received By").Style(TextStyle.Default.FontSize(10).Bold());
+                                                 // Header for the new embedded table
+                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Reciept No.").Style(TextStyle.Default.FontSize(10).Bold());
+                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Mode").Style(TextStyle.Default.FontSize(10).Bold());
+                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Amount").Style(TextStyle.Default.FontSize(10).Bold());
+                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Received By").Style(TextStyle.Default.FontSize(10).Bold());
 
-                                            // Example data rows
-                                            for (int i = 0; i < 2; i++) // Loop for adding rows
-                                            {
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                                subTable.Cell().Text("Data " + (i + 1)).Style(TextStyle.Default.FontSize(10));
-                                            }
+                                                 // Example data rows
+                                                 foreach(var ritem in paymentdetail)// Loop for adding rows
+                                                 {
+                                                     subTable.Cell().Text(ritem.TransactionId.ToString()).Style(TextStyle.Default.FontSize(10));
+                                                     subTable.Cell().Text(ritem.PaymentMode).Style(TextStyle.Default.FontSize(10));
+                                                     subTable.Cell().Text(ritem.Amount.ToString()).Style(TextStyle.Default.FontSize(10));
+                                                     subTable.Cell().Text(ritem.RecievedBy).Style(TextStyle.Default.FontSize(10));
+                                                 }
+                                             });
                                         });
-                                    });
+                                    }
 
                                     table.Cell().ColumnSpan(3).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(4).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(2).BorderTop(0.8f, Unit.Point).Text("Gross Amount" + Receiptdata[0].grossAmount).AlignRight().Style(TextStyle.Default.FontSize(10));
 
                                     table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).Text("Discount: "+ Receiptdata[0].discount).AlignRight().Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(2).Text("Discount: " + Receiptdata[0].discount).AlignRight().Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).Text("Net Amount: "+ Receiptdata[0].netAmount).AlignRight().Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(4).BorderBottom(0.8f, Unit.Point).Text("Recieved with Thanks: "+ AmountToWord((decimal)Receiptdata[0].paidAmount)).Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).BorderBottom(0.8f, Unit.Point).Text("Paid Amount: "+ Receiptdata[0].paidAmount).AlignRight().Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(2).Text("Net Amount: " + Receiptdata[0].netAmount).AlignRight().Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(4).BorderBottom(0.8f, Unit.Point).Text("Recieved with Thanks: " + AmountToWord((decimal)Receiptdata[0].paidAmount)).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(2).BorderBottom(0.8f, Unit.Point).Text("Paid Amount: " + Receiptdata[0].paidAmount).AlignRight().Style(TextStyle.Default.FontSize(10));
                                 });
 
                         });
@@ -1064,13 +1074,35 @@ namespace iMARSARLIMS.Services
                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                join tm in db.titleMaster on tb.title_id equals tm.id
                                join cm in db.centreMaster on tb.centreId equals cm.centreId
-                               where tb.workOrderId == workorderid
+                               where tb.workOrderId == workorderid && (tbi.packageName == "" || tbi.packageName == tbi.investigationName)
                                select new
                                {
-                                   tb.workOrderId,BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),DeliveryDate= tbi.deliveryDate.ToString("yyyy-MMM-dd hh:mm tt"),tbp.address,
-                                   tb.patientId,tm.title,tb.name,Age = tb.ageYear + "Y " + tb.ageMonth + "M " + tb.ageDay + "D",tb.mrp,tb.grossAmount,tb.discount,tb.netAmount,tb.paidAmount,
-                                   cm.companyName,CentreAddress = cm.address,CentreMobile = cm.mobileNo,tbp.mobileNo,tb.gender,tbi.barcodeNo,tbi.departmentName,tbi.investigationName,
-                                   ItemMRP = tbi.mrp,ItemRate = tbi.rate,ItemDiscount = tbi.discount,ItemNetAmount = tbi.netAmount }).ToList();
+                                   tb.workOrderId,
+                                   BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                   DeliveryDate = tbi.deliveryDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                   tbp.address,
+                                   tb.patientId,
+                                   tm.title,
+                                   tb.name,
+                                   Age = tb.ageYear + "Y " + tb.ageMonth + "M " + tb.ageDay + "D",
+                                   tb.mrp,
+                                   tb.grossAmount,
+                                   tb.discount,
+                                   tb.netAmount,
+                                   tb.paidAmount,
+                                   cm.companyName,
+                                   CentreAddress = cm.address,
+                                   CentreMobile = cm.mobileNo,
+                                   tbp.mobileNo,
+                                   tb.gender,
+                                   tbi.barcodeNo,
+                                   tbi.departmentName,
+                                   tbi.investigationName,
+                                   ItemMRP = tbi.mrp,
+                                   ItemRate = tbi.rate,
+                                   ItemDiscount = tbi.discount,
+                                   ItemNetAmount = tbi.netAmount
+                               }).ToList();
 
             if (Receiptdata.Count > 0)
             {
@@ -1181,7 +1213,7 @@ namespace iMARSARLIMS.Services
                                     table.Cell().ColumnSpan(3).BorderTop(0.8f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(2).BorderTop(0.8f, Unit.Point).Text("Gross Amount: " + Receiptdata[0].mrp).AlignRight().Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(3).Text("").Style(TextStyle.Default.FontSize(10));
-                                    table.Cell().ColumnSpan(2).Text("Net Amount: "+ Receiptdata[0].mrp).AlignRight().Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().ColumnSpan(2).Text("Net Amount: " + Receiptdata[0].mrp).AlignRight().Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(5).BorderBottom(1.0f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(6));
                                     table.Cell().ColumnSpan(5).Text("Recieved with Thanks: " + AmountToWord((decimal)Receiptdata[0].mrp).ToString()).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().ColumnSpan(5).Text("#Report delivery time on delivery date: Evening 07:00 PM to 07:45 PM. and 04:00 PM to 05:00 PM Sundays").Style(TextStyle.Default.FontSize(10).Bold());

@@ -557,7 +557,7 @@ namespace iMARSARLIMS.Services
                                NavigationURL = mm1.navigationUrl,
                                ChildDisplayOrder = mm1.displaySequence,
                                ChildIcon = childIcon,
-                               mm.isHide
+                               mm1.isHide
                            };
 
             if (MenuType == 2)

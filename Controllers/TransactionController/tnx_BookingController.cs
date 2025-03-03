@@ -58,11 +58,11 @@ namespace iMARSARLIMS.Controllers.transactionController
         }
 
         [HttpGet("GetMicroresult")]
-        public async Task<ServiceStatusResponseModel> GetMicroresult(int testid)
+        public async Task<ServiceStatusResponseModel> GetMicroresult(int testid,int reportStatus)
         {
             try
             {
-                var result = await _tnxBookingServices.GetMicroresult(testid);
+                var result = await _tnxBookingServices.GetMicroresult(testid, reportStatus);
                 return result;
             }
             catch (Exception ex)
@@ -156,17 +156,17 @@ namespace iMARSARLIMS.Controllers.transactionController
             try
             {
                 var barcodedata = await (from tbi in db.tnx_BookingItem
-                                   join tb in db.tnx_Booking on tbi.workOrderId equals tb.workOrderId
-                                   where tbi.barcodeNo == BarcodeNO
-                                   select new
-                                   {
-                                       tb.name,
-                                       age = string.Concat(tb.ageYear, " Y ", tb.gender),
-                                       tbi.barcodeNo,
-                                       tb.workOrderId,
-                                       tbi.sampleTypeName,
-                                       bookingDate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt")
-                                   }).ToListAsync();
+                                         join tb in db.tnx_Booking on tbi.workOrderId equals tb.workOrderId
+                                         where tbi.barcodeNo == BarcodeNO
+                                         select new
+                                         {
+                                             tb.name,
+                                             age = string.Concat(tb.ageYear, " Y ", tb.gender),
+                                             tbi.barcodeNo,
+                                             tb.workOrderId,
+                                             tbi.sampleTypeName,
+                                             bookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                         }).ToListAsync();
 
                 string returnStr = "";
                 foreach (var item in barcodedata)
@@ -195,5 +195,27 @@ namespace iMARSARLIMS.Controllers.transactionController
                 };
             }
         }
+
+        [HttpGet("GetPatientDetail")]
+        public async Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetPatientDetail(workorderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
+
+
     }
 }

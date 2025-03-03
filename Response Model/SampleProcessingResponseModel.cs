@@ -32,5 +32,8 @@ namespace iMARSARLIMS.Response_Model
         public object? sampletypedata { get; set; }
         public string? containercolor { get; set; }
         public int isremark { get; set; }
+        public string? bookingdate { get; set; }
+        public string? samplecollectiondate { get; set; }
+        public string? SampleRecievedDate { get; set; }
     }
 }

@@ -11,8 +11,8 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    [Migration("20250301054957_modelupdate1")]
-    partial class modelupdate1
+    [Migration("20250302050544_colorcodemaster")]
+    partial class colorcodemaster
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1228,6 +1228,11 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    b.Property<string>("ColorCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("colorName")
                         .IsRequired()

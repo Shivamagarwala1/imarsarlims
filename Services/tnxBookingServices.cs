@@ -122,7 +122,10 @@ namespace iMARSARLIMS.Services
                                 DueAmt = tb.netAmount - tb.paidAmount
                             };
 
-                query = query.Where(q => q.datefilter >= patientdata.FromDate && q.datefilter <= patientdata.ToDate);
+                var fromDate = patientdata.FromDate.Date; // Strip the time portion
+                var toDate = patientdata.ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+
+                query = query.Where(q => q.datefilter >= fromDate && q.datefilter <= toDate);
 
 
                 if (!string.IsNullOrEmpty(patientdata.SearchValue))
@@ -226,14 +229,14 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetMicroresult(int testid)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetMicroresult(int testid,int reportStatus)
         {
             try
             {
                 var data = await (from tbi in db.tnx_BookingItem
                                   join tr in db.tnx_Observations_Micro_Flowcyto on tbi.id equals tr.testId into trJoin
                                   from tr in trJoin.DefaultIfEmpty()
-                                  where tbi.id == testid
+                                  where tbi.id == testid && tr.reportStatus == reportStatus
                                   select new
                                   {
                                       tbi.isApproved,
@@ -434,6 +437,65 @@ namespace iMARSARLIMS.Services
                 receivedBy = settelment.receivedBy,
                 receivedID = settelment.receivedID
             };
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetPatientDetail(string workorderId)
+        {
+            try
+            {
+                var bookingData = await (from tb in db.tnx_Booking
+                                  join tm in db.titleMaster on tb.title_id equals tm.id
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                  join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
+                                  where tb.workOrderId == "ims51"
+                                        && (string.IsNullOrEmpty(tbi.packageName) || tbi.packageName == tbi.investigationName)
+                                  select new
+                                  {
+                                      tb.bookingDate,
+                                      tb.workOrderId,
+                                      tb.transactionId,
+                                      PatientName = tm.title + " " + tb.name,
+                                      tb.netAmount,
+                                      tb.grossAmount,
+                                      tb.discount,
+                                      tb.paidAmount,
+                                      tb.mobileNo,
+                                      cm.companyName,
+                                      cm.centrecode,
+                                      tb.patientId,
+                                      Status = tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 1 ? "Approved" :
+                                               tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 0 ? "ResultDone" :
+                                               tbi.isSampleCollected == "Y" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Received" :
+                                               tbi.isSampleCollected == "S" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Collected" : "Registered"
+                                  }).ToListAsync();
+
+                if(bookingData!=null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = bookingData
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message="No Data Found"
+                    };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
         }
     }
 }

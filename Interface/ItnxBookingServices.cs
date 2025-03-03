@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using OfficeOpenXml.Table.PivotTable;
 
 namespace iMARSARLIMS.Interface
 {
@@ -10,6 +11,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetPaymentDetails(string workOrderId);
         Task<ServiceStatusResponseModel> SaveSettelmentDetail(List<settelmentRequestModel> settelments);
         Task<ServiceStatusResponseModel> GetHistoresult(int testid);
-        Task<ServiceStatusResponseModel> GetMicroresult(int testid);
+        Task<ServiceStatusResponseModel> GetMicroresult(int testid,int reportStatus);
+        Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId);
     }
 }

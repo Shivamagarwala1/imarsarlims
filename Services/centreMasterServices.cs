@@ -11,10 +11,14 @@ namespace iMARSARLIMS.Services
     public class centreMasterServices : IcentreMasterServices
     {
         private readonly ContextClass db;
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public centreMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger)
+        public centreMasterServices(ContextClass context, ILogger<BaseController<empMaster>> logger, IConfiguration configuration, HttpClient httpClient)
         {
             db = context;
+            this._configuration = configuration;
+            this._httpClient = httpClient;
         }
         async Task<ServiceStatusResponseModel> IcentreMasterServices.SaveCentreDetail(centreMaster centremaster)
         {
@@ -680,6 +684,8 @@ namespace iMARSARLIMS.Services
             Centre.reportHeader = LetterHead.reportHeader;
             Centre.reciptHeader = LetterHead.reciptHeader;
             Centre.reciptFooter = LetterHead.reciptFooter;
+            Centre.waterMarkImage = LetterHead.WaterMarkImage;
+            Centre.NablImage = LetterHead.NablImage;
         }
 
         async Task<ServiceStatusResponseModel> IcentreMasterServices.GetRatetypeCentreWise(int CentreId)
@@ -716,22 +722,23 @@ namespace iMARSARLIMS.Services
             try
             {
                 var query = from tb in db.centerTypeMaster
-                            select new 
+                            select new
                             {
-                               tb.id,tb.centerTypeName
+                                tb.id,
+                                tb.centerTypeName
                             };
                 // Apply date filter
-                if (billingtype==1 )
+                if (billingtype == 1)
                 {
-                    query = query.Where(q => q.id >=3);
+                    query = query.Where(q => q.id >= 3);
                 }
-                if ( billingtype == 3 || billingtype == 4)
+                if (billingtype == 3 || billingtype == 4)
                 {
                     query = query.Where(q => q.id == 3);
                 }
-                if ( billingtype == 2)
+                if (billingtype == 2)
                 {
-                    query = query.Where(q => q.id==2);
+                    query = query.Where(q => q.id == 2);
                 }
 
                 var result = await query.ToListAsync();

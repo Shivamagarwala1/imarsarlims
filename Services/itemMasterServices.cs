@@ -487,7 +487,7 @@ namespace iMARSARLIMS.Services
 
         async Task<ServiceStatusResponseModel> IitemMasterServices.GetItemForTemplate()
         {
-            var reporttype = new List<int> { 2, 3 };
+            var reporttype = new List<int> { 2, 3,4,5 };
             try
             {
                 var itemdata = await (from im in db.itemMaster
