@@ -35,5 +35,6 @@ namespace iMARSARLIMS.Response_Model
         public string? bookingdate { get; set; }
         public string? samplecollectiondate { get; set; }
         public string? SampleRecievedDate { get; set; }
+        public int resultdone { get; set; }
     }
 }

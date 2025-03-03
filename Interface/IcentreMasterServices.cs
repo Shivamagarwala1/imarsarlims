@@ -14,6 +14,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetRateType(int CentreType, int ParentCentre);
         Task<ServiceStatusResponseModel> GetCentreData(int centreId);
         Task<ServiceStatusResponseModel> SaveLetterHead(ReportLetterHead LetterHead);
+        Task<ServiceStatusResponseModel> GetLetterHeaddetails(int CentreId);
         Task<ServiceStatusResponseModel> GetRatetypeCentreWise(int CentreId);
         Task<ServiceStatusResponseModel> GetCentreType(int billingtype);
     }

@@ -24,7 +24,6 @@ namespace iMARSARLIMS.Services
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
                         join im in db.itemMaster on tbi.itemId equals im.itemId
-
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
                         join tm in db.titleMaster on tb.title_id equals tm.id
 
@@ -56,7 +55,8 @@ namespace iMARSARLIMS.Services
                             containercolor = db.containerColorMaster.Where(c => c.id == Convert.ToInt32(im.containerColor)).Select(c => c.ColorCode).FirstOrDefault(),
                             isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count(),
                             rowcolor = tbi.isUrgent == 1 ? "#ff8960" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#8fb4ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#FF6865"))),
-                            RejectionReason = tbi.RejectedReason
+                            RejectionReason = tbi.RejectedReason,
+                            resultdone= (int)tbi.isResultDone
                         };
             // Apply date filter
             if (sampleProcessingRequestModel.fromDate.HasValue && sampleProcessingRequestModel.toDate.HasValue)
@@ -66,13 +66,10 @@ namespace iMARSARLIMS.Services
 
                 query = query.Where(q => q.createdDateTime >= fromDate && q.createdDateTime <= toDate);
             }
-
-
             if (!string.IsNullOrEmpty(sampleProcessingRequestModel.barcodeNo))
             {
                 query = query.Where(q => q.barcodeNo == sampleProcessingRequestModel.barcodeNo);
             }
-
             if (sampleProcessingRequestModel.centreId != 0)
             {
                 query = query.Where(q => q.centreId == sampleProcessingRequestModel.centreId);
@@ -82,7 +79,6 @@ namespace iMARSARLIMS.Services
                 List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == sampleProcessingRequestModel.empId).Select(e => e.centreId).ToList();
                 query = query.Where(q => CentreIds.Contains(q.centreId));
             }
-
             if (sampleProcessingRequestModel.Status != "U")
             {
                 query = query.Where(q => q.isSampleCollected == sampleProcessingRequestModel.Status);
@@ -91,10 +87,8 @@ namespace iMARSARLIMS.Services
             {
                 query = query.Where(q => q.Urgent == 1);
             }
-
             query = query.OrderBy(q => q.patientId).ThenBy(q => q.transactionId);
             var result = await query.ToListAsync();
-
             return new ServiceStatusResponseModel
             {
                 Success = true,
@@ -1359,8 +1353,9 @@ namespace iMARSARLIMS.Services
                         join tm in db.titleMaster on tb.title_id equals tm.id
                         select new
                         {
-                            tb.bookingDate,
+                            bookingDate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
                             tb.patientId,
+                            BokkingDateFilter= tb.bookingDate,
                             tb.workOrderId,
                             SampleRecievedDateShow = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             ApproveDateShow = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
@@ -1390,7 +1385,8 @@ namespace iMARSARLIMS.Services
                             Urgent = tbi.isUrgent,
                             resultdone = tbi.isResultDone,
                             Approved = tbi.isApproved,
-                            Eerun = tbi.isrerun,
+                            Rerun = tbi.isrerun,
+
                             rowcolor = tbi.isUrgent == 1 ? "#FF4E12" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#6699ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#F0466B")))
 
                         };
@@ -1401,7 +1397,7 @@ namespace iMARSARLIMS.Services
 
                 if (resultentrydata.Datetype == "tb.bookingDate")
                 {
-                    query = query.Where(q => q.bookingDate >= fromDate && q.bookingDate <= toDate);
+                    query = query.Where(q => q.BokkingDateFilter >= fromDate && q.BokkingDateFilter <= toDate);
                 }
                 else if (resultentrydata.searchvalue == "tbi.approvedDate")
                 {
@@ -1466,7 +1462,7 @@ namespace iMARSARLIMS.Services
                 }
             }
             if (resultentrydata.reporttype < 3)
-                query = query.Where(q => q.reportType <= resultentrydata.reporttype);
+                query = query.Where(q => q.reportType == 1 || q.reportType == 2 );
             else
                 query = query.Where(q => q.reportType == resultentrydata.reporttype);
 

@@ -8,24 +8,23 @@ namespace iMARSARLIMS.Controllers.MasterController
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class sampletype_masterController : BaseController<sampletype_master>
+    public class TestMethodMasterController : BaseController<TestMethodMaster>
     {
         private readonly ContextClass db;
         private readonly IlabUniversalMasterServices _labUniversalMasterServices;
-
-        public sampletype_masterController(ContextClass context, ILogger<BaseController<sampletype_master>> logger, IlabUniversalMasterServices labUniversalMasterServices) : base(context, logger)
+        public TestMethodMasterController(ContextClass context, ILogger<BaseController<TestMethodMaster>> logger, IlabUniversalMasterServices labUniversalMasterServices) : base(context, logger)
         {
             db = context;
             this._labUniversalMasterServices = labUniversalMasterServices;
         }
-        protected override IQueryable<sampletype_master> DbSet => db.sampletype_master.AsNoTracking().OrderBy(o => o.id);
+        protected override IQueryable<TestMethodMaster> DbSet => db.TestMethodMaster.AsNoTracking().OrderBy(o => o.id);
 
-        [HttpPost("SaveUpdateSampletype")]
-        public async Task<ServiceStatusResponseModel> SaveUpdateSampletype(sampletype_master SampleType)
+        [HttpPost("SaveUpdateTestMethod")]
+        public async Task<ServiceStatusResponseModel> SaveUpdateTestMethod(TestMethodMaster testMethod)
         {
             try
             {
-                var result = await _labUniversalMasterServices.SaveUpdateSampletype(SampleType);
+                var result = await _labUniversalMasterServices.SaveUpdateTestMethod(testMethod);
                 return result;
             }
             catch (Exception ex)
@@ -39,12 +38,12 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
-        [HttpPost("UpdateSampleTypeStatus")]
-        public async Task<ServiceStatusResponseModel> UpdateSampleTypeStatus(int id, byte status, int userId)
+        [HttpPost("UpdateTestMethodStatus")]
+        public async Task<ServiceStatusResponseModel> UpdateTestMethodStatus(int id, byte status, int userId)
         {
             try
             {
-                var result = await _labUniversalMasterServices.UpdateSampleTypeStatus(id, status, userId);
+                var result = await _labUniversalMasterServices.UpdateTestMethodStatus(id, status, userId);
                 return result;
             }
             catch (Exception ex)

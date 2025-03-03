@@ -179,6 +179,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpGet("GetLetterHeaddetails")]
+        public async Task<ServiceStatusResponseModel> GetLetterHeaddetails(int CentreId)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetLetterHeaddetails(CentreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         [HttpGet("GetRatetypeCentreWise")]
         public async Task<ServiceStatusResponseModel> GetRatetypeCentreWise(int CentreId)

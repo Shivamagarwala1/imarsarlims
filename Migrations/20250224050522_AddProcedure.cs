@@ -12,7 +12,7 @@ namespace iMARSARLIMS.Migrations
         {
             migrationBuilder.Sql(@"
                 CREATE PROCEDURE GetTestObservationTestIdWise(
-                    IN _TestId INT,
+                    IN _TestId VARCHAR(50),
                     IN _Gender VARCHAR(10),
                     IN _Age INT,
                     IN _ToAge INT,
@@ -33,7 +33,7 @@ namespace iMARSARLIMS.Migrations
                         FROM tnx_bookingitem bi
                         INNER JOIN tnx_booking bo ON bi.TransactionId = bo.transactionId
                         INNER JOIN itemmaster im ON bi.itemid = im.Id
-                        WHERE bi.IsSampleCollected = 'Y' AND bi.Id = _TestId
+                        WHERE bi.IsSampleCollected = 'Y' AND FIND_IN_SET(bi.Id, _TestId)
                         
                         UNION ALL
                         
@@ -71,7 +71,7 @@ namespace iMARSARLIMS.Migrations
                         LEFT JOIN tnx_Observations tob ON tob.TestId = bi.Id AND tob.LabObservationId = io.id
                         LEFT JOIN machine_result mac ON mac.observationId = io.id AND mac.testid = bi.id
                         LEFT JOIN observationReferenceRanges lr ON io.id = lr.observationId AND lr.machineid = 1
-                        WHERE bi.IsSampleCollected = 'Y' AND bi.Id = _TestId
+                        WHERE bi.IsSampleCollected = 'Y' AND FIND_IN_SET(bi.Id, _TestId)
                     ) t
                     ORDER BY t.testId, t.labObservationId;
                 END;

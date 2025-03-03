@@ -37,8 +37,11 @@ namespace iMARSARLIMS.Model.Master
         [Required, MaxLength(10)]
         public string paymentMode { get; set; }
         public int paymentModeId { get; set; }
+        [MaxLength(300)]
         public string? reportHeader { get; set; }
+        [MaxLength(300)]
         public string? reciptHeader { get; set; }
+        [MaxLength(300)]
         public string? reciptFooter { get; set; }
         public int showISO { get; set; }
         public int showBackcover { get; set; }
@@ -100,7 +103,9 @@ namespace iMARSARLIMS.Model.Master
         public int? billingType { get; set; }
         [MaxLength(20)]
         public string? billingTypeName { get; set; }
+        [MaxLength(300)]
         public string? waterMarkImage { get; set; }
+        [MaxLength(300)]
         public string? NablImage { get; set; }
 
         [ForeignKey(nameof(centreId))]

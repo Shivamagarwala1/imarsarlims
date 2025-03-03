@@ -4,7 +4,7 @@ namespace iMARSARLIMS.Request_Model
 {
     public class ResultEntryRequestModle
     {
-        public int testId { get; set; }
+        public string testId { get; set; }
         [Required, MaxLength(6)]
         public string gender { get; set; }
         public int fromAge { get; set; }

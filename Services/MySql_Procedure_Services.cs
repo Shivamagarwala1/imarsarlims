@@ -12,11 +12,11 @@ namespace iMARSARLIMS.Services
         {
             db = context;
         }
-        public async Task<ServiceStatusResponseModel> GetTestObservation(int testId, string Gender, int fromAge, int toAge, int centreId)
+        public async Task<ServiceStatusResponseModel> GetTestObservation(string testId, string Gender, int fromAge, int toAge, int centreId)
         {
 
             string sql = "call GetTestObservationTestIdWise({0},{1},{2},{3},{4});";
-            int param1 = testId;
+            string param1 = testId;
             string param2 = Gender;
             int param3 = fromAge;
             int param4 = toAge;

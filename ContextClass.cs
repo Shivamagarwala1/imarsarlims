@@ -9,7 +9,10 @@ namespace iMARSARLIMS
 {
     public class ContextClass : DbContext
     {
+        public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<SampleRerunReason> SampleRerunReason { get; set; }
         public DbSet<DoctorApprovalSign> DoctorApprovalSign { get; set; }
+        public DbSet<itemObservation_isnabl> itemObservation_isnabl { get; set; }
         public DbSet<tnx_InvestigationAttchment> tnx_InvestigationAttchment { get; set; }
         public DbSet<tnx_InvestigationAddReport> tnx_InvestigationAddReport { get; set; }
         public DbSet<area_master> area_master {  get; set; }
@@ -146,6 +149,9 @@ namespace iMARSARLIMS
             modelBuilder.Entity<tnx_Observations_Log>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_Observations_Log>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<itemObservation_isnabl>().HasKey(x => x.id);
+            modelBuilder.Entity<itemObservation_isnabl>().Property(x => x.id).ValueGeneratedOnAdd(); 
+
             modelBuilder.Entity<tnx_Observations_Histo>().HasKey(x => x.histoObservationId);
             modelBuilder.Entity<tnx_Observations_Histo>().Property(x => x.histoObservationId).ValueGeneratedOnAdd();
 
@@ -169,6 +175,12 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<bank_master>().HasKey(x => x.id);
             modelBuilder.Entity<bank_master>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<TestMethodMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<TestMethodMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<SampleRerunReason>().HasKey(x => x.id);
+            modelBuilder.Entity<SampleRerunReason>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
             modelBuilder.Entity<centerTypeMaster>().HasKey(x => x.id);
             modelBuilder.Entity<centerTypeMaster>().Property(x => x.id).ValueGeneratedOnAdd();

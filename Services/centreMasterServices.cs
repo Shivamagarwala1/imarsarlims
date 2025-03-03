@@ -682,19 +682,20 @@ namespace iMARSARLIMS.Services
             Centre.NABLyPosition = LetterHead.NABLyPosition;
             Centre.docSignYPosition = LetterHead.docSignYPosition;
             Centre.receiptHeaderY = LetterHead.receiptHeaderY;
-            Centre.reportHeader = UploadImage(LetterHead.reportHeader,"ReportHeader"+ LetterHead.CentreId);
-            Centre.reciptHeader =  UploadImage(LetterHead.reciptHeader, "reciptHeader" + LetterHead.CentreId);
-            Centre.reciptFooter = UploadImage(LetterHead.reciptFooter, "reciptFooter" + LetterHead.CentreId);
-            Centre.waterMarkImage = UploadImage(LetterHead.WaterMarkImage, "WaterMarkImage" + LetterHead.CentreId);
-            Centre.NablImage = UploadImage(LetterHead.NablImage, "NablImage" + LetterHead.CentreId);
+            Centre.reportHeader = UploadImage(LetterHead.reportHeader, "ReportHeader_" + LetterHead.CentreId + ".png");
+            Centre.reciptHeader = UploadImage(LetterHead.reciptHeader, "reciptHeader_" + LetterHead.CentreId + ".png");
+            Centre.reciptFooter = UploadImage(LetterHead.reciptFooter, "reciptFooter_" + LetterHead.CentreId + ".png");
+            Centre.waterMarkImage = UploadImage(LetterHead.WaterMarkImage, "WaterMarkImage_" + LetterHead.CentreId + ".png");
+            Centre.NablImage = UploadImage(LetterHead.NablImage, "NablImage_" + LetterHead.CentreId + ".png");
         }
 
-        private string  UploadImage(string Image,string filename)
+        private string UploadImage(string Image, string filename)
         {
             try
             {
-                if ( Image != "")
+                if (Image != "")
                 {
+
                     string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
                     if (!Directory.Exists(primaryFolder))
                     {
@@ -705,10 +706,14 @@ namespace iMARSARLIMS.Services
                     {
                         Directory.CreateDirectory(uploadPath);
                     }
-                    byte[] imageBytes = Convert.FromBase64String(Image);
+                    var image = Image.Split(',')[1];
+                    byte[] imageBytes = Convert.FromBase64String(image);
 
                     string filePath = Path.Combine(uploadPath, filename);
-
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                    }
                     File.WriteAllBytes(filePath, imageBytes);
                     return filePath;
                 }
@@ -719,7 +724,6 @@ namespace iMARSARLIMS.Services
                 return "";
             }
         }
-
         async Task<ServiceStatusResponseModel> IcentreMasterServices.GetRatetypeCentreWise(int CentreId)
         {
             try
@@ -792,5 +796,88 @@ namespace iMARSARLIMS.Services
 
 
         }
+
+        // Make the method static
+        private static string ConverttoBAse64(string imagepath)
+        {
+            if (imagepath != null)
+            {
+                byte[] imageBytes = File.ReadAllBytes(imagepath);
+                string image = Convert.ToBase64String(imageBytes);
+                return image;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetLetterHeaddetails(int CentreId)
+        {
+            try
+            {
+                // Fetch data from the database first
+                var data = (from cm in db.centreMaster
+                            where cm.centreId == CentreId
+                            select new
+                            {
+                                cm.reporrtHeaderHeightY,
+                                cm.patientYHeader,
+                                cm.barcodeXPosition,
+                                cm.barcodeYPosition,
+                                cm.QRCodeXPosition,
+                                cm.QRCodeYPosition,
+                                cm.isQRheader,
+                                cm.isBarcodeHeader,
+                                cm.footerHeight,
+                                cm.NABLxPosition,
+                                cm.NABLyPosition,
+                                cm.docSignYPosition,
+                                cm.receiptHeaderY,
+                                cm.reportHeader,
+                                cm.reciptHeader,
+                                cm.reciptFooter,
+                                cm.waterMarkImage,
+                                cm.NablImage
+                            }).AsEnumerable() // Execute the query and switch to in-memory
+                            .Select(cm => new
+                            {
+                                cm.reporrtHeaderHeightY,
+                                cm.patientYHeader,
+                                cm.barcodeXPosition,
+                                cm.barcodeYPosition,
+                                cm.QRCodeXPosition,
+                                cm.QRCodeYPosition,
+                                cm.isQRheader,
+                                cm.isBarcodeHeader,
+                                cm.footerHeight,
+                                cm.NABLxPosition,
+                                cm.NABLyPosition,
+                                cm.docSignYPosition,
+                                cm.receiptHeaderY,
+                                reportHeader = ConverttoBAse64(cm.reportHeader),
+                                reciptHeader = ConverttoBAse64(cm.reciptHeader),
+                                reciptFooter = ConverttoBAse64(cm.reciptFooter),
+                                waterMarkImage = ConverttoBAse64(cm.waterMarkImage),
+                                NablImage = ConverttoBAse64(cm.NablImage)
+                            }).ToList();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
+
+
     }
 }

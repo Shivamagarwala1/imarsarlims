@@ -103,7 +103,7 @@ namespace iMARSARLIMS.Services
                     }
 
                     var centreList = CentreId.Split(',').Select(c => int.Parse(c.Trim())).ToList();
-                    var data= db.rateTypeTagging.Where(r=>r.rateTypeId == rateId && centreList.Contains(r.centreId)).ToList();
+                    var data= db.rateTypeTagging.Where(r=>r.rateTypeId == rateId).ToList();
                     db.rateTypeTagging.RemoveRange(data);
                     await db.SaveChangesAsync();
                     var tasks = centreList.Select(centre =>
