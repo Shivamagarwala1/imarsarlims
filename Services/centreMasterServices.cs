@@ -640,6 +640,7 @@ namespace iMARSARLIMS.Services
 
         async Task<ServiceStatusResponseModel> IcentreMasterServices.SaveLetterHead(ReportLetterHead LetterHead)
         {
+
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 try
@@ -681,11 +682,42 @@ namespace iMARSARLIMS.Services
             Centre.NABLyPosition = LetterHead.NABLyPosition;
             Centre.docSignYPosition = LetterHead.docSignYPosition;
             Centre.receiptHeaderY = LetterHead.receiptHeaderY;
-            Centre.reportHeader = LetterHead.reportHeader;
-            Centre.reciptHeader = LetterHead.reciptHeader;
-            Centre.reciptFooter = LetterHead.reciptFooter;
-            Centre.waterMarkImage = LetterHead.WaterMarkImage;
-            Centre.NablImage = LetterHead.NablImage;
+            Centre.reportHeader = UploadImage(LetterHead.reportHeader,"ReportHeader"+ LetterHead.CentreId);
+            Centre.reciptHeader =  UploadImage(LetterHead.reciptHeader, "reciptHeader" + LetterHead.CentreId);
+            Centre.reciptFooter = UploadImage(LetterHead.reciptFooter, "reciptFooter" + LetterHead.CentreId);
+            Centre.waterMarkImage = UploadImage(LetterHead.WaterMarkImage, "WaterMarkImage" + LetterHead.CentreId);
+            Centre.NablImage = UploadImage(LetterHead.NablImage, "NablImage" + LetterHead.CentreId);
+        }
+
+        private string  UploadImage(string Image,string filename)
+        {
+            try
+            {
+                if ( Image != "")
+                {
+                    string primaryFolder = _configuration["DocumentPath:PrimaryFolder"];
+                    if (!Directory.Exists(primaryFolder))
+                    {
+                        Directory.CreateDirectory(primaryFolder);
+                    }
+                    string uploadPath = Path.Combine(primaryFolder, "Image");
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+                    byte[] imageBytes = Convert.FromBase64String(Image);
+
+                    string filePath = Path.Combine(uploadPath, filename);
+
+                    File.WriteAllBytes(filePath, imageBytes);
+                    return filePath;
+                }
+                else { return ""; }
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
         }
 
         async Task<ServiceStatusResponseModel> IcentreMasterServices.GetRatetypeCentreWise(int CentreId)
@@ -757,6 +789,8 @@ namespace iMARSARLIMS.Services
                     Message = ex.Message
                 };
             }
+
+
         }
     }
 }

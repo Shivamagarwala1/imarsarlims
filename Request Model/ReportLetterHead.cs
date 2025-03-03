@@ -16,11 +16,11 @@
         public int NABLyPosition { get; set; }
         public int docSignYPosition { get; set; }
         public int receiptHeaderY { get; set; }
-        public string? reportHeader { get; set; }
-        public string? reciptHeader { get; set; }
-        public string? reciptFooter { get; set; }
-        public string? WaterMarkImage { get; set; }
-        public string? NablImage { get; set; }
+        public string reportHeader { get; set; }
+        public string reciptHeader { get; set; }
+        public string reciptFooter { get; set; }
+        public string WaterMarkImage { get; set; }
+        public string NablImage { get; set; }
 
     }
 }
