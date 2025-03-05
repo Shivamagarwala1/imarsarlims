@@ -706,8 +706,8 @@ namespace iMARSARLIMS.Services
                     {
                         Directory.CreateDirectory(uploadPath);
                     }
-                    var image = Image.Split(',')[1];
-                    byte[] imageBytes = Convert.FromBase64String(image);
+                   // var image = Image.Split(',')[1];
+                    byte[] imageBytes = Convert.FromBase64String(Image);
 
                     string filePath = Path.Combine(uploadPath, filename);
                     if (File.Exists(filePath))
@@ -776,6 +776,10 @@ namespace iMARSARLIMS.Services
                 {
                     query = query.Where(q => q.id == 2);
                 }
+                if (billingtype == 5)
+                {
+                    query = query.Where(q => q.id == 2);
+                }
 
                 var result = await query.ToListAsync();
 
@@ -800,7 +804,7 @@ namespace iMARSARLIMS.Services
         // Make the method static
         private static string ConverttoBAse64(string imagepath)
         {
-            if (imagepath != null)
+            if (imagepath != null && imagepath!="")
             {
                 byte[] imageBytes = File.ReadAllBytes(imagepath);
                 string image = Convert.ToBase64String(imageBytes);
@@ -878,6 +882,69 @@ namespace iMARSARLIMS.Services
             }
         }
 
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetLetterHeaddetailall()
+        {
+            try
+            {
+                // Fetch data from the database first
+                var data = (from cm in db.centreMaster
+                            select new
+                            {
+                                cm.reporrtHeaderHeightY,
+                                cm.patientYHeader,
+                                cm.barcodeXPosition,
+                                cm.barcodeYPosition,
+                                cm.QRCodeXPosition,
+                                cm.QRCodeYPosition,
+                                cm.isQRheader,
+                                cm.isBarcodeHeader,
+                                cm.footerHeight,
+                                cm.NABLxPosition,
+                                cm.NABLyPosition,
+                                cm.docSignYPosition,
+                                cm.receiptHeaderY,
+                                cm.reportHeader,
+                                cm.reciptHeader,
+                                cm.reciptFooter,
+                                cm.waterMarkImage,
+                                cm.NablImage
+                            }).AsEnumerable() // Execute the query and switch to in-memory
+                            .Select(cm => new
+                            {
+                                cm.reporrtHeaderHeightY,
+                                cm.patientYHeader,
+                                cm.barcodeXPosition,
+                                cm.barcodeYPosition,
+                                cm.QRCodeXPosition,
+                                cm.QRCodeYPosition,
+                                cm.isQRheader,
+                                cm.isBarcodeHeader,
+                                cm.footerHeight,
+                                cm.NABLxPosition,
+                                cm.NABLyPosition,
+                                cm.docSignYPosition,
+                                cm.receiptHeaderY,
+                                reportHeader = ConverttoBAse64(cm.reportHeader),
+                                reciptHeader = ConverttoBAse64(cm.reciptHeader),
+                                reciptFooter = ConverttoBAse64(cm.reciptFooter),
+                                waterMarkImage = ConverttoBAse64(cm.waterMarkImage),
+                                NablImage = ConverttoBAse64(cm.NablImage)
+                            }).ToList();
 
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
+        }
     }
 }

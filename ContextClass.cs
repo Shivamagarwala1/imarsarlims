@@ -10,6 +10,9 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<tat_master> tat_master { get; set; }
+        public DbSet<SampleremarkMaster> SampleremarkMaster { get; set; }
+        public DbSet<labReportFooterText> labReportFooterText { get; set; }
         public DbSet<SampleRerunReason> SampleRerunReason { get; set; }
         public DbSet<DoctorApprovalSign> DoctorApprovalSign { get; set; }
         public DbSet<itemObservation_isnabl> itemObservation_isnabl { get; set; }
@@ -131,17 +134,25 @@ namespace iMARSARLIMS
             modelBuilder.Entity<tnx_BookingStatus>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_BookingItem>().HasKey(x => x.id);
-            modelBuilder.Entity<tnx_BookingItem>().Property(x => x.id).ValueGeneratedOnAdd(); 
-
+            modelBuilder.Entity<tnx_BookingItem>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_InvestigationAddReport>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_InvestigationAddReport>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<labReportFooterText>().HasKey(x => x.id);
+            modelBuilder.Entity<labReportFooterText>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
             modelBuilder.Entity<tnx_InvestigationRemarks>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_InvestigationRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_InvestigationAttchment>().HasKey(x => x.id);
-            modelBuilder.Entity<tnx_InvestigationAttchment>().Property(x => x.id).ValueGeneratedOnAdd();  
+            modelBuilder.Entity<tnx_InvestigationAttchment>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<tat_master>().HasKey(x => x.id);
+            modelBuilder.Entity<tat_master>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<SampleremarkMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<SampleremarkMaster>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
             modelBuilder.Entity<tnx_Observations>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_Observations>().Property(x => x.id).ValueGeneratedOnAdd();
@@ -436,6 +447,7 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<SingleStringResponseModel>().HasNoKey();
             modelBuilder.Entity<ResultEntryResponseModle>().HasNoKey();
+            modelBuilder.Entity<rateListData>().HasNoKey();
             //modelBuilder.Entity<SampleProcessingResponseModel>().HasNoKey();
             //modelBuilder.Entity<SampleProcessingRequestModel>().HasNoKey();
             //modelBuilder.Entity<LoginRequestModel>().HasNoKey();

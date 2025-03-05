@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,13 +11,15 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250304164715_tatmaster1")]
+    partial class tatmaster1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "8.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("iMARSARLIMS.Model.Account.CentrePayment", b =>
@@ -3756,6 +3759,12 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<double>("mrp")
                         .HasColumnType("double");
+
+                    b.Property<int>("panelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("panelItemName")
+                        .HasColumnType("longtext");
 
                     b.Property<double>("rate")
                         .HasColumnType("double");

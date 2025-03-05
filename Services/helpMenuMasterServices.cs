@@ -48,7 +48,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var count = db.helpMenuMapping.Where(h => h.itemId == HelpMenu.itemId && h.helpId == HelpMenu.helpId).Count();
+                    var count = db.helpMenuMapping.Where(h => h.ObservationId == HelpMenu.ObservationId && h.helpId == HelpMenu.helpId).Count();
                     if (count > 0)
                     {
                         return new ServiceStatusResponseModel

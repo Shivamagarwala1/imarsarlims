@@ -13,5 +13,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetHistoresult(int testid);
         Task<ServiceStatusResponseModel> GetMicroresult(int testid,int reportStatus);
         Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId);
+        Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata);
+        Task<ServiceStatusResponseModel> GetTestInfo(int TestId);
     }
 }

@@ -3,7 +3,6 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using iText.Pdfua.Checkers.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -448,7 +447,7 @@ namespace iMARSARLIMS.Services
                                   join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                   join cm in db.centreMaster on tb.centreId equals cm.centreId
                                   join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
-                                  where tb.workOrderId == "ims51"
+                                  where tb.workOrderId == workorderId
                                         && (string.IsNullOrEmpty(tbi.packageName) || tbi.packageName == tbi.investigationName)
                                   select new
                                   {
@@ -487,6 +486,139 @@ namespace iMARSARLIMS.Services
                     };
                 }
 
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetDispatchData(DispatchDataRequestModel patientdata)
+        {
+            var query = from tb in db.tnx_Booking
+                        join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                        join im in db.itemMaster on tbi.itemId equals im.itemId
+                        join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        join tm in db.titleMaster on tb.title_id equals tm.id
+                        select new
+                        {
+                            bookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                            tb.workOrderId,
+                            SampleRecievedDate = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                            ApproveDate= tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                            PatientName = string.Concat(tm.title, " ", tb.name),
+                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/",tb.gender),
+                            tbi.barcodeNo,
+                            investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "<br>", tbi.investigationName) : tbi.investigationName,
+                            Remark = tb.labRemarks,
+                            cm.centrecode,
+                            centreName = cm.companyName,
+                            tbi.departmentName,
+                            tbi.isSampleCollected,
+                            tb.transactionId,
+                            tbi.sampleCollectionDate,
+                            im.reportType,
+                            Comment="",
+                            resultdone = tbi.isResultDone,
+                            Approved = tbi.isApproved,
+                            BokkingDateFilter = tb.bookingDate,
+                            approvedDateFilter= tbi.approvedDate,
+                            sampleReceiveDateFilter= tbi.sampleReceiveDate,
+                            tbi.centreId,tbi.itemId,
+                            tbi.deptId                  
+                        };
+            if (patientdata.Datetype != "")
+            {
+                var fromDate = patientdata.FromDate.Date; // Strip the time portion
+                var toDate = patientdata.ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+
+                if (patientdata.Datetype == "tb.bookingDate")
+                {
+                    query = query.Where(q => q.BokkingDateFilter >= fromDate && q.BokkingDateFilter <= toDate);
+                }
+                else if (patientdata.searchvalue == "tbi.approvedDate")
+                {
+                    query = query.Where(q => q.approvedDateFilter >= fromDate && q.approvedDateFilter <= toDate);
+                }
+                else if (patientdata.searchvalue == "tbi.sampleReceiveDate")
+                {
+                    query = query.Where(q => q.sampleReceiveDateFilter >= fromDate && q.sampleReceiveDateFilter <= toDate);
+                }
+                else
+                {
+                    query = query.Where(q => q.sampleCollectionDate >= fromDate && q.sampleCollectionDate <= toDate);
+                }
+            }
+            if (patientdata.searchvalue != "")
+            {
+                query = query.Where(q => q.barcodeNo == patientdata.searchvalue || q.workOrderId == patientdata.searchvalue);
+            }
+            if (patientdata.ItemIds.Count > 0)
+            {
+                query = query.Where(q => patientdata.ItemIds.Contains(q.itemId));
+            }
+            if (patientdata.centreId > 0)
+            {
+                query = query.Where(q => q.centreId== patientdata.centreId);
+            }
+            else
+            {
+                List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == patientdata.empid).Select(e => e.centreId).ToList();
+                query = query.Where(q => CentreIds.Contains(q.centreId));
+            }
+
+            if (patientdata.departmentIds.Count > 0)
+            {
+                query = query.Where(q => patientdata.departmentIds.Contains(q.deptId));
+            }
+            query = query.OrderBy(q => q.workOrderId).ThenBy(q => q.deptId);
+            var result = await query.ToListAsync();
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = result
+            };
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetTestInfo(int TestId)
+        {
+            try
+            {
+                var data = await (from tb in db.tnx_Booking
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  join em in db.empMaster on tb.createdById equals em.empId
+                                  where tbi.id == TestId
+                                  select new
+                                  {
+                                      tbi.investigationName,
+                                      tbi.barcodeNo,
+                                      registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                      RegisterBy = em.fName + " " + em.lName,
+                                      sampleCollectionDate = tbi.sampleCollectionDate.HasValue ? tbi.sampleCollectionDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tbi.sampleCollectedby,
+                                      sampleReceiveDate = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tbi.sampleReceivedBY,
+                                      resultDate = tbi.resultDate.HasValue ? tbi.resultDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tbi.resutDoneBy,
+                                      approvedDate = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tbi.approvedbyName,
+                                      outhouseDoneOn = tbi.outhouseDoneOn.HasValue ? tbi.outhouseDoneOn.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tbi.outhouseLab,
+                                      tbi.outhouseDoneBy,
+                                      OutSource="",
+                                      OutSourceDate="",
+                                      OutSouceLab=""
+
+                                  }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {

@@ -185,6 +185,7 @@ builder.Services.AddScoped<Ihistoreportservices, histoReportServices>();
 builder.Services.AddScoped<ItnxInvestigationAttachmentService, tnxInvestigationAttachmentService>();
 builder.Services.AddScoped<IitemObservation_isnablService, itemObservation_isnablService>();
 builder.Services.AddScoped<IlabUniversalMasterServices, labUniversalMasterServices>();
+builder.Services.AddScoped<ItatMasterServices, tatMasterServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

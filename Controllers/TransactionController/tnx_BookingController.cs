@@ -39,6 +39,23 @@ namespace iMARSARLIMS.Controllers.transactionController
                 };
             }
         }
+        [HttpPost("GetDispatchData")]
+        public async Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetDispatchData(patientdata);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
         [HttpGet("GetHistoresult")]
         public async Task<ServiceStatusResponseModel> GetHistoresult(int testid)
         {
@@ -202,6 +219,24 @@ namespace iMARSARLIMS.Controllers.transactionController
             try
             {
                 var result = await _tnxBookingServices.GetPatientDetail(workorderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        //for popup
+        [HttpGet("GetTestInfo")]
+        public async Task<ServiceStatusResponseModel> GetTestInfo(int TestId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetTestInfo(TestId);
                 return result;
             }
             catch (Exception ex)

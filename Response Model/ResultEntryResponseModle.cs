@@ -36,5 +36,8 @@ namespace iMARSARLIMS.Response_Model
         public int? showInReport { get; set; }
         public string method { get; set; }
         public string oldreading { get; set; }
+        public int isapproved { get; set; }
+        public int hold { get; set; }
+        public int ReportType { get; set; }
     }
 }

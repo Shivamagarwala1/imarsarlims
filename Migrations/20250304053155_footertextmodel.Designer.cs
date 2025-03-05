@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,13 +11,15 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250304053155_footertextmodel")]
+    partial class footertextmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.13")
+                .HasAnnotation("ProductVersion", "8.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("iMARSARLIMS.Model.Account.CentrePayment", b =>
@@ -435,37 +438,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("SampleRerunReason");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.SampleremarkMaster", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("remark")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("SampleremarkMaster");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.TestMethodMaster", b =>
@@ -3757,6 +3729,12 @@ namespace iMARSARLIMS.Migrations
                     b.Property<double>("mrp")
                         .HasColumnType("double");
 
+                    b.Property<int>("panelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("panelItemName")
+                        .HasColumnType("longtext");
+
                     b.Property<double>("rate")
                         .HasColumnType("double");
 
@@ -3998,77 +3976,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("stateMaster");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.tat_master", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("CreatedByName")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("Createdby")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Days")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Deptid")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan?>("EndTime")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int?>("Fri")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Mins")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Mon")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Regcoll")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Sat")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan?>("StartTime")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int?>("Sun")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TATType")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("Thu")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Tue")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Wed")
-                        .HasColumnType("int");
-
-                    b.Property<int>("centreid")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("collrecv")
-                        .HasColumnType("int");
-
-                    b.Property<int>("itemid")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("tat_master");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.titleMaster", b =>

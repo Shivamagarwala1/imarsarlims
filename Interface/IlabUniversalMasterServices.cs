@@ -13,6 +13,11 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> SaveUpdateTestMethod(TestMethodMaster testMethod);
         Task<ServiceStatusResponseModel> UpdateSampleReasonStatus(int id, byte status, int userId);
         Task<ServiceStatusResponseModel> SaveUpdateSampleRerunReason(SampleRerunReason SampleReason);
+        Task<ServiceStatusResponseModel> UpdateFooterTextStatus(int id, byte status, int userId);
+        Task<ServiceStatusResponseModel> SaveUpdateFooterText(labReportFooterText FooterText);
+        Task<ServiceStatusResponseModel> GetFooterText();
+        Task<ServiceStatusResponseModel> UpdateSampleRemarkStatus(int id, byte status, int userId);
+        Task<ServiceStatusResponseModel> SaveUpdatesampleRemark(SampleremarkMaster SampleRemark);
 
     }
 }

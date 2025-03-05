@@ -18,7 +18,7 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                List<string> TestIds =  testId.Split(',').ToList();
+                List<string> TestIds = testId.Split(',').ToList();
                 HtmlToPdf htmlToPdfConverter = new HtmlToPdf();
                 htmlToPdfConverter.SerialNumber = "YCgJMTAE-BiwJAhIB-EhlWTlBA-UEBRQFBA-U1FOUVJO-WVlZWQ==";
 
@@ -27,7 +27,7 @@ namespace iMARSARLIMS.Services
                 htmlToPdfConverter.Document.PageSize = PdfPageSize.A4;   // A4 page size
                 htmlToPdfConverter.Document.PageOrientation = PdfPageOrientation.Portrait;
 
-                var headerHeight = 0; 
+                var headerHeight = 0;
                 int LeftMargin = 30;
                 var reportdata = (from tb in db.tnx_Booking
                                   join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
@@ -38,43 +38,68 @@ namespace iMARSARLIMS.Services
                                   where testId.Contains(tbi.id.ToString())
                                   select new
                                   {
-                                     VisitNo= tb.workOrderId, PatientName=string.Concat(tm.title," ",tb.name),
-                                      Age=string.Concat(tb.ageYear," Y ",tb.ageMonth," M ",tb.ageDay,"D/",tb.gender),
-                                      tb.patientId,clientName=cm.companyName,ClientCode=cm.centrecode,
-                                      RefDoctor= dr.doctorName,tbi.departmentName,tbi.investigationName,tbi.itemId, 
-                                      Registrationdate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                      CollectionDate = tbi.sampleCollectionDate.HasValue ? tbi.sampleCollectionDate.Value.ToString("yyyy-MMM-dd hh:mm tt"): "",
-                                      RecievedDate = tbi.sampleReceiveDate.HasValue? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt"): "",
-                                      ApprovedDate = tbi.approvedDate.HasValue? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt"): "",
-                                      tho.biospyNumber,tho.blockKeys,tho.clinicalHistory,tho.comment,tho.finalImpression,
-                                      tho.typesFixativeUsed,tho.specimen,tho.gross,tho.microscopy
+                                      VisitNo = tb.workOrderId,
+                                      PatientName = string.Concat(tm.title, " ", tb.name),
+                                      Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, "D/", tb.gender),
+                                      tb.patientId,
+                                      clientName = cm.companyName,
+                                      ClientCode = cm.centrecode,
+                                      RefDoctor = dr.doctorName,
+                                      tbi.departmentName,
+                                      tbi.investigationName,
+                                      tbi.itemId,
+                                      Registrationdate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                      CollectionDate = tbi.sampleCollectionDate.HasValue ? tbi.sampleCollectionDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      RecievedDate = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      ApprovedDate = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                                      tho.biospyNumber,
+                                      tho.blockKeys,
+                                      tho.clinicalHistory,
+                                      tho.comment,
+                                      tho.finalImpression,
+                                      tho.typesFixativeUsed,
+                                      tho.specimen,
+                                      tho.gross,
+                                      tho.microscopy,
+                                      TestId = tbi.id
                                   }).ToList();
 
-                string htmlContent = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).FirstOrDefault();
+                string htmlContent = "";
+                string HeaderContent = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).FirstOrDefault();
                 StringBuilder sb = new StringBuilder();
-                sb.Append("<table>");
+
                 var deptname = "";
                 var testname = "";
+                var TestId = "";
                 foreach (var item in reportdata)
                 {
+                    sb.Append("" + HeaderContent + "");
+                    if (testId != "" || TestId != item.TestId.ToString())
+                    {
+                        TestId = item.TestId.ToString();
+                        sb.Append("<table style='width:100%' >");
+                    }
                     if (deptname != item.departmentName)
                     {
                         deptname = item.departmentName;
-                        sb.Append("<tr><td colspan=2>" + item.departmentName + "</td></tr>");
+                        sb.Append("<tr><td colspan=2 style='text-align: center;'>" + item.departmentName + "</td></tr>");
                     }
                     if (testname != item.investigationName)
                     {
-                        testname=item.investigationName;
-                        sb.Append("<tr><td colspan=2 style='Border:1px'>" + item.investigationName + "</td></tr>");
+                        testname = item.investigationName;
+                        sb.Append("<tr><td colspan=2 style='Border:1px;text-align: center;'>" + item.investigationName + "</td></tr>");
                     }
-                    sb.Append("<tr><td>Specimen: </td><td>"+item.specimen +"</td></tr>");
-                    sb.Append("<tr><td>Biopsy Number: </td><td>" + item.biospyNumber + "</td></tr>");
-                    sb.Append("<tr><td colspan=2>Biopsy Number: </td></tr>");
-
-
+                    sb.Append("<tr><td colspan=2 >Specimen: " + item.specimen + "</td></tr>");
+                    sb.Append("<tr><td colspan=2 >Biopsy Number: " + item.biospyNumber + "</td></tr>");
+                    sb.Append("<tr><td colspan=2 style='border: 1px solid grey;'>Gross </td></tr>");
+                    sb.Append("<tr><td colspan=2 >" + item.gross + "</td></tr>");
+                    sb.Append("<tr><td colspan=2 style='border: 1px solid grey;'>MicroScopy </td></tr>");
+                    sb.Append("<tr><td colspan=2 >" + item.microscopy + "</td></tr>");
+                    sb.Append("<tr><td colspan=2 style='border: 1px solid grey;'>Final Impression </td></tr>");
+                    sb.Append("<tr><td colspan=2 >" + item.finalImpression + "</td></tr>");
                 }
                 sb.Append("</table>");
-                htmlContent = string.Concat(htmlContent, sb.ToString()); 
+                htmlContent = string.Concat(htmlContent, sb.ToString());
 
                 byte[] pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent, null);
 

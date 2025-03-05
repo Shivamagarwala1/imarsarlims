@@ -392,6 +392,7 @@ namespace iMARSARLIMS.Services
                              from iom in db.ItemObservationMapping
                              join lom in db.itemObservationMaster on iom.observationID equals lom.id
                              where iom.itemId == itemid
+                             orderby iom.printOrder
                              select new
                              {
                                  iom.id,
@@ -417,6 +418,7 @@ namespace iMARSARLIMS.Services
                             from iom in db.ItemObservationMapping
                             join im in db.itemMaster on iom.observationID equals im.itemId
                             where iom.itemId == itemid
+                            orderby iom.printOrder
                             select new
                             {
                                 iom.id,

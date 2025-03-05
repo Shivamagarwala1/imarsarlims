@@ -21,7 +21,7 @@ namespace iMARSARLIMS.Controllers.MasterController
         protected override IQueryable<rateTypeWiseRateList> DbSet => db.rateTypeWiseRateList.AsNoTracking().OrderBy(o => o.id);
 
         [HttpPost("SaveRateList")]
-        public async Task<ActionResult<ServiceStatusResponseModel>> SaveRateList(List<rateTypeWiseRateList> RateTypeWiseRateList)
+        public async Task<ServiceStatusResponseModel> SaveRateList(List<rateTypeWiseRateList> RateTypeWiseRateList)
         {
             try
             {
@@ -30,7 +30,70 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
             catch (Exception ex)
             {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("SaveRateListitemWise")]
+        public async Task<ServiceStatusResponseModel> SaveRateListitemWise(List<rateTypeWiseRateList> RateTypeWiseRateList)
+        {
+            try
+            {
+                var result = await _rateTypeWiseRateListServices.SaveRateListitemWise(RateTypeWiseRateList);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel 
+                { 
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetRateListExcel")]
+        public IActionResult GetRateListExcel(int RatetypeId)
+        {
+            try
+            {
+                var result = _rateTypeWiseRateListServices.GetRateListExcel(RatetypeId);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "RateList.xlsx");
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("GetItemrateListData")]
+        public async Task<ServiceStatusResponseModel> GetItemrateListData(int itemid)
+        {
+            try
+            {
+                var result = await _rateTypeWiseRateListServices.GetItemrateListData(itemid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+               return new ServiceStatusResponseModel
+               { Success = false,Message = ex.Message};
+            }
+        }
+        [HttpGet("GetRateTypeRateListData")]
+        public async Task<ServiceStatusResponseModel> GetRateTypeRateListData(int ratetypeid,int deptId)
+        {
+            try
+            {
+                var result = await _rateTypeWiseRateListServices.GetRateTypeRateListData(ratetypeid,deptId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                { Success = false, Message = ex.Message };
             }
         }
 

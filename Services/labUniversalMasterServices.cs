@@ -3,6 +3,7 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
 {
@@ -343,6 +344,218 @@ namespace iMARSARLIMS.Services
 
                     }
 
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IlabUniversalMasterServices.UpdateFooterTextStatus(int id, byte status, int userId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.labReportFooterText.Where(o => o.id == id).FirstOrDefault();
+                    if (data != null)
+                    {
+                        data.isActive = status;
+                        data.updateById = userId;
+                        data.updateDateTime = DateTime.Now;
+                        db.labReportFooterText.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No Data Found To Update"
+                        };
+
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IlabUniversalMasterServices.SaveUpdateFooterText(labReportFooterText FooterText)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (FooterText.id == 0)
+                    {
+                        var data = db.labReportFooterText.Where(l=>l.centreId== FooterText.centreId).FirstOrDefault();
+                        if (data != null)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Footer Text Already Exist"
+                            };
+                        }
+                        else
+                        {
+                            db.labReportFooterText.Add(FooterText);
+                            await db.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = true,
+                                Message = "Saved Successful"
+                            };
+                        }
+                    }
+                    else
+                    {
+                        db.labReportFooterText.Update(FooterText);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Saved Successful"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IlabUniversalMasterServices.GetFooterText()
+        {
+            try
+            {
+                var data = await (from ft in db.labReportFooterText
+                                  join cm in db.centreMaster on ft.centreId equals cm.centreId
+                                  select new
+                                  {
+                                      ft.id,
+                                      ft.centreId,
+                                      CentreName=cm.companyName,
+                                      ft.footerText,
+                                      ft.isActive
+                                  }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data=data
+                };
+            }
+            catch(Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IlabUniversalMasterServices.UpdateSampleRemarkStatus(int id, byte status, int userId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.SampleremarkMaster.Where(o => o.id == id).FirstOrDefault();
+                    if (data != null)
+                    {
+                        data.isActive = status;
+                        data.updateById = userId;
+                        data.updateDateTime = DateTime.Now;
+                        db.SampleremarkMaster.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No Data Found To Update"
+                        };
+
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IlabUniversalMasterServices.SaveUpdatesampleRemark(SampleremarkMaster SampleRemark)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    if (SampleRemark.id == 0)
+                    {
+                        db.SampleremarkMaster.Add(SampleRemark);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Saved Successful"
+                        };
+                    }
+                    else
+                    {
+                        db.SampleremarkMaster.Update(SampleRemark);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Saved Successful"
+                        };
+                    }
                 }
                 catch (Exception ex)
                 {
