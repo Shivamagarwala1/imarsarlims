@@ -20,6 +20,11 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> TatReport(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
         byte[] TatReportExcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
         byte[] TatReportpdf(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
-
+        Task<ServiceStatusResponseModel> GetMethodChangedetail(string WorkOrderId);
+        Task<ServiceStatusResponseModel> UpdateMethod(List<methodChangeRequestModel> methoddata);
+        byte[] PrintWorkSheet(string TestIds);
+        Task<ServiceStatusResponseModel> GetWorkSheetData(WorkSheetRequestModel worksheetdata);
+        Task<ServiceStatusResponseModel> GetSampleTypedetail(string WorkOrderId);
+        Task<ServiceStatusResponseModel> UpdateSampleType(List<SampltypeChangeRequestModel> sampletypedata);
     }
 }

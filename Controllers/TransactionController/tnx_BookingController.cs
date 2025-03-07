@@ -327,7 +327,7 @@ namespace iMARSARLIMS.Controllers.transactionController
 
                 return new FileStreamResult(ms, "application/pdf")
                 {
-                    FileDownloadName = "PateintReport.pdf"
+                    FileDownloadName = "TATReport.pdf"
                 };
             }
             catch (Exception ex)
@@ -335,5 +335,113 @@ namespace iMARSARLIMS.Controllers.transactionController
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("GetMethodChangedetail")]
+        public async Task<ServiceStatusResponseModel> GetMethodChangedetail(string WorkOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetMethodChangedetail(WorkOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("UpdateMethod")]
+        public async Task<ServiceStatusResponseModel> UpdateMethod(List<methodChangeRequestModel> methoddata)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.UpdateMethod(methoddata);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("GetWorkSheetData")]
+        public async Task<ServiceStatusResponseModel> GetWorkSheetData(WorkSheetRequestModel worksheetdata)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetWorkSheetData(worksheetdata);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("PrintWorkSheet")]
+        public IActionResult PrintWorkSheet(string TestIds)
+        {
+            try
+            {
+                var result =  _tnxBookingServices.PrintWorkSheet(TestIds);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "WorkSheet.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetSampleTypedetail")]
+        public async Task<ServiceStatusResponseModel> GetSampleTypedetail(string WorkOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetSampleTypedetail(WorkOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("UpdateSampleType")]
+        public async Task<ServiceStatusResponseModel> UpdateSampleType(List<SampltypeChangeRequestModel> sampletypedata)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.UpdateSampleType(sampletypedata);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
     }
 }

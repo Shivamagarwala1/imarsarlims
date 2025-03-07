@@ -1,6 +1,7 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
+using iText.Layout.Element;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -39,7 +40,26 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
-        
+
+
+        public  List<WorkSheetResposeModel> PrintWorkSheet(string TestIds)
+        {
+
+            string sql = "CALL WorkSheetReport({0});";
+            string param1 = TestIds;
+            var result = db.Set<WorkSheetResposeModel>()
+           .FromSqlRaw(sql, param1)
+           .AsEnumerable().ToList();
+            if (result.Count > 0)
+            {
+                return result;
+            }
+            else
+            {
+                return new List<WorkSheetResposeModel> { };
+            }
+        }
+
         public List<TatReportData> TatReportexcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
         {
             string sql = "call TatReport({0},{1},{2},{3},{4},{5});";

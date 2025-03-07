@@ -186,6 +186,7 @@ builder.Services.AddScoped<ItnxInvestigationAttachmentService, tnxInvestigationA
 builder.Services.AddScoped<IitemObservation_isnablService, itemObservation_isnablService>();
 builder.Services.AddScoped<IlabUniversalMasterServices, labUniversalMasterServices>();
 builder.Services.AddScoped<ItatMasterServices, tatMasterServices>();
+builder.Services.AddScoped<Itnx_OutsourceDetailServices, tnx_OutsourceDetailServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
