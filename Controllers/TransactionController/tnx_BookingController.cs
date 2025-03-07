@@ -249,8 +249,91 @@ namespace iMARSARLIMS.Controllers.transactionController
             }
         }
 
+        [HttpGet("GetbarcodeChangedetail")]
+        public async Task<ServiceStatusResponseModel> GetbarcodeChangedetail(string WorkOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetbarcodeChangedetail(WorkOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("UpdateBarcode")]
+        public async Task<ServiceStatusResponseModel> UpdateBarcode(List<barcodeChangeRequest> NewBarcodeData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.UpdateBarcode(NewBarcodeData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
 
+        [HttpGet("TatReport")]
+        public async Task<ServiceStatusResponseModel> TatReport(DateTime FromDate, DateTime ToDate, int centreId,int departmentId,int itemid,string TatType)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.TatReport(FromDate, ToDate,centreId, departmentId,itemid,TatType);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("TatReportExcel")]
+        public  IActionResult TatReportExcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+            try
+            {
+                var result =  _tnxBookingServices.TatReportExcel(FromDate, ToDate, centreId, departmentId, itemid, TatType);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TatReport.xlsx");
 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("TatReportpdf")]
+        public IActionResult TatReportpdf(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+            try
+            {
+                var result = _tnxBookingServices.TatReportpdf(FromDate, ToDate, centreId, departmentId, itemid, TatType);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "PateintReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -126,6 +126,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -192,6 +193,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,

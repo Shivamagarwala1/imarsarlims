@@ -10,6 +10,7 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<tnx_investigationtext_Report> tnx_investigationtext_Report { get; set; }
         public DbSet<tat_master> tat_master { get; set; }
         public DbSet<SampleremarkMaster> SampleremarkMaster { get; set; }
         public DbSet<labReportFooterText> labReportFooterText { get; set; }
@@ -165,9 +166,12 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<tnx_Observations_Histo>().HasKey(x => x.histoObservationId);
             modelBuilder.Entity<tnx_Observations_Histo>().Property(x => x.histoObservationId).ValueGeneratedOnAdd();
-
+            
             modelBuilder.Entity<tnx_Observations_Micro_Flowcyto>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_Observations_Micro_Flowcyto>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<tnx_investigationtext_Report>().HasKey(x => x.id);
+            modelBuilder.Entity<tnx_investigationtext_Report>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_Observations_Micro_flowcyto_Log>().HasKey(x => x.testId);
             modelBuilder.Entity<tnx_Observations_Micro_flowcyto_Log>().Property(x => x.testId).ValueGeneratedOnAdd();
@@ -448,7 +452,7 @@ namespace iMARSARLIMS
             modelBuilder.Entity<SingleStringResponseModel>().HasNoKey();
             modelBuilder.Entity<ResultEntryResponseModle>().HasNoKey();
             modelBuilder.Entity<rateListData>().HasNoKey();
-            //modelBuilder.Entity<SampleProcessingResponseModel>().HasNoKey();
+            modelBuilder.Entity<TatReportData>().HasNoKey();
             //modelBuilder.Entity<SampleProcessingRequestModel>().HasNoKey();
             //modelBuilder.Entity<LoginRequestModel>().HasNoKey();
 

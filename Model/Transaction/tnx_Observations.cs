@@ -10,7 +10,7 @@ namespace iMARSARLIMS.Model.Transaction
         public int id { get; set; }
         public int? testId { get; set; }
         public int? labObservationId { get; set; }
-        [MaxLength(50)]
+        [MaxLength(100)]
         public string? observationName { get; set; }
         [MaxLength(20)]
         public string? value { get; set; }

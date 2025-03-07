@@ -39,5 +39,6 @@ namespace iMARSARLIMS.Response_Model
         public int isapproved { get; set; }
         public int hold { get; set; }
         public int ReportType { get; set; }
+        public int DLCCheck { get; set; }
     }
 }

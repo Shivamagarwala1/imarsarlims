@@ -34,6 +34,7 @@ namespace iMARSARLIMS.Services
                     var ratelistdata = RateTypeWiseRateList.Select(CreateRatelistData).ToList();
                     db.rateTypeWiseRateList.AddRange(ratelistdata);
                     await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -42,6 +43,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -73,7 +75,6 @@ namespace iMARSARLIMS.Services
 
         async Task<ServiceStatusResponseModel> IrateTypeWiseRateListServices.SaveRateListFromExcel(IFormFile ratelistexcel)
         {
-
             string extension = Path.GetExtension(ratelistexcel.FileName);
             if (extension != ".xlsx" && extension != ".xls")
             {
@@ -83,50 +84,51 @@ namespace iMARSARLIMS.Services
                     Message = "No valid file extension Found"
                 };
             }
+
             try
             {
+                var rateListData = new List<object>(); // Collection to store all rows of data
+
                 using (var stream = new MemoryStream())
                 {
                     await ratelistexcel.CopyToAsync(stream);
                     ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.Commercial;
-                    var RateListData = new List<rateTypeWiseRateList>();
+
                     using (var package = new ExcelPackage(stream))
                     {
                         var worksheet = package.Workbook.Worksheets[0];
-                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+
+                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++) // Start from row 2 assuming row 1 is the header
                         {
+                            var deptId = GetNumericData(worksheet.Cells[row, 1], row, "DeptId"); // Validate column 1 (DeptId)
+                            var deptName = worksheet.Cells[row, 2].Value?.ToString();  // Validate column 2 (DeptName)
+                            var itemId = GetNumericData(worksheet.Cells[row, 3], row, "ItemId");  // Validate column 3 (ItemId)
+                            var itemCode = worksheet.Cells[row, 4].Value?.ToString();  // Validate column 4 (ItemCode)
+                            var itemName = worksheet.Cells[row, 5].Value?.ToString();  // Validate column 5 (ItemName)
+                            var mrp = GetDoubleData(worksheet.Cells[row, 6], row, "MRP");  // Validate column 6 (MRP)
+                            var rate = GetDoubleData(worksheet.Cells[row, 7], row, "Rate");  // Validate column 7 (Rate)
 
-                            var DeptId = GetNumericData(worksheet.Cells[row, 1], row, "DeptId");  // Validate column 1 (DeptId)
-                            var Ratetypeid = GetNumericData(worksheet.Cells[row, 2], row, "Ratetypeid");  // Validate column 2 (Ratetypeid)
-                            var MRP = GetDoubleData(worksheet.Cells[row, 3], row, "MRP");  // Validate column 3 (MRP)
-                            var Discount = GetNumericData(worksheet.Cells[row, 4], row, "Discount");  // Validate column 4 (Discount)
-                            var Rate = GetNumericData(worksheet.Cells[row, 5], row, "Rate");  // Validate column 5 (Rate)
-                            var Itemid = GetNumericData(worksheet.Cells[row, 6], row, "Itemid");  // Validate column 6 (Itemid)
-                            var ItemCode = worksheet.Cells[row, 7].Value?.ToString();  // Column 7 (ItemCode)
-                            var rateTypeWiseRateList = new rateTypeWiseRateList
+                            // Accumulate the row's data
+                            var excelData = new
                             {
-                                id = 0,
-                                deptId = DeptId,
-                                rateTypeId = Ratetypeid,
-                                mrp = MRP,
-                                rate = Rate,
-                                discount = Discount,
-                                itemid = Itemid,
-                                itemCode = ItemCode,
-                                createdById = 1,
-                                createdDateTime = DateTime.Now
+                                deptId,
+                                DepartmentName = deptName,
+                                ItemId = itemId,
+                                itemCode = itemCode,
+                                InvestigationName = itemName,
+                                mrp,
+                                rate
                             };
-                            RateListData.Add(rateTypeWiseRateList);
 
-
+                            rateListData.Add(excelData); // Add the current row to the collection
                         }
-                        var saveResult = await SaveRateListExcel(RateListData);
                     }
                 }
+
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
-                    Message = "RateList Saved Successfull"
+                    Data = rateListData // Return the full list of data
                 };
             }
             catch (Exception ex)
@@ -139,39 +141,40 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        private async Task<ServiceStatusResponseModel> SaveRateListExcel(List<rateTypeWiseRateList> rateListData)
-        {
-            using (var transaction = await db.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    var itemIds = rateListData.Select(x => x.itemid).Distinct().ToList();
-                    var rateTypeId = rateListData.Select(x => x.rateTypeId).Distinct();
+        //private async Task<ServiceStatusResponseModel> SaveRateListExcel(List<rateTypeWiseRateList> rateListData)
+        //{
+        //    using (var transaction = await db.Database.BeginTransactionAsync())
+        //    {
+        //        try
+        //        {
+        //            var itemIds = rateListData.Select(x => x.itemid).Distinct().ToList();
+        //            var rateTypeId = rateListData.Select(x => x.rateTypeId).Distinct();
 
-                    var oldratelistDelete = db.rateTypeWiseRateList.Where(r => rateTypeId.Contains(r.rateTypeId) && itemIds.Contains(r.itemid)).ToList();
-                    db.rateTypeWiseRateList.RemoveRange(oldratelistDelete);
-                    await db.SaveChangesAsync();
-                    var ratelistdata = rateListData.Select(CreateRatelistData).ToList();
-                    db.rateTypeWiseRateList.AddRange(ratelistdata);
-                    await db.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return new ServiceStatusResponseModel
-                    {
-                        Success = true,
-                        Message = "Saved SuccessFul"
-                    };
-                }
-                catch (Exception ex)
-                {
-                    return new ServiceStatusResponseModel
-                    {
-                        Success = false,
-                        Message = ex.GetBaseException().Message
-                    };
+        //            var oldratelistDelete = db.rateTypeWiseRateList.Where(r => rateTypeId.Contains(r.rateTypeId) && itemIds.Contains(r.itemid)).ToList();
+        //            db.rateTypeWiseRateList.RemoveRange(oldratelistDelete);
+        //            await db.SaveChangesAsync();
+        //            var ratelistdata = rateListData.Select(CreateRatelistData).ToList();
+        //            db.rateTypeWiseRateList.AddRange(ratelistdata);
+        //            await db.SaveChangesAsync();
+        //            await transaction.CommitAsync();
+        //            return new ServiceStatusResponseModel
+        //            {
+        //                Success = true,
+        //                Message = "Saved SuccessFul"
+        //            };
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            await transaction.RollbackAsync();
+        //            return new ServiceStatusResponseModel
+        //            {
+        //                Success = false,
+        //                Message = ex.GetBaseException().Message
+        //            };
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
         private int GetNumericData(ExcelRange cell, int row, string columnName)
         {
@@ -215,6 +218,7 @@ namespace iMARSARLIMS.Services
                     var ratelistdata = RateTypeWiseRateList.Select(CreateRatelistData).ToList();
                     db.rateTypeWiseRateList.AddRange(ratelistdata);
                     await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,
@@ -223,6 +227,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -247,8 +252,6 @@ namespace iMARSARLIMS.Services
                                        ItemId= rtt.itemid,
                                        itemcode= im.code,
                                        InvestigationName= im.itemName,
-                                       RateTypeId= rtt.rateTypeId,
-                                       RateTypeName= rt.rateType,
                                        MRP= rtt.mrp,
                                        Rate= rtt.rate
                                     }).ToList();

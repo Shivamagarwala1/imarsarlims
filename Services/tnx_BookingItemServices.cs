@@ -186,19 +186,31 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
+                    
                     var distinctTestIds = resultSaveRequestModle.Where(x => x.testId.HasValue)
                                                                   .GroupBy(x => x.testId).Select(g => g.First()).ToList();
                     var TestIds = resultSaveRequestModle.Where(x => x.testId.HasValue).Select(x => x.testId.Value).Distinct().ToList();
-                    var oldresultdata = await db.tnx_Observations.Where(b => TestIds.Contains((int)b.testId)).ToListAsync();
-                    var NumericResultLog = oldresultdata.Select(CreateResultentrylog).ToList();
-                    db.tnx_Observations_Log.AddRange(NumericResultLog);
-                    await db.SaveChangesAsync();
-                    db.tnx_Observations.RemoveRange(oldresultdata);
-                    await db.SaveChangesAsync();
-
-                    var testObservations = resultSaveRequestModle.Select(CreateObservationData).ToList();
-                    db.tnx_Observations.AddRange(testObservations);
-                    await db.SaveChangesAsync();
+                   var reporttype= resultSaveRequestModle.Select(r=>r.ReportType).FirstOrDefault();
+                    if (reporttype == 1)
+                    {
+                        var oldresultdata = await db.tnx_Observations.Where(b => TestIds.Contains((int)b.testId)).ToListAsync();
+                        var NumericResultLog = oldresultdata.Select(CreateResultentrylog).ToList();
+                        db.tnx_Observations_Log.AddRange(NumericResultLog);
+                        await db.SaveChangesAsync();
+                        db.tnx_Observations.RemoveRange(oldresultdata);
+                        await db.SaveChangesAsync();
+                        var testObservations = resultSaveRequestModle.Select(CreateObservationData).ToList();
+                        db.tnx_Observations.AddRange(testObservations);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        var oldresult= db.tnx_investigationtext_Report.Where(r=> r.testId== resultSaveRequestModle.Select(a=>a.testId).First()).ToList();
+                        db.tnx_investigationtext_Report.RemoveRange(oldresult);
+                        var resultdata = resultSaveRequestModle.Select(createTextresultdata).ToList();
+                        db.tnx_investigationtext_Report.AddRange(resultdata);
+                        await db.SaveChangesAsync();
+                    }
 
                     foreach (var testids in distinctTestIds)
                     {
@@ -261,7 +273,17 @@ namespace iMARSARLIMS.Services
                 }
             }
         }
-
+        private tnx_investigationtext_Report createTextresultdata(ResultSaveRequestModle resultdata)
+        {
+            return new tnx_investigationtext_Report
+            {
+                id = 0,
+                testId = (int)resultdata.testId,
+                value = resultdata.value,
+                createdbyId= resultdata.createdById,
+                createdate=DateTime.Now
+            };
+        }
         private tnx_Observations CreateObservationData(ResultSaveRequestModle resultSaveRequestModel)
         {
             return new tnx_Observations
@@ -1004,8 +1026,11 @@ namespace iMARSARLIMS.Services
                     var discount = 0.0;
                     var net = 0.0;
                     var transactionId = 0;
+                    
+
                     foreach (var item in Updatetestdetail)
                     {
+                        var barcodeno = db.tnx_BookingItem.Where(b => b.workOrderId == item.workOrderId).Select(b => b.barcodeNo).FirstOrDefault();
                         mrp = mrp + item.mrp;
                         gross = gross + item.rate;
                         discount = discount + item.discount;
@@ -1013,6 +1038,7 @@ namespace iMARSARLIMS.Services
                         transactionId = item.transactionId;
                         if (item.id == 0)
                         {
+                            item.barcodeNo = barcodeno;
                             var data = CreateBookingItem(item);
                             db.tnx_BookingItem.Add(data);
                             if (item.isPackage == 1)
@@ -1361,7 +1387,7 @@ namespace iMARSARLIMS.Services
                             ApproveDateShow = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             PatientName = string.Concat(tm.title, " ", tb.name),
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
-                            tb.gender,
+                            tb.gender,tb.totalAge,
                             tbi.barcodeNo,
                             testid = tbi.id,
                             tbi.itemId,

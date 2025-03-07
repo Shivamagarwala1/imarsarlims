@@ -4,15 +4,20 @@ using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace iMARSARLIMS.Services
 {
     public class tnxBookingServices : ItnxBookingServices
     {
         private readonly ContextClass db;
-        public tnxBookingServices(ContextClass context, ILogger<BaseController<tnx_Booking>> logger)
+        private readonly MySql_Procedure_Services _MySql_Procedure_Services;
+        public tnxBookingServices(ContextClass context, ILogger<BaseController<tnx_Booking>> logger, MySql_Procedure_Services mySql_Procedure_Services)
         {
             db = context;
+            this._MySql_Procedure_Services = mySql_Procedure_Services;
         }
 
         public string GetPatientDocumnet(string workOrderId)
@@ -627,6 +632,252 @@ namespace iMARSARLIMS.Services
                     Success = false,
                     Message = ex.Message
                 };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetbarcodeChangedetail(string WorkOrderId)
+        {
+            try
+            {
+                var data = await(from tb in db.tnx_Booking
+                                 join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                 join cm in db.centreMaster on tb.centreId equals cm.centreId 
+                                 where tbi.workOrderId == WorkOrderId && cm.isPrePrintedBarcode == 1
+                                 select new
+                                 {
+                                     TestId=tbi.id,
+                                     tb.workOrderId,
+                                     patientName= tb.name,
+                                     Age=string.Concat(tb.ageYear," Y ",tb.ageMonth," M ",tb.ageDay," D/",tb.gender),
+                                     tbi.investigationName,
+                                     tbi.barcodeNo,
+                                     tbi.sampleTypeName,
+                                     registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                 }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.UpdateBarcode(List<barcodeChangeRequest> NewBarcodeData)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    foreach (var item in NewBarcodeData)
+                    {
+                        var count = db.tnx_BookingItem.Where(b => b.barcodeNo == item.BarcodeNoNew).Count();
+                        if (count > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "BarcodenNo"+ item.BarcodeNoNew + " Already Exit"
+                            };
+                        }
+                        else
+                        {
+                            var data = db.tnx_BookingItem.Where(b => item.TestIds.Contains(b.id)).ToList();
+                            if (data.Count > 0)
+                            {
+                                foreach (var itemrow in data)
+                                {
+                                    itemrow.barcodeNo = item.BarcodeNoNew;
+                                }
+                                db.tnx_BookingItem.UpdateRange(data);
+                                await db.SaveChangesAsync();
+                            }
+                        }
+                    }
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Updated Successful"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.TatReport(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+            var fromDate = FromDate.Date; // Strip the time portion
+            var toDate = ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+            var result =  _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId,departmentId,itemid,TatType);
+            
+            if(result.Count>0)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            else
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "No Data Found"
+                };
+            }
+        }
+
+        public byte[] TatReportExcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+
+
+            var fromDate = FromDate.Date; // Strip the time portion
+            var toDate = ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+
+            var result =  _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId, departmentId, itemid, TatType);
+            var excelByte = MyFunction.ExportToExcel(result, "LedgerReportExcel");
+            return excelByte;
+        }
+        public byte[] TatReportpdf(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+
+
+            var fromDate = FromDate.Date; // Strip the time portion
+            var toDate = ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+
+            var result = _MySql_Procedure_Services.TatReportexcel(fromDate, toDate, centreId, departmentId, itemid, TatType);
+            if (result.Count > 0)
+            {
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                var document = Document.Create(container =>
+                {
+
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A3);
+
+                        page.MarginTop(1.0f, Unit.Centimetre);
+                        page.MarginLeft(0.5f, Unit.Centimetre);
+                        page.MarginRight(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.Foreground();
+                        page.DefaultTextStyle(x => x.FontFamily("TimesNewRoman"));
+                        page.DefaultTextStyle(x => x.FontSize(10));
+                        page.Header()
+                        .Column(column =>
+                        {
+                            column.Item().Text("TAT Report").AlignCenter().Bold();
+                        });
+
+                        page.Content()
+                        .Column(column =>
+                        {
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(1.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f, Unit.Centimetre);
+                                });
+                                table.Cell().Text("Sr.No").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("BookingDate").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("VisitId").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("PatientName").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("TestName").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("Department").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("Centre").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("Coll.Date").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("Rec.Date").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("Res.Date").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("App.Date").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("BTOS").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("STOD").Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text("DTOR").Style(TextStyle.Default.FontSize(10).Bold());
+                                var i = 0;
+                            foreach(var item in result)
+                            {
+                                    i = i + 1;
+                                table.Cell().Text(i.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.BookingDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.WorkorderId).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.PatientName).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.TestName).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.Department).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.SampleCollectionDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.SampleReceivedDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.ResultDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.ApproveDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.BTOS.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.STOD.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                table.Cell().Text(item.DTOR.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+
+                            }
+                            });
+
+                        });
+
+                        page.Footer().Height(2.5f, Unit.Centimetre)
+                           .Column(column =>
+                           {
+                               column.Item().Table(table =>
+                               {
+                                   table.ColumnsDefinition(columns =>
+                                   {
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                   });
+                                   
+                                   table.Cell().ColumnSpan(3).AlignRight().AlignBottom().Text(text =>
+                                   {
+                                       text.DefaultTextStyle(x => x.FontSize(8));
+                                       text.CurrentPageNumber();
+                                       text.Span(" of ");
+                                       text.TotalPages();
+                                   });
+                               });
+                           });
+                    });
+
+                });
+                byte[] pdfBytes = document.GeneratePdf();
+                return pdfBytes;
+            }
+            else
+            {
+                byte[] pdfbyte = [];
+                return pdfbyte;
             }
         }
     }

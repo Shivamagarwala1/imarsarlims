@@ -412,7 +412,7 @@ namespace iMARSARLIMS.Services
         async Task<ServiceStatusResponseModel> IempMasterServices.UploadDocument(IFormFile file)
         {
             string extension = Path.GetExtension(file.FileName);
-            if (extension != ".pdf" && extension != ".Pdf" && extension != ".PDF")
+            if (extension != ".pdf" && extension != ".Pdf" && extension != ".PDF" && extension != ".jpg" && extension != ".png" && extension != ".JPG" && extension != ".PNG" && extension != ".JPEG" && extension != ".jpeg")
             {
                 return new ServiceStatusResponseModel
                 {

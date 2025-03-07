@@ -15,5 +15,11 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId);
         Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata);
         Task<ServiceStatusResponseModel> GetTestInfo(int TestId);
+        Task<ServiceStatusResponseModel> GetbarcodeChangedetail(string WorkOrderId);
+        Task<ServiceStatusResponseModel> UpdateBarcode(List<barcodeChangeRequest> NewBarcodeData);
+        Task<ServiceStatusResponseModel> TatReport(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
+        byte[] TatReportExcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
+        byte[] TatReportpdf(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
+
     }
 }

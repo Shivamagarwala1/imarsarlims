@@ -1,8 +1,6 @@
 ﻿using iMARSARLIMS.Controllers;
-using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
-using iText.Layout.Element;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -39,6 +37,29 @@ namespace iMARSARLIMS.Services
                     Success = false,
                     Message = "No observation mapped"
                 };
+            }
+        }
+        
+        public List<TatReportData> TatReportexcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
+        {
+            string sql = "call TatReport({0},{1},{2},{3},{4},{5});";
+            DateTime param1 = FromDate;
+            DateTime param2 = ToDate;
+            int param3 = centreId;
+            int param4 = departmentId;
+            int param5 = itemid;
+            string param6 = TatType;
+
+            var result = db.Set<TatReportData>()
+           .FromSqlRaw(sql, param1, param2, param3, param4, param5, param5)
+           .AsEnumerable().ToList();
+            if (result.Count > 0)
+            {
+                return  result;
+            }
+            else
+            {
+                return new List<TatReportData> { };
             }
         }
         public async Task<ServiceStatusResponseModel> GetTestObservation(string testId, string Gender, int fromAge, int toAge, int centreId)

@@ -1,15 +1,7 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
-using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
-using iText.Kernel.Pdf.Canvas.Parser.ClipperLib;
-using Microsoft.AspNetCore.Http.HttpResults;
-using MySqlX.XDevAPI.Common;
-using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
-using static QuestPDF.Helpers.Colors;
-using System;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Services
@@ -22,14 +14,14 @@ namespace iMARSARLIMS.Services
         {
             db = context;
         }
-        async Task<ServiceStatusResponseModel> ItatMasterServices.GetTatMaster(int centreId, int departmentId)
+        async Task<ServiceStatusResponseModel> ItatMasterServices.GetTatMaster(int centreId, int departmentId, List<int> ItemIds)
         {
             try
             {
                 var data = (from im in db.itemMaster
                             join tm in db.tat_master on im.itemId equals tm.itemid into tmGroup
                             from tm in tmGroup.DefaultIfEmpty()
-                            where im.deptId == departmentId && (tm.centreid== null || tm.centreid == centreId)
+                            where im.deptId == departmentId && ItemIds.Contains(im.itemId) && (tm.centreid== null || tm.centreid == centreId)
                             select new
                             {
                                 id = tm != null ? tm.id : 0,

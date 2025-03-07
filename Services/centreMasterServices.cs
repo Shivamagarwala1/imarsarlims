@@ -428,7 +428,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
-                    transaction.RollbackAsync();
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -658,6 +658,7 @@ namespace iMARSARLIMS.Services
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -890,6 +891,8 @@ namespace iMARSARLIMS.Services
                 var data = (from cm in db.centreMaster
                             select new
                             {
+                                cm.centrecode,
+                                cm.companyName,
                                 cm.reporrtHeaderHeightY,
                                 cm.patientYHeader,
                                 cm.barcodeXPosition,
@@ -911,6 +914,7 @@ namespace iMARSARLIMS.Services
                             }).AsEnumerable() // Execute the query and switch to in-memory
                             .Select(cm => new
                             {
+                                cm.centrecode,cm.companyName,
                                 cm.reporrtHeaderHeightY,
                                 cm.patientYHeader,
                                 cm.barcodeXPosition,

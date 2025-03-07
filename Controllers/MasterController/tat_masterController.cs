@@ -39,12 +39,12 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
-        [HttpGet("GetTatMaster")]
-        public async Task<ServiceStatusResponseModel> GetTatMaster(int centreId, int departmentId)
+        [HttpPost("GetTatMaster")]
+        public async Task<ServiceStatusResponseModel> GetTatMaster(int centreId, int departmentId,List<int> ItemIds)
         {
             try
             {
-                var result = await _tatMasterServices.GetTatMaster(centreId, departmentId);
+                var result = await _tatMasterServices.GetTatMaster(centreId, departmentId,ItemIds);
                 return result;
             }
             catch (Exception ex)

@@ -33,6 +33,7 @@ namespace iMARSARLIMS.Request_Model
         public int createdById  { get; set; }
         public DateTime createdDate { get; set; }
         public int? appcovaldoctorId { get; set; }
+        public int? ReportType { get; set; }
 
     }
 }
