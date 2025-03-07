@@ -5571,23 +5571,26 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("SentName")
-                        .HasColumnType("longtext");
-
                     b.Property<double?>("bookingRate")
                         .HasColumnType("double");
 
                     b.Property<int?>("centreId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("createdById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("createdDateTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<byte>("isActive")
+                        .HasColumnType("tinyint unsigned");
+
                     b.Property<int?>("itemId")
                         .HasColumnType("int");
 
                     b.Property<string>("itemName")
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("outSouceDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("outSourceLabID")
                         .HasColumnType("int");
@@ -5601,11 +5604,17 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("remarks")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("sentByid")
+                    b.Property<int>("testId")
                         .HasColumnType("int");
 
                     b.Property<int?>("transactionId")
                         .HasColumnType("int");
+
+                    b.Property<int?>("updateById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("updateDateTime")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("workOrderId")
                         .HasColumnType("longtext");
@@ -5804,6 +5813,9 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("SentName")
                         .HasColumnType("longtext");
 
+                    b.Property<int>("TestId")
+                        .HasColumnType("int");
+
                     b.Property<double?>("bookingRate")
                         .HasColumnType("double");
 
@@ -5825,14 +5837,14 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("itemName")
                         .HasColumnType("longtext");
 
-                    b.Property<double?>("outHoseRate")
-                        .HasColumnType("double");
-
                     b.Property<int?>("outHosueLabID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("outHouceDate")
+                    b.Property<DateTime?>("outHouseDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<double?>("outHouseRate")
+                        .HasColumnType("double");
 
                     b.Property<string>("outhouseLabName")
                         .HasColumnType("longtext");
@@ -6047,6 +6059,41 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("int");
 
                     b.ToTable("TatReportData");
+                });
+
+            modelBuilder.Entity("iMARSARLIMS.Response_Model.WorkSheetResposeModel", b =>
+                {
+                    b.Property<string>("Barcodeno")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Gender")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("InvestigationName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MachineReading")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ObservationName")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Pname")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ReportType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("WorkOrderId")
+                        .HasColumnType("longtext");
+
+                    b.ToTable("WorkSheetResposeModel");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Response_Model.rateListData", b =>

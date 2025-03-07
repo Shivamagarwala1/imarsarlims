@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace iMARSARLIMS.Migrations
 {
     /// <inheritdoc />
-    public partial class freshdatabase : Migration
+    public partial class dbnew : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -156,6 +156,21 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "centreBillingType",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    billingTypeName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    isActive = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_centreBillingType", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "centreInvoice",
                 columns: table => new
                 {
@@ -226,9 +241,9 @@ namespace iMARSARLIMS.Migrations
                     unlockTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     paymentMode = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
                     paymentModeId = table.Column<int>(type: "int", nullable: false),
-                    reportHeader = table.Column<string>(type: "longtext", nullable: true),
-                    reciptHeader = table.Column<string>(type: "longtext", nullable: true),
-                    reciptFooter = table.Column<string>(type: "longtext", nullable: true),
+                    reportHeader = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
+                    reciptHeader = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
+                    reciptFooter = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
                     showISO = table.Column<int>(type: "int", nullable: false),
                     showBackcover = table.Column<int>(type: "int", nullable: false),
                     reportBackImage = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
@@ -278,6 +293,10 @@ namespace iMARSARLIMS.Migrations
                     receptionarea = table.Column<int>(type: "int", nullable: false),
                     waitingarea = table.Column<int>(type: "int", nullable: false),
                     watercooler = table.Column<int>(type: "int", nullable: false),
+                    billingType = table.Column<int>(type: "int", nullable: true),
+                    billingTypeName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
+                    waterMarkImage = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
+                    NablImage = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -297,7 +316,7 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     centreId = table.Column<int>(type: "int", nullable: false),
-                    paymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    paymentDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     paymentMode = table.Column<string>(type: "longtext", nullable: true),
                     advancePaymentAmt = table.Column<float>(type: "float", nullable: true),
                     bank = table.Column<string>(type: "longtext", nullable: true),
@@ -365,6 +384,25 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "chatGroupMaster",
+                columns: table => new
+                {
+                    groupMasterId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    groupMasterName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_chatGroupMaster", x => x.groupMasterId);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "cityMaster",
                 columns: table => new
                 {
@@ -385,7 +423,8 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    colorName = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    colorName = table.Column<string>(type: "varchar(40)", maxLength: 40, nullable: false),
+                    ColorCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -534,6 +573,7 @@ namespace iMARSARLIMS.Migrations
                     hold = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     unHold = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     doctorId = table.Column<int>(type: "int", nullable: false),
+                    isSign = table.Column<int>(type: "int", nullable: true),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -543,6 +583,27 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_doctorApprovalMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "DoctorApprovalSign",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    DoctorSign = table.Column<string>(type: "longtext", nullable: true),
+                    empid = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DoctorApprovalSign", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -574,7 +635,13 @@ namespace iMARSARLIMS.Migrations
                     proId = table.Column<int>(type: "int", nullable: true),
                     areaId = table.Column<int>(type: "int", nullable: true),
                     city = table.Column<int>(type: "int", nullable: true),
-                    state = table.Column<int>(type: "int", nullable: true)
+                    state = table.Column<int>(type: "int", nullable: true),
+                    type = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -959,6 +1026,29 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "itemObservation_isnabl",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    observationId = table.Column<int>(type: "int", nullable: false),
+                    itemid = table.Column<int>(type: "int", nullable: false),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    NablLogo = table.Column<string>(type: "longtext", nullable: true),
+                    IsDefaultLogo = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_itemObservation_isnabl", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ItemObservationMapping",
                 columns: table => new
                 {
@@ -1089,6 +1179,46 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "LabRemarkMaster",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    remark = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    type = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LabRemarkMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "labReportFooterText",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    footerText = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_labReportFooterText", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "labReportHeader",
                 columns: table => new
                 {
@@ -1104,6 +1234,28 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_labReportHeader", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "LegendColorMaster",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    colourCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    ColourName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    contantName = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    ShortName = table.Column<string>(type: "varchar(15)", maxLength: 15, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LegendColorMaster", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1437,6 +1589,23 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "rateListData",
+                columns: table => new
+                {
+                    ratetype = table.Column<string>(type: "longtext", nullable: true),
+                    itemid = table.Column<int>(type: "int", nullable: true),
+                    itemCode = table.Column<string>(type: "longtext", nullable: true),
+                    itemname = table.Column<string>(type: "longtext", nullable: true),
+                    rateTypeId = table.Column<int>(type: "int", nullable: true),
+                    mrp = table.Column<double>(type: "double", nullable: true),
+                    rate = table.Column<double>(type: "double", nullable: true)
+                },
+                constraints: table =>
+                {
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "rateTypeMaster",
                 columns: table => new
                 {
@@ -1484,14 +1653,12 @@ namespace iMARSARLIMS.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     deptId = table.Column<int>(type: "int", nullable: false),
-                    panelId = table.Column<int>(type: "int", nullable: false),
                     rateTypeId = table.Column<int>(type: "int", nullable: false),
                     mrp = table.Column<double>(type: "double", nullable: false),
                     discount = table.Column<double>(type: "double", nullable: false),
                     rate = table.Column<double>(type: "double", nullable: false),
                     itemid = table.Column<int>(type: "int", nullable: false),
                     itemCode = table.Column<string>(type: "longtext", nullable: true),
-                    panelItemName = table.Column<string>(type: "longtext", nullable: true),
                     transferRemarks = table.Column<string>(type: "longtext", nullable: true),
                     transferDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -1536,7 +1703,12 @@ namespace iMARSARLIMS.Migrations
                     isBold = table.Column<int>(type: "int", nullable: true),
                     machineName = table.Column<string>(type: "longtext", nullable: true),
                     showInReport = table.Column<int>(type: "int", nullable: true),
-                    method = table.Column<string>(type: "longtext", nullable: false)
+                    method = table.Column<string>(type: "longtext", nullable: false),
+                    oldreading = table.Column<string>(type: "longtext", nullable: false),
+                    isapproved = table.Column<int>(type: "int", nullable: false),
+                    hold = table.Column<int>(type: "int", nullable: false),
+                    ReportType = table.Column<int>(type: "int", nullable: false),
+                    DLCCheck = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1597,6 +1769,44 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_sampleRejectionReason", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SampleremarkMaster",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    remark = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SampleremarkMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "SampleRerunReason",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    reason = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SampleRerunReason", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1678,6 +1888,71 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "tat_master",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    centreid = table.Column<int>(type: "int", nullable: false),
+                    Deptid = table.Column<int>(type: "int", nullable: false),
+                    itemid = table.Column<int>(type: "int", nullable: false),
+                    StartTime = table.Column<TimeSpan>(type: "time(6)", nullable: true),
+                    EndTime = table.Column<TimeSpan>(type: "time(6)", nullable: true),
+                    Mins = table.Column<int>(type: "int", nullable: true),
+                    Days = table.Column<int>(type: "int", nullable: true),
+                    Sun = table.Column<int>(type: "int", nullable: true),
+                    Mon = table.Column<int>(type: "int", nullable: true),
+                    Tue = table.Column<int>(type: "int", nullable: true),
+                    Wed = table.Column<int>(type: "int", nullable: true),
+                    Thu = table.Column<int>(type: "int", nullable: true),
+                    Fri = table.Column<int>(type: "int", nullable: true),
+                    Sat = table.Column<int>(type: "int", nullable: true),
+                    Regcoll = table.Column<int>(type: "int", nullable: true),
+                    collrecv = table.Column<int>(type: "int", nullable: true),
+                    CreatedOn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Createdby = table.Column<int>(type: "int", nullable: false),
+                    CreatedByName = table.Column<string>(type: "longtext", nullable: true),
+                    TATType = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tat_master", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "TatReportData",
+                columns: table => new
+                {
+                    BookingDate = table.Column<string>(type: "longtext", nullable: true),
+                    PatientName = table.Column<string>(type: "longtext", nullable: true),
+                    itemId = table.Column<int>(type: "int", nullable: false),
+                    TestName = table.Column<string>(type: "longtext", nullable: true),
+                    RefDoctor = table.Column<string>(type: "longtext", nullable: true),
+                    Department = table.Column<string>(type: "longtext", nullable: true),
+                    DeptId = table.Column<int>(type: "int", nullable: false),
+                    centreId = table.Column<int>(type: "int", nullable: false),
+                    CentreCode = table.Column<string>(type: "longtext", nullable: true),
+                    centreName = table.Column<string>(type: "longtext", nullable: true),
+                    WorkorderId = table.Column<string>(type: "longtext", nullable: true),
+                    SampleCollectionDate = table.Column<string>(type: "longtext", nullable: true),
+                    SampleReceivedDate = table.Column<string>(type: "longtext", nullable: true),
+                    ResultDate = table.Column<string>(type: "longtext", nullable: true),
+                    ApproveDate = table.Column<string>(type: "longtext", nullable: true),
+                    BTOS = table.Column<int>(type: "int", nullable: false),
+                    STOD = table.Column<int>(type: "int", nullable: false),
+                    DTOR = table.Column<int>(type: "int", nullable: false),
+                    RTOA = table.Column<int>(type: "int", nullable: false),
+                    BTOA = table.Column<int>(type: "int", nullable: false),
+                    DeliveryTime = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Testing",
                 columns: table => new
                 {
@@ -1695,6 +1970,25 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Testing", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "TestMethodMaster",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    method = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestMethodMaster", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1815,6 +2109,46 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "tnx_InvestigationAddReport",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    testId = table.Column<int>(type: "int", nullable: false),
+                    Attachment = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tnx_InvestigationAddReport", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "tnx_InvestigationAttchment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    testId = table.Column<int>(type: "int", nullable: false),
+                    Attachment = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tnx_InvestigationAttchment", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "tnx_InvestigationRemarks",
                 columns: table => new
                 {
@@ -1822,11 +2156,11 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     invRemarks = table.Column<string>(type: "longtext", nullable: true),
                     transactionId = table.Column<int>(type: "int", nullable: true),
-                    customerID = table.Column<int>(type: "int", nullable: true),
+                    WorkOrderId = table.Column<string>(type: "longtext", nullable: true),
                     itemId = table.Column<int>(type: "int", nullable: true),
                     itemName = table.Column<string>(type: "longtext", nullable: true),
-                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     isInternal = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     updateById = table.Column<int>(type: "int", nullable: true),
@@ -1835,6 +2169,23 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_tnx_InvestigationRemarks", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "tnx_investigationtext_Report",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    testId = table.Column<int>(type: "int", nullable: false),
+                    value = table.Column<string>(type: "longtext", nullable: false),
+                    createdbyId = table.Column<int>(type: "int", nullable: false),
+                    createdate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tnx_investigationtext_Report", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -1870,7 +2221,7 @@ namespace iMARSARLIMS.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     testId = table.Column<int>(type: "int", nullable: true),
                     labObservationId = table.Column<int>(type: "int", nullable: true),
-                    observationName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    observationName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     value = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     flag = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: true),
                     min = table.Column<double>(type: "double", nullable: true),
@@ -2079,17 +2430,17 @@ namespace iMARSARLIMS.Migrations
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    TestId = table.Column<int>(type: "int", nullable: false),
                     itemId = table.Column<int>(type: "int", nullable: true),
                     itemName = table.Column<string>(type: "longtext", nullable: true),
                     centreId = table.Column<int>(type: "int", nullable: true),
                     transactionId = table.Column<int>(type: "int", nullable: true),
-                    Companyid = table.Column<int>(type: "int", nullable: true),
                     workOrderId = table.Column<string>(type: "longtext", nullable: true),
                     bookingRate = table.Column<double>(type: "double", nullable: true),
-                    outHoseRate = table.Column<double>(type: "double", nullable: true),
+                    outHouseRate = table.Column<double>(type: "double", nullable: true),
                     outHosueLabID = table.Column<int>(type: "int", nullable: true),
                     outhouseLabName = table.Column<string>(type: "longtext", nullable: true),
-                    OutsouceDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    outHouseDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     sentByid = table.Column<int>(type: "int", nullable: true),
                     SentName = table.Column<string>(type: "longtext", nullable: true),
                     remarks = table.Column<string>(type: "longtext", nullable: true),
@@ -2106,38 +2457,31 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "tnx_ReceiptDetails",
+                name: "tnx_OutsourceDetail",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    testId = table.Column<int>(type: "int", nullable: false),
+                    itemId = table.Column<int>(type: "int", nullable: true),
+                    itemName = table.Column<string>(type: "longtext", nullable: true),
+                    centreId = table.Column<int>(type: "int", nullable: true),
                     transactionId = table.Column<int>(type: "int", nullable: true),
-                    transactionType = table.Column<string>(type: "longtext", nullable: true),
                     workOrderId = table.Column<string>(type: "longtext", nullable: true),
-                    receiptNo = table.Column<int>(type: "int", nullable: true),
-                    receivedAmt = table.Column<double>(type: "double", nullable: true),
-                    cashAmt = table.Column<double>(type: "double", nullable: true),
-                    creditCardAmt = table.Column<double>(type: "double", nullable: true),
-                    creditCardNo = table.Column<string>(type: "longtext", nullable: true),
-                    chequeAmt = table.Column<double>(type: "double", nullable: true),
-                    chequeNo = table.Column<string>(type: "longtext", nullable: true),
-                    onlinewalletAmt = table.Column<double>(type: "double", nullable: true),
-                    walletno = table.Column<string>(type: "longtext", nullable: true),
-                    NEFTamt = table.Column<double>(type: "double", nullable: true),
-                    BankName = table.Column<string>(type: "longtext", nullable: true),
-                    paymentModeId = table.Column<short>(type: "smallint", nullable: false),
-                    isCancel = table.Column<byte>(type: "tinyint unsigned", nullable: true),
-                    cancelDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    canceledBy = table.Column<string>(type: "longtext", nullable: true),
-                    cancelReason = table.Column<string>(type: "longtext", nullable: true),
-                    bookingCentreId = table.Column<int>(type: "int", nullable: true),
-                    settlementCentreID = table.Column<int>(type: "int", nullable: true),
-                    receivedBy = table.Column<string>(type: "longtext", nullable: true),
-                    receivedID = table.Column<int>(type: "int", nullable: true)
+                    bookingRate = table.Column<double>(type: "double", nullable: true),
+                    outSourceRate = table.Column<double>(type: "double", nullable: true),
+                    outSourceLabID = table.Column<int>(type: "int", nullable: true),
+                    outSourceLabName = table.Column<string>(type: "longtext", nullable: true),
+                    remarks = table.Column<string>(type: "longtext", nullable: true),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_tnx_ReceiptDetails", x => x.id);
+                    table.PrimaryKey("PK_tnx_OutsourceDetail", x => x.id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2203,6 +2547,26 @@ namespace iMARSARLIMS.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "WorkSheetResposeModel",
+                columns: table => new
+                {
+                    Gender = table.Column<string>(type: "longtext", nullable: true),
+                    Pname = table.Column<string>(type: "longtext", nullable: true),
+                    Barcodeno = table.Column<string>(type: "longtext", nullable: true),
+                    WorkOrderId = table.Column<string>(type: "longtext", nullable: true),
+                    PatientId = table.Column<int>(type: "int", nullable: true),
+                    InvestigationName = table.Column<string>(type: "longtext", nullable: true),
+                    ReportType = table.Column<int>(type: "int", nullable: true),
+                    ObservationName = table.Column<string>(type: "longtext", nullable: true),
+                    Value = table.Column<string>(type: "longtext", nullable: true),
+                    MachineReading = table.Column<string>(type: "longtext", nullable: true)
+                },
+                constraints: table =>
+                {
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "zoneMaster",
                 columns: table => new
                 {
@@ -2218,6 +2582,72 @@ namespace iMARSARLIMS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_zoneMaster", x => x.id);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "chatGroupMasterEmployee",
+                columns: table => new
+                {
+                    groupMasterEmployeeId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    groupMasterId = table.Column<int>(type: "int", nullable: false),
+                    empId = table.Column<int>(type: "int", nullable: false),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_chatGroupMasterEmployee", x => x.groupMasterEmployeeId);
+                    table.ForeignKey(
+                        name: "FK_chatGroupMasterEmployee_chatGroupMaster_groupMasterId",
+                        column: x => x.groupMasterId,
+                        principalTable: "chatGroupMaster",
+                        principalColumn: "groupMasterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_chatGroupMasterEmployee_empMaster_empId",
+                        column: x => x.empId,
+                        principalTable: "empMaster",
+                        principalColumn: "empId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "chatMessage",
+                columns: table => new
+                {
+                    messageId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    content = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: false),
+                    isSeen = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
+                    empId = table.Column<int>(type: "int", nullable: true),
+                    groupMasterId = table.Column<int>(type: "int", nullable: true),
+                    fileName = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    fileUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
+                    isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    createdById = table.Column<int>(type: "int", nullable: true),
+                    createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    updateById = table.Column<int>(type: "int", nullable: true),
+                    updateDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP(6)")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_chatMessage", x => x.messageId);
+                    table.ForeignKey(
+                        name: "FK_chatMessage_chatGroupMaster_groupMasterId",
+                        column: x => x.groupMasterId,
+                        principalTable: "chatGroupMaster",
+                        principalColumn: "groupMasterId");
+                    table.ForeignKey(
+                        name: "FK_chatMessage_empMaster_empId",
+                        column: x => x.empId,
+                        principalTable: "empMaster",
+                        principalColumn: "empId");
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -2434,55 +2864,63 @@ namespace iMARSARLIMS.Migrations
                     isEmailsent = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     sampleTypeId = table.Column<int>(type: "int", nullable: false),
                     sampleTypeName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    sampleCollectionDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    sampleCollectedby = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    sampleCollectedID = table.Column<int>(type: "int", nullable: false),
-                    sampleReceiveDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    sampleReceivedBY = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    resultDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    resultDoneByID = table.Column<int>(type: "int", nullable: false),
-                    resutDoneBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    isResultDone = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    isApproved = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    approvedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    approvedByID = table.Column<int>(type: "int", nullable: false),
-                    approvedbyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    notApprovedBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    notApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    isReporting = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    isCritical = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                    sampleCollectionDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    sampleCollectedby = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    sampleCollectedID = table.Column<int>(type: "int", nullable: true),
+                    sampleReceiveDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    sampleReceivedBY = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    resultDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    resultDoneByID = table.Column<int>(type: "int", nullable: true),
+                    resutDoneBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    isResultDone = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    isApproved = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    approvedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    approvedByID = table.Column<int>(type: "int", nullable: true),
+                    approvedbyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    notApprovedBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    notApprovedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    isReporting = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    isCritical = table.Column<byte>(type: "tinyint unsigned", nullable: true),
                     deliveryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    isInvoiceCreated = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    invoiceNumber = table.Column<int>(type: "int", nullable: false),
+                    isInvoiceCreated = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    invoiceNumber = table.Column<int>(type: "int", nullable: true),
                     isUrgent = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     isSampleCollected = table.Column<string>(type: "varchar(2)", maxLength: 2, nullable: false),
-                    samplecollectionremarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    departmentReceiveRemarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    departmentReceiveDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    departmentReceiveBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    departmentReceiveByID = table.Column<int>(type: "int", nullable: false),
+                    samplecollectionremarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    departmentReceiveRemarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    departmentReceiveDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    departmentReceiveBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    departmentReceiveByID = table.Column<int>(type: "int", nullable: true),
                     isRemoveItem = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    sampleRejectionBy = table.Column<int>(type: "int", nullable: false),
-                    sampleRejectionByName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    sampleRejectionOn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    interpretationId = table.Column<int>(type: "int", nullable: false),
-                    approvalDoctor = table.Column<int>(type: "int", nullable: false),
-                    isOuthouse = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    outhouseLab = table.Column<int>(type: "int", nullable: false),
-                    labName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    outhouseDoneBy = table.Column<int>(type: "int", nullable: false),
-                    outhouseDoneOn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    sampleRecollectedby = table.Column<int>(type: "int", nullable: false),
-                    sampleRecollectedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    isrerun = table.Column<byte>(type: "tinyint unsigned", nullable: false),
-                    invoiceNo = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    invoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    invoiceCycle = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    invoiceAmount = table.Column<double>(type: "double", nullable: false),
-                    invoiceCreatedBy = table.Column<int>(type: "int", nullable: false),
-                    invoiceNoOld = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    remarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    showonReportdate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    sampleRejectionBy = table.Column<int>(type: "int", nullable: true),
+                    sampleRejectionByName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    sampleRejectionOn = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    interpretationId = table.Column<int>(type: "int", nullable: true),
+                    approvalDoctor = table.Column<int>(type: "int", nullable: true),
+                    isOuthouse = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    outhouseLab = table.Column<int>(type: "int", nullable: true),
+                    labName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    outhouseDoneBy = table.Column<int>(type: "int", nullable: true),
+                    outhouseDoneOn = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    sampleRecollectedby = table.Column<int>(type: "int", nullable: true),
+                    sampleRecollectedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    isrerun = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    invoiceNo = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    invoiceDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    invoiceCycle = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    invoiceAmount = table.Column<double>(type: "double", nullable: true),
+                    invoiceCreatedBy = table.Column<int>(type: "int", nullable: true),
+                    invoiceNoOld = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    remarks = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    showonReportdate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    hold = table.Column<int>(type: "int", nullable: true),
+                    holdById = table.Column<int>(type: "int", nullable: true),
+                    holdDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    UnholdById = table.Column<int>(type: "int", nullable: true),
+                    unHoldDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    DoctorSignId = table.Column<int>(type: "int", nullable: true),
+                    holdReason = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
+                    RejectedReason = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     isActive = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     createdById = table.Column<int>(type: "int", nullable: true),
                     createdDateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -2533,6 +2971,67 @@ namespace iMARSARLIMS.Migrations
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "tnx_ReceiptDetails",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    transactionId = table.Column<int>(type: "int", nullable: true),
+                    transactionType = table.Column<string>(type: "longtext", nullable: true),
+                    workOrderId = table.Column<string>(type: "longtext", nullable: true),
+                    receiptNo = table.Column<int>(type: "int", nullable: true),
+                    receivedAmt = table.Column<double>(type: "double", nullable: true),
+                    cashAmt = table.Column<double>(type: "double", nullable: true),
+                    creditCardAmt = table.Column<double>(type: "double", nullable: true),
+                    creditCardNo = table.Column<string>(type: "longtext", nullable: true),
+                    chequeAmt = table.Column<double>(type: "double", nullable: true),
+                    chequeNo = table.Column<string>(type: "longtext", nullable: true),
+                    onlinewalletAmt = table.Column<double>(type: "double", nullable: true),
+                    walletno = table.Column<string>(type: "longtext", nullable: true),
+                    NEFTamt = table.Column<double>(type: "double", nullable: true),
+                    BankName = table.Column<string>(type: "longtext", nullable: true),
+                    paymentModeId = table.Column<short>(type: "smallint", nullable: false),
+                    isCancel = table.Column<byte>(type: "tinyint unsigned", nullable: true),
+                    cancelDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    canceledBy = table.Column<string>(type: "longtext", nullable: true),
+                    cancelReason = table.Column<string>(type: "longtext", nullable: true),
+                    bookingCentreId = table.Column<int>(type: "int", nullable: true),
+                    settlementCentreID = table.Column<int>(type: "int", nullable: true),
+                    receivedBy = table.Column<string>(type: "longtext", nullable: true),
+                    receivedID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tnx_ReceiptDetails", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_tnx_ReceiptDetails_tnx_Booking_transactionId",
+                        column: x => x.transactionId,
+                        principalTable: "tnx_Booking",
+                        principalColumn: "transactionId");
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chatGroupMasterEmployee_empId",
+                table: "chatGroupMasterEmployee",
+                column: "empId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chatGroupMasterEmployee_groupMasterId",
+                table: "chatGroupMasterEmployee",
+                column: "groupMasterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chatMessage_empId",
+                table: "chatMessage",
+                column: "empId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chatMessage_groupMasterId",
+                table: "chatMessage",
+                column: "groupMasterId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_empCenterAccess_centreId",
                 table: "empCenterAccess",
@@ -2572,6 +3071,11 @@ namespace iMARSARLIMS.Migrations
                 name: "IX_tnx_BookingStatus_transactionId",
                 table: "tnx_BookingStatus",
                 column: "transactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tnx_ReceiptDetails_transactionId",
+                table: "tnx_ReceiptDetails",
+                column: "transactionId");
         }
 
         /// <inheritdoc />
@@ -2599,6 +3103,9 @@ namespace iMARSARLIMS.Migrations
                 name: "centerTypeMaster");
 
             migrationBuilder.DropTable(
+                name: "centreBillingType");
+
+            migrationBuilder.DropTable(
                 name: "centreInvoice");
 
             migrationBuilder.DropTable(
@@ -2612,6 +3119,12 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "changeCentreLog");
+
+            migrationBuilder.DropTable(
+                name: "chatGroupMasterEmployee");
+
+            migrationBuilder.DropTable(
+                name: "chatMessage");
 
             migrationBuilder.DropTable(
                 name: "cityMaster");
@@ -2639,6 +3152,9 @@ namespace iMARSARLIMS.Migrations
 
             migrationBuilder.DropTable(
                 name: "doctorApprovalMaster");
+
+            migrationBuilder.DropTable(
+                name: "DoctorApprovalSign");
 
             migrationBuilder.DropTable(
                 name: "doctorReferalMaster");
@@ -2692,6 +3208,9 @@ namespace iMARSARLIMS.Migrations
                 name: "itemInterpretationLog");
 
             migrationBuilder.DropTable(
+                name: "itemObservation_isnabl");
+
+            migrationBuilder.DropTable(
                 name: "ItemObservationMapping");
 
             migrationBuilder.DropTable(
@@ -2710,7 +3229,16 @@ namespace iMARSARLIMS.Migrations
                 name: "labDepartment");
 
             migrationBuilder.DropTable(
+                name: "LabRemarkMaster");
+
+            migrationBuilder.DropTable(
+                name: "labReportFooterText");
+
+            migrationBuilder.DropTable(
                 name: "labReportHeader");
+
+            migrationBuilder.DropTable(
+                name: "LegendColorMaster");
 
             migrationBuilder.DropTable(
                 name: "logoDetails");
@@ -2752,6 +3280,9 @@ namespace iMARSARLIMS.Migrations
                 name: "patientReportEmail");
 
             migrationBuilder.DropTable(
+                name: "rateListData");
+
+            migrationBuilder.DropTable(
                 name: "rateTypeMaster");
 
             migrationBuilder.DropTable(
@@ -2773,6 +3304,12 @@ namespace iMARSARLIMS.Migrations
                 name: "sampleRejectionReason");
 
             migrationBuilder.DropTable(
+                name: "SampleremarkMaster");
+
+            migrationBuilder.DropTable(
+                name: "SampleRerunReason");
+
+            migrationBuilder.DropTable(
                 name: "sampletype_master");
 
             migrationBuilder.DropTable(
@@ -2785,7 +3322,16 @@ namespace iMARSARLIMS.Migrations
                 name: "stateMaster");
 
             migrationBuilder.DropTable(
+                name: "tat_master");
+
+            migrationBuilder.DropTable(
+                name: "TatReportData");
+
+            migrationBuilder.DropTable(
                 name: "Testing");
+
+            migrationBuilder.DropTable(
+                name: "TestMethodMaster");
 
             migrationBuilder.DropTable(
                 name: "ThemeColour");
@@ -2803,7 +3349,16 @@ namespace iMARSARLIMS.Migrations
                 name: "tnx_BookingStatus");
 
             migrationBuilder.DropTable(
+                name: "tnx_InvestigationAddReport");
+
+            migrationBuilder.DropTable(
+                name: "tnx_InvestigationAttchment");
+
+            migrationBuilder.DropTable(
                 name: "tnx_InvestigationRemarks");
+
+            migrationBuilder.DropTable(
+                name: "tnx_investigationtext_Report");
 
             migrationBuilder.DropTable(
                 name: "tnx_Invoice_Payment");
@@ -2830,6 +3385,9 @@ namespace iMARSARLIMS.Migrations
                 name: "tnx_outhousedeatils");
 
             migrationBuilder.DropTable(
+                name: "tnx_OutsourceDetail");
+
+            migrationBuilder.DropTable(
                 name: "tnx_ReceiptDetails");
 
             migrationBuilder.DropTable(
@@ -2839,7 +3397,13 @@ namespace iMARSARLIMS.Migrations
                 name: "whatsapp");
 
             migrationBuilder.DropTable(
+                name: "WorkSheetResposeModel");
+
+            migrationBuilder.DropTable(
                 name: "zoneMaster");
+
+            migrationBuilder.DropTable(
+                name: "chatGroupMaster");
 
             migrationBuilder.DropTable(
                 name: "centreMaster");
