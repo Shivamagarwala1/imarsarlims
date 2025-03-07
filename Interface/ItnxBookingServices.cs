@@ -26,5 +26,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetWorkSheetData(WorkSheetRequestModel worksheetdata);
         Task<ServiceStatusResponseModel> GetSampleTypedetail(string WorkOrderId);
         Task<ServiceStatusResponseModel> UpdateSampleType(List<SampltypeChangeRequestModel> sampletypedata);
+        Task<ServiceStatusResponseModel> MachineResult(MachineResultRequestModel machineResult);
     }
 }

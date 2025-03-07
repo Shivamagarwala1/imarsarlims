@@ -967,84 +967,93 @@ namespace iMARSARLIMS.Services
         }
         async Task<ServiceStatusResponseModel> ItnxBookingServices.GetWorkSheetData(WorkSheetRequestModel worksheetdata)
         {
-            var query = from tb in db.tnx_Booking
-                        join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
-                        join im in db.itemMaster on tbi.itemId equals im.itemId
-                        join cm in db.centreMaster on tb.centreId equals cm.centreId
-                        join tm in db.titleMaster on tb.title_id equals tm.id
-                        where tb.bookingDate>= worksheetdata.FromDate && tb.bookingDate<= worksheetdata.ToDate
-                        select new
-                        {
-                            BookingDate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                            tbi.barcodeNo,
-                            PatientName = string.Concat(tm.title, " ", tb.name),
-                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/",tb.gender),
-                            investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "<br>", tbi.investigationName) : tbi.investigationName,
-                            cm.centrecode,
-                            centreName = cm.companyName,
-                            testid = tbi.id,
-                            tbi.itemId,
-                            tbi.deptId,
-                            tbi.departmentName,
-                            tbi.isSampleCollected,
-                            Urgent = tbi.isUrgent,
-                            resultdone = tbi.isResultDone,
-                            Approved = tbi.isApproved,tb.centreId,tb.workOrderId
-                        };
-            
-            if (worksheetdata.BarcodeNo != "")
+            try
             {
-                query = query.Where(q => q.barcodeNo == worksheetdata.BarcodeNo);
-            }
-            if (worksheetdata.DeptId > 0)
-            {
-                query = query.Where(q => q.deptId== worksheetdata.DeptId);
-            }
-            if (worksheetdata.CentreId > 0)
-            {
-                query = query.Where(q => q.centreId== worksheetdata.CentreId);
-            }
-            else
-            {
-                List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == worksheetdata.empid).Select(e => e.centreId).ToList();
-                query = query.Where(q => CentreIds.Contains(q.centreId));
-            }
+                var query = from tb in db.tnx_Booking
+                            join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                            join im in db.itemMaster on tbi.itemId equals im.itemId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            join tm in db.titleMaster on tb.title_id equals tm.id
+                            where tb.bookingDate >= worksheetdata.FromDate && tb.bookingDate <= worksheetdata.ToDate
+                            select new
+                            {
+                                BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                tbi.barcodeNo,
+                                PatientName = string.Concat(tm.title, " ", tb.name),
+                                Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
+                                investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "<br>", tbi.investigationName) : tbi.investigationName,
+                                cm.centrecode,
+                                centreName = cm.companyName,
+                                testid = tbi.id,
+                                tbi.itemId,
+                                tbi.deptId,
+                                tbi.departmentName,
+                                tbi.isSampleCollected,
+                                Urgent = tbi.isUrgent,
+                                resultdone = tbi.isResultDone,
+                                Approved = tbi.isApproved,
+                                tb.centreId,
+                                tb.workOrderId
+                            };
 
-            if (worksheetdata.ItemId > 0)
-            {
-                query = query.Where(q => q.itemId== worksheetdata.ItemId);
-            }
-            if (worksheetdata.Status != "")
-            {
-                if (worksheetdata.Status == "Pending")
+                if (worksheetdata.BarcodeNo != "")
                 {
-                    query = query.Where(q => q.isSampleCollected == "Y" && q.resultdone==0);
+                    query = query.Where(q => q.barcodeNo == worksheetdata.BarcodeNo);
                 }
-                else if (worksheetdata.Status == "Tested")
+                if (worksheetdata.DeptId > 0)
                 {
-                    query = query.Where(q => q.resultdone == 1 && q.Approved==0);
+                    query = query.Where(q => q.deptId == worksheetdata.DeptId);
                 }
-                else if (worksheetdata.Status == "Approved")
+                if (worksheetdata.CentreId > 0)
                 {
-                    query = query.Where(q => q.Approved == 1);
-                }
-                else if (worksheetdata.Status == "MachineData")
-                {
-                   // query = query.Where(q => q.isSampleCollected == "R");
+                    query = query.Where(q => q.centreId == worksheetdata.CentreId);
                 }
                 else
                 {
-                    query = query.Where(q => q.Urgent == 1);
+                    List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == worksheetdata.empid).Select(e => e.centreId).ToList();
+                    query = query.Where(q => CentreIds.Contains(q.centreId));
                 }
+
+                if (worksheetdata.ItemId > 0)
+                {
+                    query = query.Where(q => q.itemId == worksheetdata.ItemId);
+                }
+                if (worksheetdata.Status != "")
+                {
+                    if (worksheetdata.Status == "Pending")
+                    {
+                        query = query.Where(q => q.isSampleCollected == "Y" && q.resultdone == 0);
+                    }
+                    else if (worksheetdata.Status == "Tested")
+                    {
+                        query = query.Where(q => q.resultdone == 1 && q.Approved == 0);
+                    }
+                    else if (worksheetdata.Status == "Approved")
+                    {
+                        query = query.Where(q => q.Approved == 1);
+                    }
+                    else if (worksheetdata.Status == "MachineData")
+                    {
+                        // query = query.Where(q => q.isSampleCollected == "R");
+                    }
+                    else
+                    {
+                        query = query.Where(q => q.Urgent == 1);
+                    }
+                }
+
+                query = query.OrderBy(q => q.workOrderId).ThenBy(q => q.deptId);
+                var result = await query.ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
             }
-           
-            query = query.OrderBy(q => q.workOrderId).ThenBy(q => q.deptId);
-            var result = await query.ToListAsync();
-            return new ServiceStatusResponseModel
+            catch (Exception ex)
             {
-                Success = true,
-                Data = result
-            };
+                return new ServiceStatusResponseModel {Success=false,Message=ex.Message};
+            }
         }
         public byte[] PrintWorkSheet(string TestIds)
         {
@@ -1259,6 +1268,66 @@ namespace iMARSARLIMS.Services
                         Message = ex.Message
                     };
                 }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.MachineResult(MachineResultRequestModel machineResult)
+        {
+            try
+            {
+                var query = from tb in db.tnx_Booking
+                            join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
+                            join mr in db.machine_result on tbi.id equals mr.testId
+                            join io in db.itemObservationMaster on mr.observationId equals io.id
+                            where mr.createdDateTime >= machineResult.FromDate && mr.createdDateTime <= machineResult.ToDate
+                            select new
+                            {
+                                patientName = tb.name,
+                                visitId = tb.workOrderId,
+                                tbi.barcodeNo,
+                                tbi.investigationName,
+                                io.labObservationName,
+                                mr.machineName1,
+                                mr.macId1,
+                                Reading = mr.macReading1,
+                                mr.machineComments,
+                                tb.centreId
+                            };
+
+                if (machineResult.BarcodeNo != "")
+                {
+                    query = query.Where(q => q.barcodeNo == machineResult.BarcodeNo);
+                }
+                if (machineResult.MachineId > 0)
+                {
+                    query = query.Where(q => q.macId1 == machineResult.MachineId);
+                }
+                if (machineResult.centreId > 0)
+                {
+                    query = query.Where(q => q.centreId == machineResult.centreId);
+                }
+                else
+                {
+                    List<int> CentreIds = db.empCenterAccess.Where(e => e.empId == machineResult.empId).Select(e => e.centreId).ToList();
+                    query = query.Where(q => CentreIds.Contains(q.centreId));
+                }
+
+                query = query.OrderBy(q => q.visitId);
+                var result = await query.ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch(Exception ex) 
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success=false,
+                    Message=ex.Message
+                };
+
             }
         }
     }

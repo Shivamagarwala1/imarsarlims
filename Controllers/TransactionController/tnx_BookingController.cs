@@ -441,7 +441,23 @@ namespace iMARSARLIMS.Controllers.transactionController
                 };
             }
         }
-
+        [HttpPost("MachineResult")]
+        public async Task<ServiceStatusResponseModel> MachineResult(MachineResultRequestModel machineResult)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.MachineResult(machineResult);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
     }
 }
