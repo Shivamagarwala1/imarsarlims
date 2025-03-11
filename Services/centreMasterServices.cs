@@ -707,7 +707,7 @@ namespace iMARSARLIMS.Services
                     {
                         Directory.CreateDirectory(uploadPath);
                     }
-                   // var image = Image.Split(',')[1];
+                    // var image = Image.Split(',')[1];
                     byte[] imageBytes = Convert.FromBase64String(Image);
 
                     string filePath = Path.Combine(uploadPath, filename);
@@ -805,7 +805,7 @@ namespace iMARSARLIMS.Services
         // Make the method static
         private static string ConverttoBAse64(string imagepath)
         {
-            if (imagepath != null && imagepath!="")
+            if (imagepath != null && imagepath != "")
             {
                 byte[] imageBytes = File.ReadAllBytes(imagepath);
                 string image = Convert.ToBase64String(imageBytes);
@@ -891,6 +891,7 @@ namespace iMARSARLIMS.Services
                 var data = (from cm in db.centreMaster
                             select new
                             {
+                                cm.centreId,
                                 cm.centrecode,
                                 cm.companyName,
                                 cm.reporrtHeaderHeightY,
@@ -914,7 +915,9 @@ namespace iMARSARLIMS.Services
                             }).AsEnumerable() // Execute the query and switch to in-memory
                             .Select(cm => new
                             {
-                                cm.centrecode,cm.companyName,
+                                cm.centreId,
+                                cm.centrecode,
+                                cm.companyName,
                                 cm.reporrtHeaderHeightY,
                                 cm.patientYHeader,
                                 cm.barcodeXPosition,
@@ -950,5 +953,62 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.DeleteLetterHeadDetail(int CentreId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = db.centreMaster.Where(c => c.centreId == CentreId).FirstOrDefault();
+                    if (data != null)
+                    {
+                        data.reporrtHeaderHeightY = 0;
+                        data.patientYHeader = 0;
+                        data.barcodeXPosition = 0;
+                        data.barcodeYPosition = 0;
+                        data.QRCodeXPosition = 0;
+                        data.QRCodeYPosition = 0;
+                        data.isQRheader = 0;
+                        data.isBarcodeHeader = 0;
+                        data.footerHeight = 0;
+                        data.NABLxPosition = 0;
+                        data.NABLyPosition = 0;
+                        data.docSignYPosition = 0;
+                        data.receiptHeaderY = 0;
+                        data.reportHeader = "";
+                        data.reciptHeader = "";
+                        data.reciptFooter = "";
+                        data.waterMarkImage = "";
+                        db.centreMaster.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "Updated Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "No data founs to update"
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message,
+                    };
+
+                }
+            }
+        }
     }
 }
+

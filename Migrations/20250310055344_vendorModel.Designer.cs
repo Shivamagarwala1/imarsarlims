@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250310055344_vendorModel")]
+    partial class vendorModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4299,100 +4302,31 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("zoneMaster");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.Indent", b =>
-                {
-                    b.Property<int>("indentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RejectDatetime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("indentBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("indentById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("indentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("isrejected")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rejectedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("indentId");
-
-                    b.ToTable("Indent");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.ItemMasterStore", b =>
-                {
-                    b.Property<int>("itemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("itemName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("maxQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("minQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("itemId");
-
-                    b.ToTable("ItemMasterStore");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.indentDetail", b =>
+            modelBuilder.Entity("iMARSARLIMS.Model.Store.VendorMaster", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("IssuedQuantity")
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("ContactNo")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<int>("city")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
+                    b.Property<string>("contactPerson")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("country")
                         .HasColumnType("int");
 
                     b.Property<int?>("createdById")
@@ -4401,18 +4335,51 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime>("createdDateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("indentId")
-                        .HasColumnType("int");
+                    b.Property<string>("emailId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("faxNo")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
 
                     b.Property<byte>("isActive")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int>("itemId")
+                    b.Property<string>("landline")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<string>("pinCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("varchar(6)");
+
+                    b.Property<int>("state")
                         .HasColumnType("int");
 
-                    b.Property<string>("itemName")
+                    b.Property<string>("supplierCategory")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("supplierCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("supplierName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("supplierType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");
@@ -4420,62 +4387,14 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime?>("updateDateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("id");
-
-                    b.HasIndex("indentId");
-
-                    b.ToTable("indentDetail");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Transaction.machineRerunTestDetail", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("InvestigationName")
+                    b.Property<string>("website")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("LabObservationName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<byte>("MacID")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("MacReading")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
-                    b.Property<DateTime>("RerunDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("RerunReason")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int>("Rerunbyid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("observationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("testID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("workorderid")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("id");
 
-                    b.ToTable("machineRerunTestDetail");
+                    b.ToTable("VendorMaster");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Allergy_ResultEntry", b =>
@@ -6502,15 +6421,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.indentDetail", b =>
-                {
-                    b.HasOne("iMARSARLIMS.Model.Store.Indent", null)
-                        .WithMany("addIndentDetail")
-                        .HasForeignKey("indentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Transaction.tnx_BookingPatient", null)
@@ -6573,11 +6483,6 @@ namespace iMARSARLIMS.Migrations
             modelBuilder.Entity("iMARSARLIMS.Model.Master.itemMaster", b =>
                 {
                     b.Navigation("AddSampletype");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.Indent", b =>
-                {
-                    b.Navigation("addIndentDetail");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>

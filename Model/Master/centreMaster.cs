@@ -107,6 +107,8 @@ namespace iMARSARLIMS.Model.Master
         public string? waterMarkImage { get; set; }
         [MaxLength(300)]
         public string? NablImage { get; set; }
+        public string? CertificateImage { get; set; }
+        public string? Aggreement { get; set; }
 
         [ForeignKey(nameof(centreId))]
         public List<empCenterAccess> addEmpCenterAccess { get; set; }

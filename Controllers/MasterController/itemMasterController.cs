@@ -193,6 +193,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpGet("EvaluateTest")]
+        public async Task<ServiceStatusResponseModel> EvaluateTest(int itemid1, int itemid2,int itemid3)
+        {
+            try
+            {
+                var result = await _itemMasterServices.EvaluateTest(itemid1,itemid2,itemid3);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }
 

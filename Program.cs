@@ -1,6 +1,8 @@
 using iMARSARLIMS;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Interface.Store;
 using iMARSARLIMS.Services;
+using iMARSARLIMS.Services.Store;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Microsoft.AspNetCore.OData.NewtonsoftJson;
@@ -187,6 +189,11 @@ builder.Services.AddScoped<IitemObservation_isnablService, itemObservation_isnab
 builder.Services.AddScoped<IlabUniversalMasterServices, labUniversalMasterServices>();
 builder.Services.AddScoped<ItatMasterServices, tatMasterServices>();
 builder.Services.AddScoped<Itnx_OutsourceDetailServices, tnx_OutsourceDetailServices>();
+builder.Services.AddScoped<ICentreCertificateServices, CentreCertificateServices>();
+builder.Services.AddScoped<Itnx_testcommentServices, tnx_testcommentServices>();
+builder.Services.AddScoped<IinvestigationUDServices, investigationUDServices >();
+builder.Services.AddScoped<ImachineRerunTestDetailServices, machineRerunTestDetailServices>();
+builder.Services.AddScoped<IItemMasterStoreServices, ItemMasterStoreServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

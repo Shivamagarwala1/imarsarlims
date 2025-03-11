@@ -233,6 +233,24 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpPost("DeleteLetterHeadDetail")]
+        public async Task<ServiceStatusResponseModel> DeleteLetterHeadDetail(int CentreId)
+        {
+            try
+            {
+                var result = await _centreMasterServices.DeleteLetterHeadDetail(CentreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
 
     }
 }

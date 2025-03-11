@@ -516,5 +516,57 @@ namespace iMARSARLIMS.Services
             }
         }
 
+        async Task<ServiceStatusResponseModel> IitemMasterServices.EvaluateTest(int itemid1, int itemid2, int itemid3)
+        {
+            var data1 = (from iom in db.ItemObservationMapping
+                        join im in db.itemMaster on iom.observationID equals im.itemId
+                        where iom.itemId== itemid1
+                        select new
+                        {
+                            ItemId = iom.itemId,
+                            TestName = im.itemName,
+                            Rate = (from rt in db.rateTypeWiseRateList
+                                    where rt.itemid == itemid1 && rt.rateTypeId == 1
+                                    select rt.rate).FirstOrDefault()
+                        }).ToList();
+
+            var data2 = (from iom in db.ItemObservationMapping
+                        join im in db.itemMaster on iom.observationID equals im.itemId
+                        where iom.itemId == itemid2
+                        select new
+                        {
+                            ItemId = iom.itemId,
+                            TestName = im.itemName,
+                            Rate = (from rt in db.rateTypeWiseRateList
+                                    where rt.itemid == itemid2 && rt.rateTypeId == 1
+                                    select rt.rate).FirstOrDefault()
+                        }).ToList();
+
+            var data3 = (from iom in db.ItemObservationMapping
+                         join im in db.itemMaster on iom.observationID equals im.itemId
+                         where iom.itemId == itemid3
+                         select new
+                         {
+                             ItemId = iom.itemId,
+                             TestName = im.itemName,
+                             Rate = (from rt in db.rateTypeWiseRateList
+                                     where rt.itemid == itemid3 && rt.rateTypeId == 1
+                                     select rt.rate).FirstOrDefault()
+                         }).ToList();
+
+            var groupedData = new
+            {
+                item1 = data1,
+                item2 = data2,
+                item3 = data3
+            };
+
+            return new ServiceStatusResponseModel
+            {
+                Success = true,
+                Data = groupedData
+            };
+
+        }
     }
 }

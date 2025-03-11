@@ -1,15 +1,23 @@
 ﻿using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Model.Store;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
+using machineRerunTestDetail = iMARSARLIMS.Model.Transaction.machineRerunTestDetail;
 
 namespace iMARSARLIMS
 {
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<machineRerunTestDetail> machineRerunTestDetail { get; set; }
+        public DbSet<ItemMasterStore> ItemMasterStore { get; set; }
+        public DbSet<Indent> Indent { get; set; }
+        public DbSet<indentDetail> indentDetail { get; set; }
+        public DbSet<InvestigationMasterUD> InvestigationMasterUD { get; set; }
+        public DbSet<tnx_testcomment> tnx_testcomment { get; set; }
+        public DbSet<CentreCertificate> CentreCertificate { get; set; }
         public DbSet<tnx_OutsourceDetail> tnx_OutsourceDetail { get; set; }
         public DbSet<tnx_investigationtext_Report> tnx_investigationtext_Report { get; set; }
         public DbSet<tat_master> tat_master { get; set; }
@@ -128,6 +136,21 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<centreMaster>().HasKey(x => x.centreId);
             modelBuilder.Entity<centreMaster>().Property(x => x.centreId).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<InvestigationMasterUD>().HasKey(x => x.id);
+            modelBuilder.Entity<InvestigationMasterUD>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<Indent>().HasKey(x => x.indentId);
+            modelBuilder.Entity<Indent>().Property(x => x.indentId).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<indentDetail>().HasKey(x => x.id);
+            modelBuilder.Entity<indentDetail>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<ItemMasterStore>().HasKey(x => x.itemId);
+            modelBuilder.Entity<ItemMasterStore>().Property(x => x.itemId).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<CentreCertificate>().HasKey(x => x.id);
+            modelBuilder.Entity<CentreCertificate>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_Booking>().HasKey(x => x.transactionId);
             modelBuilder.Entity<tnx_Booking>().Property(x => x.transactionId).ValueGeneratedOnAdd();
@@ -142,7 +165,10 @@ namespace iMARSARLIMS
             modelBuilder.Entity<tnx_InvestigationAddReport>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<labReportFooterText>().HasKey(x => x.id);
-            modelBuilder.Entity<labReportFooterText>().Property(x => x.id).ValueGeneratedOnAdd(); 
+            modelBuilder.Entity<labReportFooterText>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<tnx_testcomment>().HasKey(x => x.id);
+            modelBuilder.Entity<tnx_testcomment>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_InvestigationRemarks>().HasKey(x => x.id);
             modelBuilder.Entity<tnx_InvestigationRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
@@ -416,6 +442,10 @@ namespace iMARSARLIMS
          
             modelBuilder.Entity<CentrePayment>().HasKey(x => x.id);
             modelBuilder.Entity<CentrePayment>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+
+            modelBuilder.Entity<machineRerunTestDetail>().HasKey(x => x.id);
+            modelBuilder.Entity<machineRerunTestDetail>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<ThemeColour>().HasKey(x => x.id);
             modelBuilder.Entity<ThemeColour>().Property(x => x.id).ValueGeneratedOnAdd();

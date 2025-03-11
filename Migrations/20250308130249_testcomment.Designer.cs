@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250308130249_testcomment")]
+    partial class testcomment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,45 +293,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("DoctorApprovalSign");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.InvestigationMasterUD", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("formatUrl")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<int>("investigationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("investigationName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("InvestigationMasterUD");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.ItemObservationMapping", b =>
@@ -4299,185 +4263,6 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("zoneMaster");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.Indent", b =>
-                {
-                    b.Property<int>("indentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RejectDatetime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("indentBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("indentById")
-                        .HasColumnType("int");
-
-                    b.Property<int>("indentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("isrejected")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rejectedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("indentId");
-
-                    b.ToTable("Indent");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.ItemMasterStore", b =>
-                {
-                    b.Property<int>("itemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Category")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("itemName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("maxQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("minQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("itemId");
-
-                    b.ToTable("ItemMasterStore");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.indentDetail", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("IssuedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("indentId")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("itemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("itemName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("indentId");
-
-                    b.ToTable("indentDetail");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Transaction.machineRerunTestDetail", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("InvestigationName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("LabObservationName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<byte>("MacID")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("MacReading")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
-                    b.Property<DateTime>("RerunDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("RerunReason")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int>("Rerunbyid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("observationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("testID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("workorderid")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("machineRerunTestDetail");
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Allergy_ResultEntry", b =>
                 {
                     b.Property<int>("id")
@@ -6502,15 +6287,6 @@ namespace iMARSARLIMS.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.indentDetail", b =>
-                {
-                    b.HasOne("iMARSARLIMS.Model.Store.Indent", null)
-                        .WithMany("addIndentDetail")
-                        .HasForeignKey("indentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Transaction.tnx_BookingPatient", null)
@@ -6573,11 +6349,6 @@ namespace iMARSARLIMS.Migrations
             modelBuilder.Entity("iMARSARLIMS.Model.Master.itemMaster", b =>
                 {
                     b.Navigation("AddSampletype");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.Indent", b =>
-                {
-                    b.Navigation("addIndentDetail");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
