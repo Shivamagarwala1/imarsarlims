@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
@@ -7,7 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Linq;
+using System.Xml;
 using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace iMARSARLIMS.Services
 {
@@ -59,11 +63,10 @@ namespace iMARSARLIMS.Services
                                       tb.netAmount,
                                       tb.paidAmount,
                                       DueAmt = tb.netAmount - tb.paidAmount,
-                                      tb.paymentMode,
+                                      paymentMode = tr.cashAmt.HasValue ? "Cash" : tr.onlinewalletAmt.HasValue ? "OnliNe" : "Cheque",
                                       RecieptNo = tr != null ? tr.id : 0,
                                       cashAmt = tr.cashAmt.HasValue ? tr.cashAmt.Value.ToString() : "",
                                       onlineAmt = tr.onlinewalletAmt.HasValue ? tr.onlinewalletAmt.Value.ToString() : "",
-
                                       ChequeAmt = tr.chequeAmt.HasValue ? tr.chequeAmt.Value.ToString() : ""
                                   }).ToListAsync();
 
@@ -234,7 +237,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetMicroresult(int testid,int reportStatus)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetMicroresult(int testid, int reportStatus)
         {
             try
             {
@@ -384,7 +387,7 @@ namespace iMARSARLIMS.Services
                     db.tnx_ReceiptDetails.AddRange(settelmentDataList);
                     await db.SaveChangesAsync();
 
-                    var workorderid= settelments.Select(s=>s.workOrderId).First();
+                    var workorderid = settelments.Select(s => s.workOrderId).First();
                     var paidamt = settelments.Select(s => s.PaidAmt).First();
 
                     var data = db.tnx_Booking.Where(b => b.workOrderId == workorderid).FirstOrDefault();
@@ -417,7 +420,7 @@ namespace iMARSARLIMS.Services
         {
             return new tnx_ReceiptDetails
             {
-                id=0,
+                id = 0,
                 transactionId = settelment.transactionId,
                 transactionType = settelment.transactionType,
                 workOrderId = settelment.workOrderId,
@@ -449,33 +452,33 @@ namespace iMARSARLIMS.Services
             try
             {
                 var bookingData = await (from tb in db.tnx_Booking
-                                  join tm in db.titleMaster on tb.title_id equals tm.id
-                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
-                                  join cm in db.centreMaster on tb.centreId equals cm.centreId
-                                  join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
-                                  where tb.workOrderId == workorderId
-                                        && (string.IsNullOrEmpty(tbi.packageName) || tbi.packageName == tbi.investigationName)
-                                  select new
-                                  {
-                                      tb.bookingDate,
-                                      tb.workOrderId,
-                                      tb.transactionId,
-                                      PatientName = tm.title + " " + tb.name,
-                                      tb.netAmount,
-                                      tb.grossAmount,
-                                      tb.discount,
-                                      tb.paidAmount,
-                                      tb.mobileNo,
-                                      cm.companyName,
-                                      cm.centrecode,
-                                      tb.patientId,
-                                      Status = tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 1 ? "Approved" :
-                                               tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 0 ? "ResultDone" :
-                                               tbi.isSampleCollected == "Y" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Received" :
-                                               tbi.isSampleCollected == "S" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Collected" : "Registered"
-                                  }).ToListAsync();
+                                         join tm in db.titleMaster on tb.title_id equals tm.id
+                                         join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                         join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
+                                         where tb.workOrderId == workorderId
+                                               && (string.IsNullOrEmpty(tbi.packageName) || tbi.packageName == tbi.investigationName)
+                                         select new
+                                         {
+                                             tb.bookingDate,
+                                             tb.workOrderId,
+                                             tb.transactionId,
+                                             PatientName = tm.title + " " + tb.name,
+                                             tb.netAmount,
+                                             tb.grossAmount,
+                                             tb.discount,
+                                             tb.paidAmount,
+                                             tb.mobileNo,
+                                             cm.companyName,
+                                             cm.centrecode,
+                                             tb.patientId,
+                                             Status = tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 1 ? "Approved" :
+                                                      tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 0 ? "ResultDone" :
+                                                      tbi.isSampleCollected == "Y" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Received" :
+                                                      tbi.isSampleCollected == "S" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Collected" : "Registered"
+                                         }).ToListAsync();
 
-                if(bookingData!=null)
+                if (bookingData != null)
                 {
                     return new ServiceStatusResponseModel
                     {
@@ -488,7 +491,7 @@ namespace iMARSARLIMS.Services
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
-                        Message="No Data Found"
+                        Message = "No Data Found"
                     };
                 }
 
@@ -509,15 +512,17 @@ namespace iMARSARLIMS.Services
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
                         join im in db.itemMaster on tbi.itemId equals im.itemId
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
                         join tm in db.titleMaster on tb.title_id equals tm.id
+                        join em in db.empMaster on tb.createdById equals em.empId
                         select new
                         {
                             bookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
                             tb.workOrderId,
                             SampleRecievedDate = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
-                            ApproveDate= tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
+                            ApproveDate = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             PatientName = string.Concat(tm.title, " ", tb.name),
-                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/",tb.gender),
+                            Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
                             tbi.barcodeNo,
                             investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "<br>", tbi.investigationName) : tbi.investigationName,
                             Remark = tb.labRemarks,
@@ -528,14 +533,23 @@ namespace iMARSARLIMS.Services
                             tb.transactionId,
                             tbi.sampleCollectionDate,
                             im.reportType,
-                            Comment="",
+                            Comment = "",
                             resultdone = tbi.isResultDone,
                             Approved = tbi.isApproved,
                             BokkingDateFilter = tb.bookingDate,
-                            approvedDateFilter= tbi.approvedDate,
-                            sampleReceiveDateFilter= tbi.sampleReceiveDate,
-                            tbi.centreId,tbi.itemId,
-                            tbi.deptId                  
+                            approvedDateFilter = tbi.approvedDate,
+                            sampleReceiveDateFilter = tbi.sampleReceiveDate,
+                            tbi.centreId,
+                            tbi.itemId,
+                            tbi.deptId,
+                            ReferDoctor = dr.doctorName,
+                            CreatedBy = em.fName,
+                            testId= tbi.id,
+                            Email = tbi.isEmailsent,
+                            Whatsapp = tbi.isWhatsApp,
+                            isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count()
+
+
                         };
             if (patientdata.Datetype != "")
             {
@@ -569,7 +583,7 @@ namespace iMARSARLIMS.Services
             }
             if (patientdata.centreId > 0)
             {
-                query = query.Where(q => q.centreId== patientdata.centreId);
+                query = query.Where(q => q.centreId == patientdata.centreId);
             }
             else
             {
@@ -590,14 +604,26 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetTestInfo(int TestId)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetTestInfo(string TestId)
         {
             try
             {
+                // Check for null or empty TestId and return early if invalid
+                if (string.IsNullOrEmpty(TestId))
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "TestId cannot be null or empty."
+                    };
+                }
+
+                List<int> testIds = TestId.Split(',').Select(id => int.Parse(id)).ToList();
+
                 var data = await (from tb in db.tnx_Booking
                                   join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                                   join em in db.empMaster on tb.createdById equals em.empId
-                                  where tbi.id == TestId
+                                  where testIds.Contains(tbi.id)
                                   select new
                                   {
                                       tbi.investigationName,
@@ -615,11 +641,11 @@ namespace iMARSARLIMS.Services
                                       outhouseDoneOn = tbi.outhouseDoneOn.HasValue ? tbi.outhouseDoneOn.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                                       tbi.outhouseLab,
                                       tbi.outhouseDoneBy,
-                                      OutSource="",
-                                      OutSourceDate="",
-                                      OutSouceLab=""
-
+                                      OutSource = "",
+                                      OutSourceDate = "",
+                                      OutSouceLab = ""
                                   }).ToListAsync();
+
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
@@ -640,21 +666,21 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var data = await(from tb in db.tnx_Booking
-                                 join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
-                                 join cm in db.centreMaster on tb.centreId equals cm.centreId 
-                                 where tbi.workOrderId == WorkOrderId && cm.isPrePrintedBarcode == 1
-                                 select new
-                                 {
-                                     TestId=tbi.id,
-                                     tb.workOrderId,
-                                     patientName= tb.name,
-                                     Age=string.Concat(tb.ageYear," Y ",tb.ageMonth," M ",tb.ageDay," D/",tb.gender),
-                                     tbi.investigationName,
-                                     tbi.barcodeNo,
-                                     tbi.sampleTypeName,
-                                     registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                 }).ToListAsync();
+                var data = await (from tb in db.tnx_Booking
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                  where tbi.workOrderId == WorkOrderId && cm.isPrePrintedBarcode == 1
+                                  select new
+                                  {
+                                      TestId = tbi.id,
+                                      tb.workOrderId,
+                                      patientName = tb.name,
+                                      Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
+                                      tbi.investigationName,
+                                      tbi.barcodeNo,
+                                      tbi.sampleTypeName,
+                                      registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                  }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
@@ -685,7 +711,7 @@ namespace iMARSARLIMS.Services
                             return new ServiceStatusResponseModel
                             {
                                 Success = false,
-                                Message = "BarcodenNo"+ item.BarcodeNoNew + " Already Exit"
+                                Message = "BarcodenNo" + item.BarcodeNoNew + " Already Exit"
                             };
                         }
                         else
@@ -725,9 +751,9 @@ namespace iMARSARLIMS.Services
         {
             var fromDate = FromDate.Date; // Strip the time portion
             var toDate = ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
-            var result =  _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId,departmentId,itemid,TatType);
-            
-            if(result.Count>0)
+            var result = _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId, departmentId, itemid, TatType);
+
+            if (result.Count > 0)
             {
                 return new ServiceStatusResponseModel
                 {
@@ -752,7 +778,7 @@ namespace iMARSARLIMS.Services
             var fromDate = FromDate.Date; // Strip the time portion
             var toDate = ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
 
-            var result =  _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId, departmentId, itemid, TatType);
+            var result = _MySql_Procedure_Services.TatReportexcel(FromDate, ToDate, centreId, departmentId, itemid, TatType);
             var excelByte = MyFunction.ExportToExcel(result, "LedgerReportExcel");
             return excelByte;
         }
@@ -795,19 +821,19 @@ namespace iMARSARLIMS.Services
                             {
                                 table.ColumnsDefinition(columns =>
                                 {
-                                    columns.ConstantColumn(1.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.0f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(2.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(1.5f,Unit.Centimetre);
-                                    columns.ConstantColumn(1.5f,Unit.Centimetre);
+                                    columns.ConstantColumn(1.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f, Unit.Centimetre);
+                                    columns.ConstantColumn(1.5f, Unit.Centimetre);
                                     columns.ConstantColumn(1.5f, Unit.Centimetre);
                                 });
                                 table.Cell().Text("Sr.No").Style(TextStyle.Default.FontSize(10).Bold());
@@ -825,25 +851,25 @@ namespace iMARSARLIMS.Services
                                 table.Cell().Text("STOD").Style(TextStyle.Default.FontSize(10).Bold());
                                 table.Cell().Text("DTOR").Style(TextStyle.Default.FontSize(10).Bold());
                                 var i = 0;
-                            foreach(var item in result)
-                            {
+                                foreach (var item in result)
+                                {
                                     i = i + 1;
-                                table.Cell().Text(i.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.BookingDate).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.WorkorderId).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.PatientName).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.TestName).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.Department).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.SampleCollectionDate).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.SampleReceivedDate).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.ResultDate).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.ApproveDate).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.BTOS.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.STOD.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text(item.DTOR.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(i.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.BookingDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.WorkorderId).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.PatientName).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.TestName).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.Department).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.SampleCollectionDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.SampleReceivedDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.ResultDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.ApproveDate).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.BTOS.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.STOD.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
+                                    table.Cell().Text(item.DTOR.ToString()).Style(TextStyle.Default.FontSize(10).Bold());
 
-                            }
+                                }
                             });
 
                         });
@@ -859,7 +885,7 @@ namespace iMARSARLIMS.Services
                                        columns.RelativeColumn();
                                        columns.RelativeColumn();
                                    });
-                                   
+
                                    table.Cell().ColumnSpan(3).AlignRight().AlignBottom().Text(text =>
                                    {
                                        text.DefaultTextStyle(x => x.FontSize(8));
@@ -886,22 +912,22 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var data = await(from tb in db.tnx_Booking
-                                 join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
-                                 join tbo in db.tnx_Observations on tbi.id equals tbo.testId
-                                 where tbi.workOrderId == WorkOrderId 
-                                 select new
-                                 {
-                                     tb.workOrderId,
-                                     patientName = tb.name,
-                                     Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
-                                     tbi.investigationName,
-                                     tbi.barcodeNo,
-                                     observationdataid=tbo.id,
-                                     tbo.observationName,
-                                     tbo.testMethod,
-                                     registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                 }).ToListAsync();
+                var data = await (from tb in db.tnx_Booking
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  join tbo in db.tnx_Observations on tbi.id equals tbo.testId
+                                  where tbi.workOrderId == WorkOrderId
+                                  select new
+                                  {
+                                      tb.workOrderId,
+                                      patientName = tb.name,
+                                      Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
+                                      tbi.investigationName,
+                                      tbi.barcodeNo,
+                                      observationdataid = tbo.id,
+                                      tbo.observationName,
+                                      tbo.testMethod,
+                                      registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                  }).ToListAsync();
                 if (data != null)
                 {
                     return new ServiceStatusResponseModel
@@ -937,14 +963,14 @@ namespace iMARSARLIMS.Services
                 {
                     foreach (var item in methoddata)
                     {
-                     var data = db.tnx_Observations.Where(b => b.id== item.id).FirstOrDefault();
-                        if (data !=null)
+                        var data = db.tnx_Observations.Where(b => b.id == item.id).FirstOrDefault();
+                        if (data != null)
                         {
-                        data.testMethod = item.Method;
-                        db.tnx_Observations.Update(data);
-                        await db.SaveChangesAsync();
+                            data.testMethod = item.Method;
+                            db.tnx_Observations.Update(data);
+                            await db.SaveChangesAsync();
                         }
-                        
+
                     }
                     await transaction.CommitAsync();
                     return new ServiceStatusResponseModel
@@ -1052,14 +1078,14 @@ namespace iMARSARLIMS.Services
             }
             catch (Exception ex)
             {
-                return new ServiceStatusResponseModel {Success=false,Message=ex.Message};
+                return new ServiceStatusResponseModel { Success = false, Message = ex.Message };
             }
         }
         public byte[] PrintWorkSheet(string TestIds)
         {
-            
+
             var result = _MySql_Procedure_Services.PrintWorkSheet(TestIds);
-            if (result.Count>0)
+            if (result.Count > 0)
             {
                 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -1094,42 +1120,42 @@ namespace iMARSARLIMS.Services
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
                                     columns.RelativeColumn();
-                                    
-                                    
+
+
                                 });
-                               
+
                                 var i = 0;
                                 var workorderId = "";
                                 var investigation = "";
-                                
-                                 foreach (var item in result)
-                                 {
-                                    if (workorderId!="" && workorderId != item.WorkOrderId)
+
+                                foreach (var item in result)
+                                {
+                                    if (workorderId != "" && workorderId != item.WorkOrderId)
                                     {
                                         table.Cell().RowSpan(4).ColumnSpan(2).BorderBottom(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10).Bold());
-                                        
+
                                     }
-                                    if (workorderId!= item.WorkOrderId)
+                                    if (workorderId != item.WorkOrderId)
                                     {
-                                        table.Cell().ColumnSpan(2).BorderBottom(0.5f,Unit.Point).Text("PatientName: "+ item.Pname).Style(TextStyle.Default.FontSize(10).Bold());
-                                        table.Cell().ColumnSpan(2).BorderBottom(0.5f, Unit.Point).Text("WorkOrderId: "+item.WorkOrderId).Style(TextStyle.Default.FontSize(10).Bold());
+                                        table.Cell().ColumnSpan(2).BorderBottom(0.5f, Unit.Point).Text("PatientName: " + item.Pname).Style(TextStyle.Default.FontSize(10).Bold());
+                                        table.Cell().ColumnSpan(2).BorderBottom(0.5f, Unit.Point).Text("WorkOrderId: " + item.WorkOrderId).Style(TextStyle.Default.FontSize(10).Bold());
                                         workorderId = item.WorkOrderId;
                                     }
-                                    if(investigation!= item.InvestigationName)
+                                    if (investigation != item.InvestigationName)
                                     {
                                         table.Cell().ColumnSpan(4).Text("").Style(TextStyle.Default.FontSize(10).Bold());
-                                        table.Cell().ColumnSpan(2).Height(0.5f,Unit.Centimetre).BorderBottom(0.5f,Unit.Point).Text("Test Name:" + item.InvestigationName).Style(TextStyle.Default.FontSize(10).Bold());
-                                        table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).BorderBottom(0.5f, Unit.Point).Text("Barcode No: "+ item.Barcodeno).Style(TextStyle.Default.FontSize(10).Bold());
-                                     
+                                        table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).BorderBottom(0.5f, Unit.Point).Text("Test Name:" + item.InvestigationName).Style(TextStyle.Default.FontSize(10).Bold());
+                                        table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).BorderBottom(0.5f, Unit.Point).Text("Barcode No: " + item.Barcodeno).Style(TextStyle.Default.FontSize(10).Bold());
+
                                     }
                                     investigation = item.InvestigationName;
-                                    
+
                                     table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Text(item.ObservationName).Style(TextStyle.Default.FontSize(10));
                                     if (item.Value != "Header")
                                         table.Cell().Height(0.5f, Unit.Centimetre).Text(item.Value).Style(TextStyle.Default.FontSize(10));
                                     else
                                         table.Cell().Height(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
-                                   table.Cell().Height(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Height(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
 
                                 }
                             });
@@ -1175,23 +1201,23 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var data = await(from tb in db.tnx_Booking
-                                 join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
-                                 where tbi.workOrderId == WorkOrderId
-                                 select new
-                                 {
-                                     tb.workOrderId,
-                                     patientName = tb.name,
-                                     Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
-                                     tbi.investigationName,
-                                     tbi.barcodeNo,
-                                     testid= tbi.id,
-                                     tbi.sampleTypeName,
-                                     tbi.sampleTypeId,
-                                     tbi.reportType,
-                                     SampletypeData= (from stm in db.itemSampleTypeMapping where stm.itemId==tbi.itemId select new {stm.sampleTypeId,stm.sampleTypeName}).ToList(),
-                                     registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                                 }).ToListAsync();
+                var data = await (from tb in db.tnx_Booking
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  where tbi.workOrderId == WorkOrderId
+                                  select new
+                                  {
+                                      tb.workOrderId,
+                                      patientName = tb.name,
+                                      Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
+                                      tbi.investigationName,
+                                      tbi.barcodeNo,
+                                      testid = tbi.id,
+                                      tbi.sampleTypeName,
+                                      tbi.sampleTypeId,
+                                      tbi.reportType,
+                                      SampletypeData = (from stm in db.itemSampleTypeMapping where stm.itemId == tbi.itemId select new { stm.sampleTypeId, stm.sampleTypeName }).ToList(),
+                                      registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                  }).ToListAsync();
                 if (data != null)
                 {
                     return new ServiceStatusResponseModel
@@ -1240,13 +1266,13 @@ namespace iMARSARLIMS.Services
                                 isActive = 1,
                                 createdById = item.empid,
                                 createdDateTime = DateTime.Now,
-                                patientId=0,
+                                patientId = 0,
                             };
                             db.tnx_BookingStatus.Add(changelog);
                             await db.SaveChangesAsync();
                             data.sampleTypeName = item.Sampletypename;
                             data.sampleTypeId = item.sampletypeId;
-                            data.reportType= item.reporttype;
+                            data.reportType = item.reporttype;
                             db.tnx_BookingItem.Update(data);
                             await db.SaveChangesAsync();
                         }
@@ -1320,14 +1346,265 @@ namespace iMARSARLIMS.Services
                     Data = result
                 };
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 return new ServiceStatusResponseModel
                 {
-                    Success=false,
-                    Message=ex.Message
+                    Success = false,
+                    Message = ex.Message
                 };
 
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetReportDateChangeData(string WorkOrderId)
+        {
+            try
+            {
+                var data = await (from tb in db.tnx_Booking
+                                  join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                  where tbi.workOrderId == WorkOrderId
+                                  select new
+                                  {
+                                      tb.workOrderId,
+                                      patientName = tb.name,
+                                      Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
+                                      tbi.investigationName,
+                                      tbi.barcodeNo,
+                                      tbi.isResultDone,
+                                      tbi.isApproved,
+                                      tbi.isSampleCollected,
+                                      TestId = tbi.id,
+                                      tbi.sampleCollectionDate,
+                                      tbi.sampleReceiveDate,
+                                      tbi.resultDate,
+                                      tbi.approvedDate,
+                                      registrationDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                  }).ToListAsync();
+                if (data != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = data
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "Result Not Saved"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.ReportDateChange(List<DateChangeRequestModel> DateData)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    foreach (var dateChange in DateData)
+                    {
+                        var data = db.tnx_BookingItem.Where(b => b.id == dateChange.testId).FirstOrDefault();
+                        if (data != null)
+                        {
+                            data.sampleCollectionDate = dateChange.SamplecollectedDate;
+                            data.sampleReceiveDate = dateChange.SamplerecievedDate;
+                            data.resultDate = dateChange.Resultdate;
+                            data.approvedDate = dateChange.ApproveDate;
+                        }
+                        db.tnx_BookingItem.Update(data);
+                        await db.SaveChangesAsync();
+                    }
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Updated Successful"
+                    };
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendWhatsapp(string workOrderId, int Userid)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = (from tb in db.tnx_Booking
+                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                where tb.workOrderId == workOrderId
+                                select new
+                                {
+                                    PateintName = tb.name,
+                                    tb.workOrderId,
+                                    tb.transactionId,
+                                    smsText = "Testing",
+                                    Url = "",
+                                    tb.mobileNo,
+                                    tb.labRemarks
+                                }).FirstOrDefault();
+                    if (data != null)
+                    {
+                        var whatsappData = new whatsapp
+                        {
+                            id = 0,
+                            transactionId = data.transactionId,
+                            workOrderId = data.workOrderId,
+                            smsText = data.smsText,
+                            name = data.PateintName,
+                            reportPath = data.Url,
+                            deliveryDate = DateTime.Now,
+                            mobileNo = data.mobileNo,
+                            isSend = 0,
+                            isAutoSend = 0,
+                            sentBy = Userid,
+                            sendDate = DateTime.Now,
+                            remarks = "",
+                            type = "",
+                            createdDate = DateTime.Now,
+                            templateId = ""
+                        };
+                        db.whatsapp.Add(whatsappData);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "WorkOrder Id Not Found"
+                        };
+                    }
+                    var databi = db.tnx_BookingItem.Where(bi => bi.workOrderId == workOrderId).ToList();
+                    foreach(var item in databi)
+                    {
+                        item.isWhatsApp = 1;
+
+                    }
+                    db.tnx_BookingItem.UpdateRange(databi);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Whatsapp Report Requested"
+                    };
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendEmail(string workOrderId, int Userid)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var data = (from tb in db.tnx_Booking
+                                join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                                where tb.workOrderId == workOrderId
+                                select new
+                                {
+                                    PateintName = tb.name,
+                                    tb.workOrderId,
+                                    tb.transactionId,
+                                    smsText = "Testing",
+                                    Url = "",
+                                    tb.mobileNo,
+                                    tb.labRemarks
+                                }).FirstOrDefault();
+                    if (data != null)
+                    {
+                        var whatsappData = new whatsapp
+                        {
+                            id = 0,
+                            transactionId = data.transactionId,
+                            workOrderId = data.workOrderId,
+                            smsText = data.smsText,
+                            name = data.PateintName,
+                            reportPath = data.Url,
+                            deliveryDate = DateTime.Now,
+                            mobileNo = data.mobileNo,
+                            isSend = 0,
+                            isAutoSend = 0,
+                            sentBy = Userid,
+                            sendDate = DateTime.Now,
+                            remarks = "",
+                            type = "",
+                            createdDate = DateTime.Now,
+                            templateId = ""
+                        };
+                        db.whatsapp.Add(whatsappData);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "WorkOrder Id Not Found"
+                        };
+                    }
+                    var databi = db.tnx_BookingItem.Where(bi => bi.workOrderId == workOrderId).ToList();
+                    foreach (var item in databi)
+                    {
+                        item.isEmailsent = 1;
+
+                    }
+                    db.tnx_BookingItem.UpdateRange(databi);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Email Report Requested"
+                    };
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+
+                }
             }
         }
     }

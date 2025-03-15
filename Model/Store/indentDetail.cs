@@ -15,7 +15,7 @@ namespace iMARSARLIMS.Model.Store
         public string itemName { get; set; }
         public int Quantity { get; set; }
         public int IssuedQuantity { get; set; }
-
+        public int? ApprovedQuantity { get; set; }
 
     }
 }

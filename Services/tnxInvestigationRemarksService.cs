@@ -66,12 +66,15 @@ namespace iMARSARLIMS.Services
             try
             {
                 var data = await (from sr in db.tnx_InvestigationRemarks
+                                  join em in db.empMaster on sr.createdById equals em.empId
                                   where sr.transactionId == transacctionId && sr.itemId == itemId && sr.WorkOrderId == WorkOrderId
                                   select new
                                   {
                                       sr.id,
                                       sr.transactionId, sr.itemId,
-                                      sr.invRemarks, sr.isActive, sr.itemName,sr.isInternal
+                                      sr.invRemarks, sr.isActive, sr.itemName, sr.isInternal,
+                                      remardkDate = sr.createdDateTime.ToString("yyyy-MMM-dd hh:mm tt"),
+                                      remarkAdBy = string.Concat(em.fName, ' ', em.lName)
                                   }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {

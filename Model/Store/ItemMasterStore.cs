@@ -9,8 +9,7 @@ namespace iMARSARLIMS.Model.Store
         public int itemId { get; set; }
         public string itemName { get; set; }
         public int Category {  get; set; }
-        public int minQuantity { get; set; }
-        public int maxQuantity { get; set; }
+        public int Quantity { get; set; }
 
     }
 }

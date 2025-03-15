@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250311075517_indentData1")]
+    partial class indentData1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -480,55 +483,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("LegendColorMaster");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.MarketingDashBoard", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Pdf")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("MarketingDashBoard");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.SampleRerunReason", b =>
@@ -2059,9 +2013,6 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<byte?>("IndentApprove")
-                        .HasColumnType("tinyint unsigned");
-
                     b.Property<string>("address")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2105,7 +2056,7 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("designationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("district")
+                    b.Property<int>("district")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("dob")
@@ -2136,9 +2087,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("fromIP")
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-
-                    b.Property<byte?>("indentIssue")
-                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isActive")
                         .HasColumnType("tinyint unsigned");
@@ -4360,23 +4308,17 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("ApproveDatetime")
+                    b.Property<DateTime>("RejectDatetime")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("CentreId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("RejectDatetime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("approveByid")
-                        .HasColumnType("int");
 
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("createdDateTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int>("deptId")
+                        .HasColumnType("int");
 
                     b.Property<string>("indentBy")
                         .IsRequired()
@@ -4391,13 +4333,10 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte>("isActive")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int?>("isrejected")
+                    b.Property<int>("isrejected")
                         .HasColumnType("int");
 
-                    b.Property<int?>("rejectedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("roleId")
+                    b.Property<int>("rejectedBy")
                         .HasColumnType("int");
 
                     b.Property<int?>("updateById")
@@ -4420,9 +4359,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
 
@@ -4435,6 +4371,12 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("itemName")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("maxQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("minQuantity")
+                        .HasColumnType("int");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");
@@ -4451,9 +4393,6 @@ namespace iMARSARLIMS.Migrations
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ApprovedQuantity")
                         .HasColumnType("int");
 
                     b.Property<int>("IssuedQuantity")
@@ -4492,35 +4431,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasIndex("indentId");
 
                     b.ToTable("indentDetail");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Store.indentIssueDetail", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("IssueById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("IssueDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("IssuedQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("indentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("itemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("requestedQuantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("indentIssueDetail");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.machineRerunTestDetail", b =>
@@ -4837,9 +4747,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int?>("DoctorSignId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("REfundDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("RejectedReason")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -4990,9 +4897,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte>("isUrgent")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int?>("isWhatsApp")
-                        .HasColumnType("int");
-
                     b.Property<byte?>("isrerun")
                         .HasColumnType("tinyint unsigned");
 
@@ -5050,10 +4954,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<double>("rate")
                         .HasColumnType("double");
-
-                    b.Property<string>("refundReason")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("remarks")
                         .HasMaxLength(100)
@@ -6290,9 +6190,6 @@ namespace iMARSARLIMS.Migrations
                 {
                     b.Property<int>("DLCCheck")
                         .HasColumnType("int");
-
-                    b.Property<string>("Formula")
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Pname")
                         .IsRequired()

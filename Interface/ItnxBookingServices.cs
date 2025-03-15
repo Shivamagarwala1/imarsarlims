@@ -14,7 +14,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetMicroresult(int testid,int reportStatus);
         Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId);
         Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata);
-        Task<ServiceStatusResponseModel> GetTestInfo(int TestId);
+        Task<ServiceStatusResponseModel> GetTestInfo(string TestId);
         Task<ServiceStatusResponseModel> GetbarcodeChangedetail(string WorkOrderId);
         Task<ServiceStatusResponseModel> UpdateBarcode(List<barcodeChangeRequest> NewBarcodeData);
         Task<ServiceStatusResponseModel> TatReport(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType);
@@ -27,5 +27,9 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetSampleTypedetail(string WorkOrderId);
         Task<ServiceStatusResponseModel> UpdateSampleType(List<SampltypeChangeRequestModel> sampletypedata);
         Task<ServiceStatusResponseModel> MachineResult(MachineResultRequestModel machineResult);
+        Task<ServiceStatusResponseModel> GetReportDateChangeData(string WorkOrderId);
+        Task<ServiceStatusResponseModel> ReportDateChange(List<DateChangeRequestModel> DateData);
+        Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId, int Userid);
+        Task<ServiceStatusResponseModel> SendEmail(string workOrderId, int Userid);
     }
 }

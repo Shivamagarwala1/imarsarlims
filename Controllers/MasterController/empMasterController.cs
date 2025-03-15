@@ -60,6 +60,8 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+
+
         [HttpGet("EmployeeWiseCentre")]
         public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseCentre(int EmplyeeId)
         {
@@ -125,7 +127,7 @@ namespace iMARSARLIMS.Controllers.MasterController
         public async Task<ActionResult<ServiceStatusResponseModel>> EmployeeWiseRole(int EmplyeeId)
         {
             if (EmplyeeId == 0)
-                return BadRequest("Invalid Role ID.");
+                return BadRequest("Invalid Employee ID.");
 
             try
             {
@@ -216,6 +218,7 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
 
 
         [HttpPost("UploadDocument")]

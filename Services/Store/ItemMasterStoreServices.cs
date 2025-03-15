@@ -66,6 +66,9 @@ namespace iMARSARLIMS.Services.Store
                         data.isActive = status;
                         data.updateById= userId;
                         data.updateDateTime= DateTime.Now;
+                        db.ItemMasterStore.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,

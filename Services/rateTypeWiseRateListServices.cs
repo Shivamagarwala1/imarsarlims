@@ -6,6 +6,7 @@ using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace iMARSARLIMS.Services
 {
@@ -259,23 +260,29 @@ namespace iMARSARLIMS.Services
             return excelByte;
         }
 
-        async Task<ServiceStatusResponseModel> IrateTypeWiseRateListServices.GetRateTypeRateListData(int ratetypeid, int deptId)
+        async Task<ServiceStatusResponseModel> IrateTypeWiseRateListServices.GetRateTypeRateListData(int ratetypeid, int deptId, int itemid)
         {
             try
             {
-                var RateData = (from im in db.itemMaster
-                                join rtt in db.rateTypeWiseRateList
-                                on im.itemId equals rtt.itemid into rttGroup
-                                from rtt in rttGroup.DefaultIfEmpty()
-                                where im.deptId == deptId && (rtt == null || rtt.rateTypeId == ratetypeid)
-                                select new
-                                {
-                                    im.itemId,
-                                    itemCode= im.code,
-                                    im.itemName,
-                                    mrp = rtt != null ? rtt.mrp : 0,
-                                    rate = rtt != null ? rtt.rate : 0
-                                }).ToList();
+                var RateData = from im in db.itemMaster
+                               join rtt in db.rateTypeWiseRateList
+                               on im.itemId equals rtt.itemid into rttGroup
+                               from rtt in rttGroup.DefaultIfEmpty()
+                               where im.deptId == deptId && (rtt == null || rtt.rateTypeId == ratetypeid)
+                               select new
+                               {
+                                   im.itemId,
+                                   itemCode = im.code,
+                                   im.itemName,
+                                   mrp = rtt != null ? rtt.mrp : 0,
+                                   rate = rtt != null ? rtt.rate : 0
+                               };
+                if(itemid>0)
+                {
+                    RateData = RateData.Where(q => q.itemId == itemid);
+                }
+
+                var ratelist= RateData.ToList();
                 return new ServiceStatusResponseModel
                 {
                     Success = true,

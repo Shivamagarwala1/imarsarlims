@@ -194,6 +194,8 @@ builder.Services.AddScoped<Itnx_testcommentServices, tnx_testcommentServices>();
 builder.Services.AddScoped<IinvestigationUDServices, investigationUDServices >();
 builder.Services.AddScoped<ImachineRerunTestDetailServices, machineRerunTestDetailServices>();
 builder.Services.AddScoped<IItemMasterStoreServices, ItemMasterStoreServices>();
+builder.Services.AddScoped<IindentServices, indentServices>();
+builder.Services.AddScoped<IMarketingDashBoardServices, MarketingDashBoardServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

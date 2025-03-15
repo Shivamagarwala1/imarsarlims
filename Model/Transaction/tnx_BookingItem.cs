@@ -132,5 +132,9 @@ namespace iMARSARLIMS.Model.Transaction
         public string? holdReason { get; set; }
         [MaxLength(100)]
         public string? RejectedReason { get; set; }
+        public int? isWhatsApp { get; set; }
+        [MaxLength(50)]
+        public string? refundReason { get; set; }
+        public DateTime? REfundDate { get; set; }
     }
 }

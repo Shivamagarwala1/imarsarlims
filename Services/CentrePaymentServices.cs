@@ -318,7 +318,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var result = await (from bp in db.tnx_Booking
-                                    join bi in db.tnx_BookingItem on bp.workOrderId equals bi.workOrderId
+                                   // join bi in db.tnx_BookingItem on bp.workOrderId equals bi.workOrderId
                                     where bp.workOrderId == Workorderid && bp.isActive == 1
                                     select new
                                     {
@@ -358,6 +358,16 @@ namespace iMARSARLIMS.Services
                     }
                     db.tnx_BookingItem.UpdateRange(result);
                     await db.SaveChangesAsync();
+
+                    var resultbi = db.tnx_Booking.Where(b => b.workOrderId == Workorderid).FirstOrDefault();
+                    if (resultbi != null)
+                    {
+                        resultbi.isActive = 0;
+                        resultbi.updateById = Userid;
+                        resultbi.updateDateTime = DateTime.Now;
+                        db.tnx_Booking.Update(resultbi);
+                        await db.SaveChangesAsync();
+                    }
                     await transaction.CommitAsync();
 
                     return new ServiceStatusResponseModel

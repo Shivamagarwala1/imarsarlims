@@ -11,9 +11,11 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<MarketingDashBoard> MarketingDashBoard { get; set; }
         public DbSet<machineRerunTestDetail> machineRerunTestDetail { get; set; }
         public DbSet<ItemMasterStore> ItemMasterStore { get; set; }
         public DbSet<Indent> Indent { get; set; }
+        public DbSet<indentIssueDetail> indentIssueDetail { get; set; }
         public DbSet<indentDetail> indentDetail { get; set; }
         public DbSet<InvestigationMasterUD> InvestigationMasterUD { get; set; }
         public DbSet<tnx_testcomment> tnx_testcomment { get; set; }
@@ -149,8 +151,14 @@ namespace iMARSARLIMS
             modelBuilder.Entity<ItemMasterStore>().HasKey(x => x.itemId);
             modelBuilder.Entity<ItemMasterStore>().Property(x => x.itemId).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<indentIssueDetail>().HasKey(x => x.id);
+            modelBuilder.Entity<indentIssueDetail>().Property(x => x.id).ValueGeneratedOnAdd();
+
             modelBuilder.Entity<CentreCertificate>().HasKey(x => x.id);
-            modelBuilder.Entity<CentreCertificate>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<CentreCertificate>().Property(x => x.id).ValueGeneratedOnAdd(); 
+
+            modelBuilder.Entity<MarketingDashBoard>().HasKey(x => x.id);
+            modelBuilder.Entity<MarketingDashBoard>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<tnx_Booking>().HasKey(x => x.transactionId);
             modelBuilder.Entity<tnx_Booking>().Property(x => x.transactionId).ValueGeneratedOnAdd();

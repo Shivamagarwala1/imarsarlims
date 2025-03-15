@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250313132026_bimodelChange1")]
+    partial class bimodelChange1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4420,9 +4423,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<int?>("createdById")
                         .HasColumnType("int");
 
@@ -4435,6 +4435,12 @@ namespace iMARSARLIMS.Migrations
                     b.Property<string>("itemName")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<int>("maxQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("minQuantity")
+                        .HasColumnType("int");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");

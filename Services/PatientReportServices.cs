@@ -21,7 +21,7 @@ namespace iMARSARLIMS.Services
 
             db = context;
         }
-        public byte[] GetPatientReportType1(string TestId)
+        public byte[] GetPatientReportType1(string TestId, int header)
         {
 
             var testIds = TestId.Split(',').Select(int.Parse).ToList();
@@ -267,7 +267,7 @@ namespace iMARSARLIMS.Services
         }
 
 
-        public byte[] GetPatientReportType2(string TestId)
+        public byte[] GetPatientReportType2(string TestId )
         {
             var testIds = TestId.Split(',').Select(int.Parse).ToList();
             var Reportdata = (from tb in db.tnx_Booking

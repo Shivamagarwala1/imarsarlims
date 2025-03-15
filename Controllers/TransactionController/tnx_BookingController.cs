@@ -232,7 +232,7 @@ namespace iMARSARLIMS.Controllers.transactionController
         }
         //for popup
         [HttpGet("GetTestInfo")]
-        public async Task<ServiceStatusResponseModel> GetTestInfo(int TestId)
+        public async Task<ServiceStatusResponseModel> GetTestInfo(string TestId)
         {
             try
             {
@@ -447,6 +447,78 @@ namespace iMARSARLIMS.Controllers.transactionController
             try
             {
                 var result = await _tnxBookingServices.MachineResult(machineResult);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetReportDateChangeData")]
+        public async Task<ServiceStatusResponseModel> GetReportDateChangeData(string WorkOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetReportDateChangeData(WorkOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("ReportDateChange")]
+        public async Task<ServiceStatusResponseModel> ReportDateChange(List<DateChangeRequestModel> DateData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.ReportDateChange(DateData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("SendWhatsapp")]
+        public async Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId,int Userid)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.SendWhatsapp(workOrderId, Userid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("SendEmail")]
+        public async Task<ServiceStatusResponseModel> SendEmail(string workOrderId,int Userid)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.SendEmail(workOrderId, Userid);
                 return result;
             }
             catch (Exception ex)

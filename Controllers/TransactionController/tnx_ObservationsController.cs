@@ -24,11 +24,11 @@ namespace iMARSARLIMS.Controllers.TransactionController
         protected override IQueryable<tnx_Observations> DbSet => db.tnx_Observations.AsNoTracking().OrderBy(o => o.id);
 
         [HttpGet("GetPatientReportType1")]
-        public IActionResult GetPatientReportType1(string TestId)
+        public IActionResult GetPatientReportType1(string TestId, int header)
         {
             try
             {
-                var result = _PatientReportServices.GetPatientReportType1(TestId);
+                var result = _PatientReportServices.GetPatientReportType1(TestId, header);
                 MemoryStream ms = new MemoryStream(result);
 
                 return new FileStreamResult(ms, "application/pdf")

@@ -40,5 +40,6 @@ namespace iMARSARLIMS.Response_Model
         public int hold { get; set; }
         public int ReportType { get; set; }
         public int DLCCheck { get; set; }
+        public string? Formula { get; set; }
     }
 }

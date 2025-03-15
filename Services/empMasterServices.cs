@@ -192,6 +192,8 @@ namespace iMARSARLIMS.Services
                 toIP = empmaster.toIP,
                 isdeviceAuthentication = empmaster.isdeviceAuthentication,
                 tempPassword = empmaster.tempPassword,
+                indentIssue = empmaster.indentIssue,
+                IndentApprove = empmaster.IndentApprove
 
             };
         }
@@ -335,6 +337,8 @@ namespace iMARSARLIMS.Services
             EmpMaster.toIP = empmaster.toIP;
             EmpMaster.isdeviceAuthentication = empmaster.isdeviceAuthentication;
             EmpMaster.tempPassword = empmaster.tempPassword;
+            EmpMaster.indentIssue = empmaster.indentIssue;
+            EmpMaster.IndentApprove = empmaster.IndentApprove;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)

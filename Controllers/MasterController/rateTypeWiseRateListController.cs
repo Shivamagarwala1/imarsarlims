@@ -83,11 +83,11 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
         [HttpGet("GetRateTypeRateListData")]
-        public async Task<ServiceStatusResponseModel> GetRateTypeRateListData(int ratetypeid,int deptId)
+        public async Task<ServiceStatusResponseModel> GetRateTypeRateListData(int ratetypeid,int deptId,int itemid)
         {
             try
             {
-                var result = await _rateTypeWiseRateListServices.GetRateTypeRateListData(ratetypeid,deptId);
+                var result = await _rateTypeWiseRateListServices.GetRateTypeRateListData(ratetypeid,deptId,itemid);
                 return result;
             }
             catch (Exception ex)
