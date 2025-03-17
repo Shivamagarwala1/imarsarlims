@@ -135,6 +135,7 @@ namespace iMARSARLIMS.Model.Transaction
         public int? isWhatsApp { get; set; }
         [MaxLength(50)]
         public string? refundReason { get; set; }
-        public DateTime? REfundDate { get; set; }
+        public DateTime? RefundDate { get; set; }
+        public int Isprint { get; set; }= 0;
     }
 }

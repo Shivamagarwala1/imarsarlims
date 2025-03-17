@@ -36,5 +36,9 @@ namespace iMARSARLIMS.Response_Model
         public string? samplecollectiondate { get; set; }
         public string? SampleRecievedDate { get; set; }
         public int resultdone { get; set; }
+        public int? approved { get; set; }
+        public int? Hold { get; set; }
+        public int ReportPrinted { get; set; }
+
     }
 }

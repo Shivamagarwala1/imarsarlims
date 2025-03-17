@@ -83,6 +83,7 @@ namespace iMARSARLIMS.Services
             {
                 query = query.Where(q => q.isSampleCollected == sampleProcessingRequestModel.Status);
             }
+
             else
             {
                 query = query.Where(q => q.Urgent == 1);
@@ -1379,15 +1380,16 @@ namespace iMARSARLIMS.Services
                         join tm in db.titleMaster on tb.title_id equals tm.id
                         select new
                         {
-                            bookingDate= tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                            bookingDate =  tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt") ,
                             tb.patientId,
-                            BokkingDateFilter= tb.bookingDate,
+                            BokkingDateFilter = tb.bookingDate,
                             tb.workOrderId,
                             SampleRecievedDateShow = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             ApproveDateShow = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             PatientName = string.Concat(tm.title, " ", tb.name),
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
-                            tb.gender,tb.totalAge,
+                            tb.gender,
+                            tb.totalAge,
                             tbi.barcodeNo,
                             testid = tbi.id,
                             tbi.itemId,
@@ -1412,14 +1414,16 @@ namespace iMARSARLIMS.Services
                             resultdone = tbi.isResultDone,
                             Approved = tbi.isApproved,
                             Rerun = tbi.isrerun,
-
+                            ReportPrinted = tbi.Isprint,
+                            Hold = tbi.hold.HasValue ? (int)tbi.hold : 0,
                             rowcolor = tbi.isUrgent == 1 ? "#FF4E12" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "N" ? "#D7CDC6" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "S" ? "#6699ff" : (tbi.isUrgent == 0 && tbi.isSampleCollected == "Y" ? "#75AADB" : "#F0466B")))
-
                         };
+
+            // Date filter logic
             if (resultentrydata.Datetype != "")
             {
-                var fromDate = resultentrydata.FromDate.Date; // Strip the time portion
-                var toDate = resultentrydata.ToDate.Date.AddHours(24).AddSeconds(-1); // Include the entire end date
+                var fromDate = resultentrydata.FromDate.Date;
+                var toDate = resultentrydata.ToDate.Date.AddHours(24).AddSeconds(-1);
 
                 if (resultentrydata.Datetype == "tb.bookingDate")
                 {
@@ -1427,15 +1431,15 @@ namespace iMARSARLIMS.Services
                 }
                 else if (resultentrydata.searchvalue == "tbi.approvedDate")
                 {
-                    query = query.Where(q => q.approvedDate >= fromDate && q.approvedDate <= toDate);
+                    query = query.Where(q => q.approvedDate.HasValue && q.approvedDate.Value >= fromDate && q.approvedDate.Value <= toDate);
                 }
                 else if (resultentrydata.searchvalue == "tbi.sampleReceiveDate")
                 {
-                    query = query.Where(q => q.sampleReceiveDate >= fromDate && q.sampleReceiveDate <= toDate);
+                    query = query.Where(q => q.sampleReceiveDate.HasValue && q.sampleReceiveDate.Value >= fromDate && q.sampleReceiveDate.Value <= toDate);
                 }
                 else
                 {
-                    query = query.Where(q => q.sampleCollectionDate >= fromDate && q.sampleCollectionDate <= toDate);
+                    query = query.Where(q => q.sampleCollectionDate.HasValue && q.sampleCollectionDate.Value >= fromDate && q.sampleCollectionDate.Value <= toDate);
                 }
             }
             if (resultentrydata.searchvalue != "")
@@ -1462,26 +1466,35 @@ namespace iMARSARLIMS.Services
             }
             if (resultentrydata.status != "")
             {
-                if (resultentrydata.status == "Pending")
+                if (resultentrydata.status == "Pending Report" || resultentrydata.status == "Pending")
                 {
                     query = query.Where(q => q.isSampleCollected == "Y");
                 }
-                else if (resultentrydata.status == "Tested")
-                {
-                    query = query.Where(q => q.resultdone == 1);
-                }
-                else if (resultentrydata.status == "Approved")
-                {
-                    query = query.Where(q => q.Approved == 1);
-                }
-                else if (resultentrydata.status == "Rejected")
+                else if (resultentrydata.status == "Reject-Sample")
                 {
                     query = query.Where(q => q.isSampleCollected == "R");
                 }
-                else if (resultentrydata.status == "Received")
+                else if (resultentrydata.status == "Tested" || resultentrydata.status == "Report Save")
                 {
-                    query = query.Where(q => q.isSampleCollected == "Y");
+                    query = query.Where(q => q.resultdone == 1);
                 }
+                else if (resultentrydata.status == "Approved" || resultentrydata.status == "Approved")
+                {
+                    query = query.Where(q => q.resultdone == 1);
+                }
+                else if (resultentrydata.status == "Urgent")
+                {
+                    query = query.Where(q => q.resultdone == 1);
+                }
+                else if (resultentrydata.status == "Report Hold")
+                {
+                    query = query.Where(q => q.Hold == 1);
+                }
+                else if (resultentrydata.status == "Report Print")
+                {
+                    query = query.Where(q => q.ReportPrinted == 1);
+                }
+
                 else
                 {
                     query = query.Where(q => q.isSampleCollected == "S");

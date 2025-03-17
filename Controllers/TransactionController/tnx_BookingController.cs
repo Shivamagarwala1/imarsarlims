@@ -496,11 +496,28 @@ namespace iMARSARLIMS.Controllers.transactionController
         }
 
         [HttpPost("SendWhatsapp")]
-        public async Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId,int Userid)
+        public async Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId, int Userid,string Mobileno,int header)
         {
             try
             {
-                var result = await _tnxBookingServices.SendWhatsapp(workOrderId, Userid);
+                var result = await _tnxBookingServices.SendWhatsapp(workOrderId, Userid,Mobileno, header);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("WhatsappNo")]
+        public async Task<ServiceStatusResponseModel> WhatsappNo(string workOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.WhatsappNo(workOrderId);
                 return result;
             }
             catch (Exception ex)
@@ -514,11 +531,28 @@ namespace iMARSARLIMS.Controllers.transactionController
         }
 
         [HttpPost("SendEmail")]
-        public async Task<ServiceStatusResponseModel> SendEmail(string workOrderId,int Userid)
+        public async Task<ServiceStatusResponseModel> SendEmail(string workOrderId, int Userid,string EmailId,int header)
         {
             try
             {
-                var result = await _tnxBookingServices.SendEmail(workOrderId, Userid);
+                var result = await _tnxBookingServices.SendEmail(workOrderId, Userid , EmailId, header);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("SendEmailId")]
+        public async Task<ServiceStatusResponseModel> SendEmailId(string workOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.SendEmailId(workOrderId);
                 return result;
             }
             catch (Exception ex)
@@ -531,5 +565,42 @@ namespace iMARSARLIMS.Controllers.transactionController
             }
         }
 
+        [HttpPost("CollectionReport")]
+        public IActionResult CollectionReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.CollectionReport(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "CollectionReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("DiscountReport")]
+        public IActionResult DiscountReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.DiscountReport(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "DiscountReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<ReportEmail> ReportEmail { get; set; }
         public DbSet<MarketingDashBoard> MarketingDashBoard { get; set; }
         public DbSet<machineRerunTestDetail> machineRerunTestDetail { get; set; }
         public DbSet<ItemMasterStore> ItemMasterStore { get; set; }
@@ -154,6 +155,9 @@ namespace iMARSARLIMS
             modelBuilder.Entity<indentIssueDetail>().HasKey(x => x.id);
             modelBuilder.Entity<indentIssueDetail>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<ReportEmail>().HasKey(x => x.id);
+            modelBuilder.Entity<ReportEmail>().Property(x => x.id).ValueGeneratedOnAdd();
+            
             modelBuilder.Entity<CentreCertificate>().HasKey(x => x.id);
             modelBuilder.Entity<CentreCertificate>().Property(x => x.id).ValueGeneratedOnAdd(); 
 

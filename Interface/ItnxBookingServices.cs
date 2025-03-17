@@ -29,7 +29,11 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> MachineResult(MachineResultRequestModel machineResult);
         Task<ServiceStatusResponseModel> GetReportDateChangeData(string WorkOrderId);
         Task<ServiceStatusResponseModel> ReportDateChange(List<DateChangeRequestModel> DateData);
-        Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId, int Userid);
-        Task<ServiceStatusResponseModel> SendEmail(string workOrderId, int Userid);
+        Task<ServiceStatusResponseModel> SendWhatsapp(string workOrderId, int Userid,string MobileNo,int header);
+        Task<ServiceStatusResponseModel> WhatsappNo(string workOrderId);
+        Task<ServiceStatusResponseModel> SendEmail(string workOrderId, int Userid,string EmailId,int header);
+        Task<ServiceStatusResponseModel> SendEmailId(string workOrderId);
+        byte[] CollectionReport(collectionReportRequestModel collectionData);
+        byte[] DiscountReport(collectionReportRequestModel collectionData);
     }
 }

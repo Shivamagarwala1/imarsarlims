@@ -42,11 +42,11 @@ namespace iMARSARLIMS.Controllers.StoreController
 
 
         [HttpGet("GetIndentDetails")]
-        public async Task<ServiceStatusResponseModel> GetIndentDetails(int roleId, int empId, DateTime fromDate, DateTime todate,int UserId)
+        public async Task<ServiceStatusResponseModel> GetIndentDetails(int roleId, int empId, DateTime fromDate, DateTime todate,int UserId, int itemId)
         {
             try
             {
-                var result = await _indentServices.GetIndentDetails(roleId, empId,fromDate,todate,UserId);
+                var result = await _indentServices.GetIndentDetails(roleId, empId,fromDate,todate,UserId,itemId);
                 return result;
             }
             catch (Exception ex)

@@ -31,5 +31,6 @@ namespace iMARSARLIMS.Model.Transaction
         public int? settlementCentreID { get; set; }
         public string? receivedBy { get; set; }
         public int? receivedID { get; set; }
+        public DateTime? collectionDate { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250317080603_itemBooking")]
+    partial class itemBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -529,58 +532,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("MarketingDashBoard");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.ReportEmail", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("Header")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("createdDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("emailId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<byte?>("isAutoSend")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<byte?>("isSend")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("remarks")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateTime?>("sendDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("sentBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("type")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("workOrderId")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("ReportEmail");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.SampleRerunReason", b =>
@@ -4311,10 +4262,10 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("Header")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("createdDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("deliveryDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<byte?>("isAutoSend")
@@ -4337,10 +4288,28 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("reportPath")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<DateTime?>("sendDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int?>("sentBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("smsText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("templateId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<int?>("transactionId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("type")
@@ -6074,9 +6043,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("chequeNo")
                         .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("collectionDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<double?>("creditCardAmt")
                         .HasColumnType("double");

@@ -12,17 +12,20 @@ using System.Linq;
 using System.Xml;
 using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace iMARSARLIMS.Services
 {
     public class tnxBookingServices : ItnxBookingServices
     {
         private readonly ContextClass db;
+        private readonly IConfiguration _configuration;
         private readonly MySql_Procedure_Services _MySql_Procedure_Services;
-        public tnxBookingServices(ContextClass context, ILogger<BaseController<tnx_Booking>> logger, MySql_Procedure_Services mySql_Procedure_Services)
+        public tnxBookingServices(ContextClass context, ILogger<BaseController<tnx_Booking>> logger, MySql_Procedure_Services mySql_Procedure_Services, IConfiguration configuration)
         {
             db = context;
             this._MySql_Procedure_Services = mySql_Procedure_Services;
+            this._configuration = configuration;
         }
 
         public string GetPatientDocumnet(string workOrderId)
@@ -544,7 +547,7 @@ namespace iMARSARLIMS.Services
                             tbi.deptId,
                             ReferDoctor = dr.doctorName,
                             CreatedBy = em.fName,
-                            testId= tbi.id,
+                            testId = tbi.id,
                             Email = tbi.isEmailsent,
                             Whatsapp = tbi.isWhatsApp,
                             isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count()
@@ -595,6 +598,8 @@ namespace iMARSARLIMS.Services
             {
                 query = query.Where(q => patientdata.departmentIds.Contains(q.deptId));
             }
+
+
             query = query.OrderBy(q => q.workOrderId).ThenBy(q => q.deptId);
             var result = await query.ToListAsync();
             return new ServiceStatusResponseModel
@@ -1448,7 +1453,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendWhatsapp(string workOrderId, int Userid)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendWhatsapp(string workOrderId, int Userid, string MobileNo,int header)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
@@ -1461,10 +1466,6 @@ namespace iMARSARLIMS.Services
                                 {
                                     PateintName = tb.name,
                                     tb.workOrderId,
-                                    tb.transactionId,
-                                    smsText = "Testing",
-                                    Url = "",
-                                    tb.mobileNo,
                                     tb.labRemarks
                                 }).FirstOrDefault();
                     if (data != null)
@@ -1472,21 +1473,17 @@ namespace iMARSARLIMS.Services
                         var whatsappData = new whatsapp
                         {
                             id = 0,
-                            transactionId = data.transactionId,
                             workOrderId = data.workOrderId,
-                            smsText = data.smsText,
                             name = data.PateintName,
-                            reportPath = data.Url,
-                            deliveryDate = DateTime.Now,
-                            mobileNo = data.mobileNo,
+                            mobileNo = MobileNo,
                             isSend = 0,
                             isAutoSend = 0,
                             sentBy = Userid,
                             sendDate = DateTime.Now,
                             remarks = "",
                             type = "",
-                            createdDate = DateTime.Now,
-                            templateId = ""
+                            Header = header,
+                            createdDate = DateTime.Now
                         };
                         db.whatsapp.Add(whatsappData);
                         await db.SaveChangesAsync();
@@ -1500,7 +1497,7 @@ namespace iMARSARLIMS.Services
                         };
                     }
                     var databi = db.tnx_BookingItem.Where(bi => bi.workOrderId == workOrderId).ToList();
-                    foreach(var item in databi)
+                    foreach (var item in databi)
                     {
                         item.isWhatsApp = 1;
 
@@ -1528,7 +1525,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendEmail(string workOrderId, int Userid)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendEmail(string workOrderId, int Userid, string EmailId,int header)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
@@ -1541,34 +1538,27 @@ namespace iMARSARLIMS.Services
                                 {
                                     PateintName = tb.name,
                                     tb.workOrderId,
-                                    tb.transactionId,
-                                    smsText = "Testing",
-                                    Url = "",
                                     tb.mobileNo,
                                     tb.labRemarks
                                 }).FirstOrDefault();
                     if (data != null)
                     {
-                        var whatsappData = new whatsapp
+                        var EmailData = new ReportEmail
                         {
                             id = 0,
-                            transactionId = data.transactionId,
                             workOrderId = data.workOrderId,
-                            smsText = data.smsText,
                             name = data.PateintName,
-                            reportPath = data.Url,
-                            deliveryDate = DateTime.Now,
-                            mobileNo = data.mobileNo,
+                            emailId = EmailId,
                             isSend = 0,
                             isAutoSend = 0,
                             sentBy = Userid,
                             sendDate = DateTime.Now,
                             remarks = "",
                             type = "",
-                            createdDate = DateTime.Now,
-                            templateId = ""
+                            Header= header,
+                            createdDate = DateTime.Now
                         };
-                        db.whatsapp.Add(whatsappData);
+                        db.ReportEmail.Add(EmailData);
                         await db.SaveChangesAsync();
                     }
                     else
@@ -1605,6 +1595,391 @@ namespace iMARSARLIMS.Services
                     };
 
                 }
+            }
+        }
+
+        public byte[] CollectionReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                // Query for data
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            select new
+                            {
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                                tb.grossAmount,
+                                tb.discount,
+                                tb.netAmount,
+                                tr.cashAmt,
+                                tr.onlinewalletAmt,
+                                tr.NEFTamt,
+                                tr.chequeAmt,
+                                tr.receivedBy,
+                                tr.receivedID,
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName
+                            };
+
+                // If empIds and centreIds are provided, filter the query
+                if (collectionData.empIds.Count > 0)
+                {
+                    // Filter by empIds (uncomment if needed)
+                    // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                }
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                }
+
+                // Get the data
+                var collectiondata = Query.ToList();
+
+                // If no data found, return an empty PDF
+                if (collectiondata.Count == 0)
+                {
+                    return new byte[0]; // Zero-byte return when no data exists
+                }
+
+                // Log or Debug to confirm data is loaded
+                Console.WriteLine($"Found {collectiondata.Count} records.");
+
+                // QuestPDF document generation
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                // Handling the company logo
+                var image1 = _configuration["FileBase64:CompanyLogo1"];
+                byte[] image1Bytes = null;
+
+                if (!string.IsNullOrEmpty(image1))
+                {
+                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+                }
+
+                // Generate the PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+
+                        // Page Header
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                        });
+
+                        // Table Layout
+                        page.Content().Table(table =>
+                        {
+                            // Define the columns
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
+                                columns.RelativeColumn();  // Patient Name
+                                columns.RelativeColumn();  // Booking Date
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cash column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cheque column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Wallet column
+                            });
+
+                            // Add table header
+                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+
+                            // Populate table rows
+                            int rowNumber = 1;
+                            foreach (var item in collectiondata)
+                            {
+                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                rowNumber++;
+                            }
+                        });
+
+                        // Page Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().AlignCenter().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(8));
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                        });
+                    });
+                });
+
+                // Generate the PDF byte array
+                byte[] pdfBytes = document.GeneratePdf();
+
+                // Save the PDF to file for debugging (optional)
+                File.WriteAllBytes("collection_report.pdf", pdfBytes);
+
+                return pdfBytes;  // Return the generated PDF
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return empty byte array in case of error
+                return new byte[0];
+            }
+        }
+
+
+        public byte[] DiscountReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                // Query for data
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            select new
+                            {
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                                tb.grossAmount,
+                                tb.discount,
+                                tb.netAmount,
+                                tr.receivedBy,
+                                tr.receivedID,
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName
+                            };
+
+                // If empIds and centreIds are provided, filter the query
+                if (collectionData.empIds.Count > 0)
+                {
+                    // Filter by empIds (uncomment if needed)
+                    // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                }
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                }
+
+                // Get the data
+                var collectiondata = Query.ToList();
+
+                // If no data found, return an empty PDF
+                if (collectiondata.Count == 0)
+                {
+                    return new byte[0]; // Zero-byte return when no data exists
+                }
+
+                // Log or Debug to confirm data is loaded
+                Console.WriteLine($"Found {collectiondata.Count} records.");
+
+                // QuestPDF document generation
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                // Handling the company logo
+                var image1 = _configuration["FileBase64:CompanyLogo1"];
+                byte[] image1Bytes = null;
+
+                if (!string.IsNullOrEmpty(image1))
+                {
+                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+                }
+
+                // Generate the PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+
+                        // Page Header
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                        });
+
+                        // Table Layout
+                        page.Content().Table(table =>
+                        {
+                            // Define the columns
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
+                                columns.RelativeColumn();  // Patient Name
+                                columns.RelativeColumn();  // Booking Date
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                            });
+
+                            // Add table header
+                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+
+                            // Populate table rows
+                            int rowNumber = 1;
+                            foreach (var item in collectiondata)
+                            {
+                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                rowNumber++;
+                            }
+                        });
+
+                        // Page Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().AlignCenter().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(8));
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                        });
+                    });
+                });
+
+                // Generate the PDF byte array
+                byte[] pdfBytes = document.GeneratePdf();
+
+                // Save the PDF to file for debugging (optional)
+                File.WriteAllBytes("discount_report.pdf", pdfBytes);
+
+                return pdfBytes;  // Return the generated PDF
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return empty byte array in case of error
+                return new byte[0];
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.WhatsappNo(string workOrderId)
+        {
+            try
+            {
+                var mobileno = (from tb in db.tnx_Booking
+                                join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                where tb.workOrderId == workOrderId
+                                select new
+                                {
+                                    mobileNo = cm.centretype == "2" ? cm.mobileNo : tb.mobileNo
+                                }).First();
+                if (mobileno == null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message="Mobile no Not available"
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = mobileno.mobileNo
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.SendEmailId(string workOrderId)
+        {
+            try
+            {
+                var EmailData = (from tb in db.tnx_Booking
+                                join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
+                                join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                where tb.workOrderId == workOrderId
+                                select new
+                                {
+                                    EmailId = cm.centretype == "2" ? cm.reportEmail : tbp.emailId
+                                }).First();
+                if (EmailData == null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "Email Id Not available"
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = EmailData.EmailId
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
             }
         }
     }

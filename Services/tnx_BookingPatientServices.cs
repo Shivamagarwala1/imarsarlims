@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Collections;
 
 namespace iMARSARLIMS.Services
 {
@@ -373,6 +374,7 @@ namespace iMARSARLIMS.Services
                 settlementCentreID = Payment.settlementCentreID,
                 receivedBy = Payment.receivedBy,
                 receivedID = Payment.receivedID,
+                collectionDate= DateTime.Now
             };
         }
         private tnx_BookingItem CreateBookingItem(tnx_BookingItem bookingItem, int patientId, string workOrderId, int transactionId)

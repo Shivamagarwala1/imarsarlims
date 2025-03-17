@@ -3,18 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
 {
-    [Table(nameof(whatsapp))]
-    public class whatsapp
+    [Table(nameof(ReportEmail))]
+    public class ReportEmail
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
         public int id { get; set; }
         [Required, MaxLength(10)]
         public string? workOrderId { get; set; }
         [Required, MaxLength(100)]
         public string? name { get; set; }
-        [Required, MaxLength(10)]
-        public string? mobileNo { get; set; }
+        [Required, MaxLength(50)]
+        public string? emailId { get; set; }
         public byte? isSend { get; set; }
         public byte? isAutoSend { get; set; }
         public int? sentBy { get; set; }
@@ -23,7 +22,7 @@ namespace iMARSARLIMS.Model.Master
         public string? remarks { get; set; }
         [MaxLength(20)]
         public string? type { get; set; }
-        public int Header {  get; set; }
+        public int Header { get; set; }
         public DateTime? createdDate { get; set; }
     }
 }

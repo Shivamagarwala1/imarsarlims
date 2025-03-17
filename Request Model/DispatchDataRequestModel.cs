@@ -10,5 +10,6 @@
         public List<int> ItemIds { get; set; }
         public List<int> departmentIds { get; set; }
         public int empid { get; set; }
+        public string? status { get; set; }
     }
 }

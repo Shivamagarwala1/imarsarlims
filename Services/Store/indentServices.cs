@@ -163,17 +163,20 @@ namespace iMARSARLIMS.Services.Store
             };
     }
 
-        async Task<ServiceStatusResponseModel> IindentServices.GetIndentDetails(int roleId, int empId, DateTime fromDate, DateTime todate, int UserId)
+        async Task<ServiceStatusResponseModel> IindentServices.GetIndentDetails(int roleId, int empId, DateTime fromDate, DateTime todate, int UserId, int itemId   )
         {
             try
             {
+                var FromDate = fromDate.Date;
+                var ToDate = todate.Date.AddHours(24).AddSeconds(-1);
+
                 var query = from ind in db.Indent
                             join id in db.indentDetail on ind.indentId equals id.indentId
                                   join ld in db.roleMaster on ind.roleId equals ld.id
                                   join em in db.empMaster on ind.indentById equals em.empId
                                   join cm in db.centreMaster on ind.CentreId equals cm.centreId
-                            where ind.createdDateTime>= fromDate && ind.createdDateTime<= todate
-                                  select new
+                            where ind.createdDateTime>= FromDate && ind.createdDateTime<= ToDate
+                            select new
                                   {
                                       ind.indentId,
                                       ind.indentById,
@@ -181,7 +184,7 @@ namespace iMARSARLIMS.Services.Store
                                       RoleName = ld.roleName,
                                       ind.roleId,
                                       centrename= cm.companyName,
-                                      id.itemName, id.Quantity, id.ApprovedQuantity, id.IssuedQuantity,
+                                      id.itemName,id.itemId, id.Quantity, id.ApprovedQuantity, id.IssuedQuantity,
                                       ind.createdDateTime,
                                       rejected = ind.isrejected,
                                       rejectedText = ind.isrejected==1?"rejeccted":"",
@@ -197,7 +200,11 @@ namespace iMARSARLIMS.Services.Store
                     {
                         query = query.Where(q => q.indentById == empId);
                     }
-                    query = query.OrderBy(q => q.indentId);
+                if (itemId > 0)
+                {
+                    query = query.Where(q => q.itemId == itemId);
+                }
+                query = query.OrderBy(q => q.indentId);
 
                     var data= await query.ToListAsync();
 
