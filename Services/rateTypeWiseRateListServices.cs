@@ -241,22 +241,23 @@ namespace iMARSARLIMS.Services
 
         public  byte[] GetRateListExcel(int RatetypeId)
         {
-            var excelData = ( from rtt in db.rateTypeWiseRateList
-                                    join ld in db.labDepartment on rtt.deptId equals ld.id
-                                    join im in db.itemMaster on rtt.itemid equals im.itemId
-                                    join rt in db.rateTypeMaster on rtt.rateTypeId equals rt.id
-                                    where rtt.rateTypeId== RatetypeId
-                                    select new
-                                    {
-                                       DepartMentId= rtt.deptId,
-                                       DepartmentName= ld.deptName,
-                                       ItemId= rtt.itemid,
-                                       itemcode= im.code,
-                                       InvestigationName= im.itemName,
-                                       MRP= rtt.mrp,
-                                       Rate= rtt.rate
-                                    }).ToList();
-                var excelByte = MyFunction.ExportToExcel(excelData, "LedgerReportExcel");
+            var excelData = (from im in db.itemMaster
+                             join ld in db.labDepartment on im.deptId equals ld.id
+                             join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid into rttGroup
+                             from rtt in rttGroup.DefaultIfEmpty()
+                             join rt in db.rateTypeMaster on rtt.rateTypeId equals rt.id
+                             where rtt == null || rtt.rateTypeId == 1
+                             select new
+                             {
+                                 DepartMentId = im.deptId,
+                                 DepartmentName = ld.deptName,
+                                 ItemId = im.itemId,
+                                 ItemCode = im.code,
+                                 InvestigationName = im.itemName,
+                                 MRP = rtt.mrp,
+                                 Rate = rtt.rate
+                             }).ToList();
+            var excelByte = MyFunction.ExportToExcel(excelData, "LedgerReportExcel");
             return excelByte;
         }
 

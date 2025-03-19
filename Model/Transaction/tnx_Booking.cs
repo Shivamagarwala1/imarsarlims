@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using iMARSARLIMS.Model.Appointment;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Transaction
@@ -81,6 +82,7 @@ namespace iMARSARLIMS.Model.Transaction
         [MaxLength(30)]
         public string? invoiceNo { get; set; } = "";
         public int? salesExecutiveID { get; set; }
+        public int isAppointment { get; set; } = 0;
 
         [ForeignKey(nameof(transactionId))]
         public List<tnx_BookingStatus>? addBookingStatus { get; set; }
@@ -88,5 +90,7 @@ namespace iMARSARLIMS.Model.Transaction
         public List<tnx_BookingItem>? addBookingItem { get; set; }
         [ForeignKey(nameof(transactionId))]
         public List<tnx_ReceiptDetails>? addpaymentdetail { get; set; }
+        [ForeignKey(nameof(transactionId))]
+        public List<appointmentBooking>? addAppointment { get; set; }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using iMARSARLIMS.Model.Account;
+using iMARSARLIMS.Model.Appointment;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Store;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
+using iMARSARLIMS.Services.Appointment;
 using Microsoft.EntityFrameworkCore;
 using machineRerunTestDetail = iMARSARLIMS.Model.Transaction.machineRerunTestDetail;
 
@@ -11,7 +13,12 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<routeMaster> routeMaster { get; set; }
+        public DbSet<RouteMapping> RouteMapping { get; set; }
+        public DbSet<timeSlotMaster> timeSlotMaster { get; set; }
+        public DbSet<appointmentBooking> appointmentBooking { get; set; }
         public DbSet<ReportEmail> ReportEmail { get; set; }
+        public DbSet<RolePageAccess> RolePageAccess { get; set; }
         public DbSet<MarketingDashBoard> MarketingDashBoard { get; set; }
         public DbSet<machineRerunTestDetail> machineRerunTestDetail { get; set; }
         public DbSet<ItemMasterStore> ItemMasterStore { get; set; }
@@ -137,6 +144,12 @@ namespace iMARSARLIMS
             modelBuilder.Entity<area_master>().HasKey(x => x.id);
             modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<RolePageAccess>().HasKey(x => x.id);
+            modelBuilder.Entity<RolePageAccess>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<timeSlotMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<timeSlotMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+
             modelBuilder.Entity<centreMaster>().HasKey(x => x.centreId);
             modelBuilder.Entity<centreMaster>().Property(x => x.centreId).ValueGeneratedOnAdd();
             
@@ -154,7 +167,16 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<indentIssueDetail>().HasKey(x => x.id);
             modelBuilder.Entity<indentIssueDetail>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<appointmentBooking>().HasKey(x => x.appointmentId);
+            modelBuilder.Entity<appointmentBooking>().Property(x => x.appointmentId).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<RouteMapping>().HasKey(x => x.id);
+            modelBuilder.Entity<RouteMapping>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<routeMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<routeMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            
             modelBuilder.Entity<ReportEmail>().HasKey(x => x.id);
             modelBuilder.Entity<ReportEmail>().Property(x => x.id).ValueGeneratedOnAdd();
             

@@ -74,7 +74,8 @@ namespace iMARSARLIMS.Services
                                       sr.transactionId, sr.itemId,
                                       sr.invRemarks, sr.isActive, sr.itemName, sr.isInternal,
                                       remardkDate = sr.createdDateTime.ToString("yyyy-MMM-dd hh:mm tt"),
-                                      remarkAdBy = string.Concat(em.fName, ' ', em.lName)
+                                      remarkAdBy = string.Concat(em.fName, ' ', em.lName),
+                                      isapproved= (db.tnx_BookingItem.Where(bi=>bi.itemId == itemId && bi.workOrderId== WorkOrderId).Select(bi=> bi.isApproved)).FirstOrDefault()
                                   }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {

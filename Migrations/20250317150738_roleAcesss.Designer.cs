@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250317150738_roleAcesss")]
+    partial class roleAcesss
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,161 +131,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("centreInvoice");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Appointment.RouteMapping", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("pheleboId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("routeId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("RouteMapping");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Appointment.appointmentBooking", b =>
-                {
-                    b.Property<int>("appointmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("AppointmentScheduledOn")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("AppointmentType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("AssignedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("AssignedPhlebo")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("CancelDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Pincode")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("varchar(6)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("WorkorderId")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
-                    b.Property<int?>("assignedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("cancleBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("rescheduleBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("rescheduleDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("transactionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("appointmentId");
-
-                    b.HasIndex("transactionId");
-
-                    b.ToTable("appointmentBooking");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Appointment.routeMaster", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<int>("pincode")
-                        .HasColumnType("int");
-
-                    b.Property<string>("routeName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("routeMaster");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Appointment.timeSlotMaster", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("centreId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("createdById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("createdDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<byte>("isActive")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("timeslot")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("updateById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("updateDateTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("timeSlotMaster");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.Allergy_SubType_Master", b =>
@@ -2910,10 +2758,12 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("sortName")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
                     b.Property<string>("testMethod")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
@@ -4947,9 +4797,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<byte>("isActive")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<int>("isAppointment")
-                        .HasColumnType("int");
-
                     b.Property<byte>("isCredit")
                         .HasColumnType("tinyint unsigned");
 
@@ -5278,9 +5125,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<double>("rate")
                         .HasColumnType("double");
-
-                    b.Property<int?>("refundBy")
-                        .HasColumnType("int");
 
                     b.Property<string>("refundReason")
                         .HasMaxLength(50)
@@ -6773,15 +6617,6 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("rateListData");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Appointment.appointmentBooking", b =>
-                {
-                    b.HasOne("iMARSARLIMS.Model.Transaction.tnx_Booking", null)
-                        .WithMany("addAppointment")
-                        .HasForeignKey("transactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Master.chatGroupMasterEmployee", b =>
                 {
                     b.HasOne("iMARSARLIMS.Model.Master.empMaster", null)
@@ -6934,8 +6769,6 @@ namespace iMARSARLIMS.Migrations
 
             modelBuilder.Entity("iMARSARLIMS.Model.Transaction.tnx_Booking", b =>
                 {
-                    b.Navigation("addAppointment");
-
                     b.Navigation("addBookingItem");
 
                     b.Navigation("addBookingStatus");

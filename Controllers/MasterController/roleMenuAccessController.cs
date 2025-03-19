@@ -77,5 +77,77 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+
+        [HttpPost("SaveRolePageAccess")]
+        public async Task<ServiceStatusResponseModel> SaveRolePageAccess(List<RolePageAccess> Rolepage)
+        {
+            try
+            {
+                var result = await _roleMenuAccessServices.SaveRolePageAccess(Rolepage);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
+
+        [HttpGet("RolePageAccessRemove")]
+        public async Task<ServiceStatusResponseModel> RolePageAccessRemove(int Id)
+        {
+            try
+            {
+                var result = await _roleMenuAccessServices.RolePageAccessRemove(Id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpGet("GetEmployeePageAccess")]
+        public async Task<ServiceStatusResponseModel> GetEmployeePageAccess(int empid,int roleid)
+        {
+            try
+            {
+                var result = await _roleMenuAccessServices.GetEmployeePageAccess(empid, roleid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("RolePagebindData")]
+        public async Task<ServiceStatusResponseModel> RolePagebindData(int roleid)
+        {
+            try
+            {
+                var result = await _roleMenuAccessServices.RolePagebindData(roleid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
     }
 }

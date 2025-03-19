@@ -136,6 +136,7 @@ namespace iMARSARLIMS.Model.Transaction
         [MaxLength(50)]
         public string? refundReason { get; set; }
         public DateTime? RefundDate { get; set; }
+        public int? refundBy { get; set; }
         public int Isprint { get; set; }= 0;
     }
 }

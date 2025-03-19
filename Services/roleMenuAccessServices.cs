@@ -7,6 +7,7 @@ using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace iMARSARLIMS.Services
 {
@@ -262,6 +263,164 @@ namespace iMARSARLIMS.Services
                         Message = ex.InnerException?.Message ?? "An error occurred."
                     };
                 }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.SaveRolePageAccess(List<RolePageAccess> Rolepage)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    foreach (var rolePageAccess in Rolepage)
+                    {
+                        db.RolePageAccess.Add(rolePageAccess);
+                        await db.SaveChangesAsync();
+                    }
+                    await transaction.CommitAsync();
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Saved Successfully"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = $"Error: {ex.Message}"
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.RolePageAccessRemove(int Id)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var menuAccess = await db.RolePageAccess.Where(r => r.id == Id).FirstOrDefaultAsync();
+                    if (menuAccess == null)
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Menu access not found"
+                        };
+                    }
+                    db.RolePageAccess.Remove(menuAccess);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "mapping Removed Successfully"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = $"Error: {ex.Message}"
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.GetEmployeePageAccess(int empid, int roleid)
+        {
+            try
+            {
+                var AccessData = await (from pd in db.roleMenuAccess
+                                        join em in db.empMaster on pd.employeeId equals em.empId
+                                        join mm in db.menuMaster on pd.menuId equals mm.id
+                                        join mm1 in db.menuMaster on pd.subMenuId equals mm1.id
+                                        join rm in db.roleMaster on pd.roleId equals rm.id
+                                        where pd.roleId== roleid && pd.employeeId==empid
+                                        select new
+                                        {
+                                            pd.id,
+                                            Name = em.fName + " " + em.lName,
+                                            MenuMame = mm.menuName,
+                                            SubMenuName = mm1.menuName,
+                                            rm.roleName
+                                        }).ToListAsync();
+                if (AccessData != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = AccessData
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message="No Access found"
+                    };
+                }
+            }
+            catch(Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                   Message= ex.Message
+                };
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IroleMenuAccessServices.RolePagebindData(int roleid)
+        {
+            try
+            {
+                var AccessData = await(from pd in db.RolePageAccess
+                                      
+                                       join mm in db.menuMaster on pd.parentmenuid equals mm.id
+                                       join mm1 in db.menuMaster on pd.submenuId equals mm1.id
+                                       join rm in db.roleMaster on pd.roleid equals rm.id
+                                       where pd.roleid == roleid 
+                                       select new
+                                       {
+                                           pd.id,
+                                           
+                                           MenuMame = mm.menuName,
+                                           SubMenuName = mm1.menuName,
+                                           rm.roleName
+                                       }).ToListAsync();
+                if (AccessData != null)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Data = AccessData
+                    };
+                }
+                else
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = "No Access found"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
     }

@@ -14,5 +14,9 @@ namespace iMARSARLIMS.Interface
 
         Task<ServiceStatusResponseModel> SaveUpdateRole(roleMaster Role);
         Task<ServiceStatusResponseModel> UpdateRoleStatus(int id, byte status, int userId);
+        Task<ServiceStatusResponseModel> SaveRolePageAccess(List<RolePageAccess> Rolepage);
+        Task<ServiceStatusResponseModel> RolePageAccessRemove(int Id);
+        Task<ServiceStatusResponseModel> GetEmployeePageAccess(int empid, int roleid);
+        Task<ServiceStatusResponseModel> RolePagebindData(int roleid);
     }
 }

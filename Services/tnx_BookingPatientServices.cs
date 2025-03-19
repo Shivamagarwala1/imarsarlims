@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Model.Appointment;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
@@ -89,9 +90,12 @@ namespace iMARSARLIMS.Services
 
                         }
                         await Savepaymentdeatil(TnxBookingData.addpaymentdetail, patientId, workOrderId, transactionId);
+                        if (TnxBookingData.isAppointment == 1)
+                        {
+                            await SaveAppointment(TnxBookingData.addAppointment, patientId, workOrderId, transactionId);
+                        }
                         await transaction.CommitAsync();
-                        var result = db.tnx_BookingPatient.Where(x => x.patientId == patientId).Include(b => b.addBooking).ThenInclude(b => b.addBookingItem)
-                                  .ToList();
+                        var result = db.tnx_BookingItem.Where(bi=> bi.workOrderId== workOrderId).Select(bi => new { bi.workOrderId, bi.barcodeNo }).FirstOrDefault();
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
@@ -290,6 +294,21 @@ namespace iMARSARLIMS.Services
             };
         }
 
+        private async Task<ServiceStatusResponseModel> SaveAppointment(IEnumerable<appointmentBooking> AppointmentDetail, int patientId, string workOrderId, int transactionId)
+        {
+            foreach (var Appointment in AppointmentDetail)
+            {
+                var Appointmentdata = createAppointmentData(Appointment, patientId, workOrderId, transactionId);
+                db.appointmentBooking.Add(Appointmentdata);
+                await db.SaveChangesAsync();
+            }
+            return new ServiceStatusResponseModel
+            {
+                Success = true
+            };
+        }
+
+
         private async Task<ServiceStatusResponseModel> SaveBookingItem(IEnumerable<tnx_BookingItem> tnxBookingItems, int patientId, string workOrderId, int transactionId)
         {
             foreach (var bookingItem in tnxBookingItems)
@@ -374,7 +393,25 @@ namespace iMARSARLIMS.Services
                 settlementCentreID = Payment.settlementCentreID,
                 receivedBy = Payment.receivedBy,
                 receivedID = Payment.receivedID,
-                collectionDate= DateTime.Now
+                collectionDate = DateTime.Now
+            };
+        }
+        private appointmentBooking createAppointmentData(appointmentBooking appointment, int patientId, string workOrderId, int transactionId)
+        {
+            return new appointmentBooking
+            {
+                appointmentId = appointment.appointmentId,
+                transactionId = transactionId,
+                WorkorderId = workOrderId,
+                AppointmentType = appointment.AppointmentType,
+                AppointmentScheduledOn = appointment.AppointmentScheduledOn,
+                Pincode = appointment.Pincode,
+                Status = appointment.Status,
+                AssignedPhlebo = appointment.AssignedPhlebo,
+                assignedBy = appointment.assignedBy,
+                cancleBy = appointment.cancleBy,
+                AssignedDate = appointment.AssignedDate,
+                CancelDate = appointment.CancelDate
             };
         }
         private tnx_BookingItem CreateBookingItem(tnx_BookingItem bookingItem, int patientId, string workOrderId, int transactionId)
@@ -1001,32 +1038,32 @@ namespace iMARSARLIMS.Services
                                     {
                                         table.Cell().ColumnSpan(3).Element(innerTable =>
                                         {
-                                             innerTable.Table(subTable =>
-                                             {
-                                                 subTable.ColumnsDefinition(columns =>
-                                                 {
-                                                     
-                                                     columns.RelativeColumn();
-                                                     columns.RelativeColumn();
-                                                     columns.RelativeColumn();
-                                                     columns.RelativeColumn();
-                                                 });
+                                            innerTable.Table(subTable =>
+                                            {
+                                                subTable.ColumnsDefinition(columns =>
+                                                {
 
-                                                 // Header for the new embedded table
-                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Reciept No.").Style(TextStyle.Default.FontSize(10).Bold());
-                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Mode").Style(TextStyle.Default.FontSize(10).Bold());
-                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Amount").Style(TextStyle.Default.FontSize(10).Bold());
-                                                 subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Received By").Style(TextStyle.Default.FontSize(10).Bold());
+                                                    columns.RelativeColumn();
+                                                    columns.RelativeColumn();
+                                                    columns.RelativeColumn();
+                                                    columns.RelativeColumn();
+                                                });
 
-                                                 // Example data rows
-                                                 foreach(var ritem in paymentdetail)// Loop for adding rows
-                                                 {
-                                                     subTable.Cell().Text(ritem.TransactionId.ToString()).Style(TextStyle.Default.FontSize(10));
-                                                     subTable.Cell().Text(ritem.PaymentMode).Style(TextStyle.Default.FontSize(10));
-                                                     subTable.Cell().Text(ritem.Amount.ToString()).Style(TextStyle.Default.FontSize(10));
-                                                     subTable.Cell().Text(ritem.RecievedBy).Style(TextStyle.Default.FontSize(10));
-                                                 }
-                                             });
+                                                // Header for the new embedded table
+                                                subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Reciept No.").Style(TextStyle.Default.FontSize(10).Bold());
+                                                subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Mode").Style(TextStyle.Default.FontSize(10).Bold());
+                                                subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Amount").Style(TextStyle.Default.FontSize(10).Bold());
+                                                subTable.Cell().BorderBottom(0.8f, Unit.Point).BorderTop(0.8f, Unit.Point).Text("Received By").Style(TextStyle.Default.FontSize(10).Bold());
+
+                                                // Example data rows
+                                                foreach (var ritem in paymentdetail)// Loop for adding rows
+                                                {
+                                                    subTable.Cell().Text(ritem.TransactionId.ToString()).Style(TextStyle.Default.FontSize(10));
+                                                    subTable.Cell().Text(ritem.PaymentMode).Style(TextStyle.Default.FontSize(10));
+                                                    subTable.Cell().Text(ritem.Amount.ToString()).Style(TextStyle.Default.FontSize(10));
+                                                    subTable.Cell().Text(ritem.RecievedBy).Style(TextStyle.Default.FontSize(10));
+                                                }
+                                            });
                                         });
                                     }
 

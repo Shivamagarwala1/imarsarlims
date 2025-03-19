@@ -584,6 +584,89 @@ namespace iMARSARLIMS.Controllers.transactionController
             }
         }
 
+        [HttpPost("CollectionReportData")]
+        public async Task<ServiceStatusResponseModel> CollectionReportData(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.CollectionReportData(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("CollectionReportExcel")]
+        public IActionResult CollectionReportExcel(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.CollectionReportExcel(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "CollectionReport.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("CollectionReportSummury")]
+        public IActionResult CollectionReportSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.CollectionReportSummury(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "CollectionReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("CollectionReportDataSummury")]
+        public async Task<ServiceStatusResponseModel> CollectionReportDataSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.CollectionReportDataSummury(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("CollectionReportExcelSummury")]
+        public IActionResult CollectionReportExcelSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.CollectionReportExcelSummury(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "CollectionReportSummury.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("DiscountReport")]
         public IActionResult DiscountReport(collectionReportRequestModel collectionData)
         {
@@ -602,5 +685,153 @@ namespace iMARSARLIMS.Controllers.transactionController
                 return BadRequest(ex.Message);
             }
         }
+
+       
+
+        [HttpPost("DiscountReportData")]
+        public async Task<ServiceStatusResponseModel> DiscountReportData(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.DiscountReportData(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+      
+
+        [HttpPost("DiscountReportExcel")]
+        public IActionResult DiscountReportExcel(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.DiscountReportExcel(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DiscountReport.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("DiscountReportSummury")]
+        public IActionResult DiscountReportSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.DiscountReportSummury(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "DiscountReportSummury.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("DiscountReportDataSummury")]
+        public async Task<ServiceStatusResponseModel> DiscountReportDataSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.DiscountReportData(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
+        [HttpPost("DiscountReportExcelSummury")]
+        public IActionResult DiscountReportExcelSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.DiscountReportExcelSummury(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DiscountReportSummury.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("patientDataDiscount")]
+        public async Task<ServiceStatusResponseModel> patientDataDiscount(string workorderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.patientDataDiscount(workorderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("DiscountAfterBill")]
+        public async Task<ServiceStatusResponseModel> DiscountAfterBill(DicountAfterBillRequestModel DiscountData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.DiscountAfterBill(DiscountData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("TestRefund")]
+        public async Task<ServiceStatusResponseModel> TestRefund(testRefundModel RefundData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.TestRefund(RefundData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
     }
 }

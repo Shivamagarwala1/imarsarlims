@@ -33,7 +33,25 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> WhatsappNo(string workOrderId);
         Task<ServiceStatusResponseModel> SendEmail(string workOrderId, int Userid,string EmailId,int header);
         Task<ServiceStatusResponseModel> SendEmailId(string workOrderId);
+
         byte[] CollectionReport(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> CollectionReportData(collectionReportRequestModel collectionData);
+
+        byte[] CollectionReportSummury(collectionReportRequestModel collectionData);
+
+        byte[] CollectionReportExcel(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> CollectionReportDataSummury(collectionReportRequestModel collectionData);
+
+        byte[] CollectionReportExcelSummury(collectionReportRequestModel collectionData);
         byte[] DiscountReport(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> DiscountReportData(collectionReportRequestModel collectionData);
+        byte[] DiscountReportExcel(collectionReportRequestModel collectionData);
+
+        byte[] DiscountReportSummury(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> DiscountReportDataSummury(collectionReportRequestModel collectionData);
+        byte[] DiscountReportExcelSummury(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> DiscountAfterBill(DicountAfterBillRequestModel DiscountData);
+        Task<ServiceStatusResponseModel> patientDataDiscount(string workorderId);
+        Task<ServiceStatusResponseModel> TestRefund(testRefundModel RefundData);
     }
 }

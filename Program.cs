@@ -1,7 +1,9 @@
 using iMARSARLIMS;
 using iMARSARLIMS.Interface;
+using iMARSARLIMS.Interface.appointment;
 using iMARSARLIMS.Interface.Store;
 using iMARSARLIMS.Services;
+using iMARSARLIMS.Services.Appointment;
 using iMARSARLIMS.Services.Store;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
@@ -196,6 +198,9 @@ builder.Services.AddScoped<ImachineRerunTestDetailServices, machineRerunTestDeta
 builder.Services.AddScoped<IItemMasterStoreServices, ItemMasterStoreServices>();
 builder.Services.AddScoped<IindentServices, indentServices>();
 builder.Services.AddScoped<IMarketingDashBoardServices, MarketingDashBoardServices>();
+builder.Services.AddScoped<IrouteMasterServices, routeMasterServices>();
+builder.Services.AddScoped<ItimeSlotMasterServices, timeSlotMasterServices>();
+builder.Services.AddScoped<IappointmentBookingServices, appointmentBookingServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

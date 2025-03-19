@@ -12,12 +12,12 @@ namespace iMARSARLIMS.Model.Master
         public string? itemName { get; set; }
         [Required, MaxLength(100)]
         public string? dispalyName { get; set; }
-        [Required, MaxLength(100)]
+        [ MaxLength(100)]
         public string? testMethod { get; set; }
         public int? deptId { get; set; }
         [Required, MaxLength(20)]
         public string? code { get; set; }
-        [Required, MaxLength(20)]
+        [ MaxLength(20)]
         public string? sortName { get; set; }
         public byte allowDiscont { get; set; }
         public byte? allowShare { get; set; }
