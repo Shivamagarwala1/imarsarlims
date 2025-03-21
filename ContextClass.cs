@@ -2,6 +2,7 @@
 using iMARSARLIMS.Model.Appointment;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Store;
+using iMARSARLIMS.Model.SupportTicket;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services.Appointment;
@@ -14,6 +15,7 @@ namespace iMARSARLIMS
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
         public DbSet<supportTicket> supportTicket { get; set; }
+        public DbSet<SupportTicketType> SupportTicketType { get; set; }
         public DbSet<routeMaster> routeMaster { get; set; }
         public DbSet<DoctorSpecialization> DoctorSpecialization { get; set; }
         public DbSet<doctorShareMaster> doctorShareMaster { get; set; }
@@ -156,6 +158,9 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<timeSlotMaster>().HasKey(x => x.id);
             modelBuilder.Entity<timeSlotMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<SupportTicketType>().HasKey(x => x.id);
+            modelBuilder.Entity<SupportTicketType>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<centreMaster>().HasKey(x => x.centreId);
             modelBuilder.Entity<centreMaster>().Property(x => x.centreId).ValueGeneratedOnAdd();
