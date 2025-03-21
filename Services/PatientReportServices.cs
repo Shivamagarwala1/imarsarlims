@@ -8,13 +8,14 @@ using QuestPDF.Infrastructure;
 using IronBarCode;
 using iMARSARLIMS.Response_Model;
 using System.Text;
+using Microsoft.Extensions.Primitives;
 
 
 namespace iMARSARLIMS.Services
 {
     public class PatientReportServices : IPatientReportServices
     {
-       
+
 
         private readonly ContextClass db;
         public PatientReportServices(ContextClass context, ILogger<BaseController<tnx_BookingPatient>> logger)
@@ -243,7 +244,7 @@ namespace iMARSARLIMS.Services
                                    });
                                    table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(2.0f, Unit.Centimetre).Image(GenerateQrCode(Reportdata[0].workOrderId));
                                    //  table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Image(GenerateBarcode(Reportdata[0].workOrderId));
-                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Text("") ;
+                                   table.Cell().AlignLeft().Height(2.0f, Unit.Centimetre).Width(5.0f, Unit.Centimetre).Text("");
 
                                    table.Cell().AlignRight().AlignBottom().Text(text =>
                                    {
@@ -270,18 +271,22 @@ namespace iMARSARLIMS.Services
 
         public byte[] GetPatientReportType2(string TestId)
         {
-            var testIds = TestId.Split(',').Select(int.Parse).ToList();
+            var testIds = TestId.Split(',').Select(int.Parse).ToList(); // Split TestId into a list of integers
+
+            // Query to fetch report data from multiple tables
             var Reportdata = (from tb in db.tnx_Booking
                               join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
                               join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                               join tos in db.tnx_Observations on tbi.id equals tos.testId
                               join tm in db.titleMaster on tb.title_id equals tm.id
                               join cm in db.centreMaster on tb.centreId equals cm.centreId
+                              join da in db.doctorApprovalMaster on tbi.approvalDoctor equals da.doctorId
                               where testIds.Contains(tbi.id) && tos.showInReport == 1
                               select new
                               {
+                                  da.signature,
                                   tb.workOrderId,
-                                  BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
+                                  BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"), // Date formatting
                                   tm.title,
                                   tb.name,
                                   Age = tb.ageYear + "Y " + tb.ageMonth + "M " + tb.ageDay + "D",
@@ -311,79 +316,70 @@ namespace iMARSARLIMS.Services
                                   ResultDate = tbi.resultDate
                               }).ToList();
 
+            // If no report data found, return empty byte array
             if (Reportdata.Count > 0)
             {
                 HiQPdf.HtmlToPdf htmlToPdfConverter = new HiQPdf.HtmlToPdf();
                 var headerSpace = 200;
                 var left = 30;
                 var right = 30;
-
                 StringBuilder htmlContent = new StringBuilder();
-                htmlContent.Append("<html><head><style>" +
-                                   "body { font-family: Arial, sans-serif; font-size: 10px; margin-left: " + left + "px; margin-right: " + right + "px; } " +
-                                   "table { width: 100%; border-collapse: collapse; } " +
-                                   "th, td { border: 1px solid black; padding: 5px; text-align: left; } " +
-                                   "h2 { margin-top: " + headerSpace + "px; }" +
-                                   "</style></head><body>");
 
-                // Dynamically build the header
-                htmlContent.Append("<table style='width:100%'> <tr> <td style='border:solid 1px black;width:50%'> <table >   ");
-                htmlContent.Append("<tr><td>Visit ID</td><td>:{ 0 }</td></tr>");
-                htmlContent.Append("<tr><td>UHID</td><td>: {1}</td></tr>");
-                htmlContent.Append("<tr><td>Patient Name</td><td>: " + Reportdata[0].name + "</td></tr>");
-                htmlContent.Append("<tr><td>Age/Gender</td><td>: " + Reportdata[0].Age + "</td></tr>");
-                htmlContent.Append("<tr><td>Ref Doctor</td><td>: " + Reportdata[0].title + "</td></tr>");
-                htmlContent.Append("<tr><td>Client Name</td><td>: " + Reportdata[0].companyName + "</td></tr>");
-                htmlContent.Append("</table></td>  <td style='border:solid 1px black;width:50%'>   <table >");
-                htmlContent.Append("<tr><td>Registration</td><td>: " + Reportdata[0].BookingDate + "</td></tr>");
-                htmlContent.Append("<tr><td>Collected</td><td>: " + Reportdata[0].SampleCollectionDate + "</td></tr>");
-                htmlContent.Append("<tr><td>Received</td><td>: " + Reportdata[0].ResultDate + "</td></tr>");
-                htmlContent.Append("<tr><td>Reported</td><td>: " + Reportdata[0].ResultDate + "</td></tr>");
-                htmlContent.Append("<tr><td>Status</td><td>: Pending</td></tr>");
-                htmlContent.Append("<tr><td>Client Code</td><td>: " + Reportdata[0].centrecode + "</td></tr>");
-                htmlContent.Append("</table></td></tr></table>");
-
-                // Add test result data
-                string department = "";
-                StringBuilder sb = new StringBuilder();
+                // Define header template with placeholders for dynamic data
+                var Header = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).First();
+                string investigationname = "";
+                htmlContent.AppendFormat("<div style='margin-left:{0}px; margin-right:{1}px'>",  left, right);
 
                 foreach (var item in Reportdata)
                 {
-                    if (department == "" || department != item.departmentName)
+                    if (investigationname == "" || investigationname != item.investigationName)
                     {
-                        sb.AppendFormat(htmlContent.ToString(), item.workOrderId, item.name);
-                        sb.Append("<tr><td> TestName</td>");
-                        sb.Append("<td>Value</td>");
-                        sb.Append("<td> unit </td>");
-                        sb.Append("<td>displayReading </td></tr>");
-                        sb.Append("<tr><td colspan=2 style='Border:1px solid black'> </td></tr>");
-                        department = item.departmentName; // Set the department to avoid repeating headers
-                    }
+                        if (!string.IsNullOrEmpty(investigationname))
+                        {
+                            htmlContent.AppendFormat("<div><img src='data:{0}' alt='Image' /></div>",item.signature);
+                            htmlContent.Append("<div style='page-break-before:always;'></div>"); 
+                        }
+                        var headerHtml = string.Format(Header,
+                            item.workOrderId,
+                            item.name,
+                            item.name,
+                            item.Age,
+                            "Dr. X", // Replace with actual data for referring doctor
+                            item.companyName,
+                            item.BookingDate,
+                            item.SampleCollectionDate,
+                            item.ResultDate,
+                            item.ResultDate,
+                            item.centrecode);
 
-                    string resultColor = "black";
-                    if (double.TryParse(item.value, out double numericValue) && (numericValue < item.min || numericValue > item.max))
+                        htmlContent.AppendFormat("<div style='height:{0}px; margin-left:{1}px; margin-right:{2}px'></div>", headerSpace, left, right);
+                        htmlContent.Append(headerHtml); 
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("<table style='width:100%'>");
+                    if (investigationname != item.investigationName)
                     {
-                        resultColor = "red";
-                    }
 
-                    sb.Append("<tr><td>" + item.observationName + "</td>");
-                    sb.Append("<td style='color:" + resultColor + "'>" + item.value + "</td>");
-                    sb.Append("<td>" + item.unit + "</td>");
-                    sb.Append("<td>" + item.displayReading + "</td></tr>");
+                        sb.AppendFormat("<tr><td colspan=4 >{0}</td></tr>", item.departmentName);
+                        sb.Append("<tr><td style='width:40%' >TestName</td><td style='width:20%'>Value</td><td style='width:20%'>Unit</td><td style='width:20%' >Display Reading</td></tr>");
+                        investigationname = item.investigationName;
+                    }
+                    sb.AppendFormat("<tr><td style='width:40%'>{0}</td><td style='width:20%' >{1}</td><td style='width:20%'>{2}</td><td style='width:20%' >{3}</td></tr>", item.observationName, item.value, item.unit, item.displayReading);
+                    htmlContent.Append(sb.ToString());
+                    htmlContent.Append("</div>");
                 }
+                //string footerHtml = @" <div style='text-align:center; font-size:12px; margin-top:30px; margin-bottom:20px;'> <hr /><p>Powered by MyLab - 2025</p></div>";
+                //htmlContent.Append(footerHtml);
 
-                
-                sb.Append("</table></body></html>");
-
-                byte[] pdfBytes = htmlToPdfConverter.ConvertHtmlToMemory(sb.ToString(), null);
-                return pdfBytes;
+                // Convert HTML content to PDF
+                byte[] pdfBytes = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent.ToString(), null);
+                return pdfBytes; 
             }
             else
             {
-                return new byte[0];
+                return new byte[0]; 
             }
         }
-
 
         public static byte[] GenerateQrCode(string text)
         {
@@ -394,7 +390,7 @@ namespace iMARSARLIMS.Services
         }
         public static byte[] GenerateBarcode(string text)
         {
-            GeneratedBarcode barcode = BarcodeWriter.CreateBarcode(text, BarcodeEncoding.Code128,600,180);
+            GeneratedBarcode barcode = BarcodeWriter.CreateBarcode(text, BarcodeEncoding.Code128, 600, 180);
             var barcodeimage = barcode.ToPngBinaryData();
             return barcodeimage;
         }
@@ -647,7 +643,7 @@ namespace iMARSARLIMS.Services
                 try
                 {
                     var testIds = TestId.Split(',').Select(int.Parse).ToList();
-                    var testdata= db.tnx_BookingItem.Where(b=> testIds.Contains(b.id)).ToList();
+                    var testdata = db.tnx_BookingItem.Where(b => testIds.Contains(b.id)).ToList();
                     if (testIds.Count == 0)
                     {
                         return new ServiceStatusResponseModel
@@ -658,12 +654,12 @@ namespace iMARSARLIMS.Services
                     }
                     foreach (var test in testdata)
                     {
-                        if(isHold==1)
+                        if (isHold == 1)
                         {
                             test.hold = isHold;
-                            test.holdById= holdBy;
-                            test.holdDate= DateTime.Now;
-                            test.holdReason= holdReason;
+                            test.holdById = holdBy;
+                            test.holdDate = DateTime.Now;
+                            test.holdReason = holdReason;
                         }
                         else
                         {
@@ -693,14 +689,14 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> IPatientReportServices.ReportNotApprove(string TestId,string userid)
+        async Task<ServiceStatusResponseModel> IPatientReportServices.ReportNotApprove(string TestId, string userid)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 try
                 {
                     var testIds = TestId.Split(',').Select(int.Parse).ToList();
-                    var testdata = db.tnx_BookingItem.Where(b => testIds.Contains(b.id) && b.isApproved==1).ToList();
+                    var testdata = db.tnx_BookingItem.Where(b => testIds.Contains(b.id) && b.isApproved == 1).ToList();
                     if (testIds.Count == 0)
                     {
                         return new ServiceStatusResponseModel

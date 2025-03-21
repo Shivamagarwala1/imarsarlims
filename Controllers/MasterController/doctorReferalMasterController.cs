@@ -39,5 +39,43 @@ namespace iMARSARLIMS.Controllers.MasterController
             }
         }
 
+        [HttpPost("UpdateReferDoctorStatus")]
+        public async Task<ServiceStatusResponseModel> UpdateReferDoctorStatus(int DoctorId, byte status, int UserId)
+        {
+            try
+            {
+                var result = await _doctorReferalServices.UpdateReferDoctorStatus(DoctorId, status,UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+
+        [HttpGet("ReferDoctorData")]
+        public async Task<ServiceStatusResponseModel> ReferDoctorData()
+        {
+            try
+            {
+                var result = await _doctorReferalServices.ReferDoctorData();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+
     }
 }

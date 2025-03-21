@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250319070749_Doctorspeciali")]
+    partial class Doctorspeciali
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,10 +202,6 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int?>("assignedBy")
                         .HasColumnType("int");
 
-                    b.Property<string>("cancelreason")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
                     b.Property<int?>("cancleBy")
                         .HasColumnType("int");
 
@@ -211,10 +210,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<DateTime?>("rescheduleDate")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("reschedulreason")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("transactionId")
                         .HasColumnType("int");
@@ -2043,28 +2038,6 @@ namespace iMARSARLIMS.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<byte>("AllowOPD")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<byte>("Discount")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("EmailReport")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<byte>("OPDFee")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<byte>("OnlineLogin")
-                        .HasColumnType("tinyint unsigned");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
                     b.Property<string>("address1")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -2132,11 +2105,6 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("varchar(10)");
 
-                    b.Property<string>("password")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("varchar(15)");
-
                     b.Property<int?>("pinCode")
                         .HasColumnType("int");
 
@@ -2200,8 +2168,9 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("ItemID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("createdDate")
-                        .HasColumnType("datetime(6)");
+                    b.Property<byte[]>("createdDate")
+                        .IsRequired()
+                        .HasColumnType("longblob");
 
                     b.Property<string>("createdbyName")
                         .IsRequired()
@@ -3344,9 +3313,6 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<int>("itemId")
                         .HasColumnType("int");
-
-                    b.Property<double>("rate")
-                        .HasColumnType("double");
 
                     b.Property<int?>("updateById")
                         .HasColumnType("int");
@@ -4502,55 +4468,6 @@ namespace iMARSARLIMS.Migrations
                     b.HasKey("id");
 
                     b.ToTable("stateMaster");
-                });
-
-            modelBuilder.Entity("iMARSARLIMS.Model.Master.supportTicket", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("ActionTaken")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<DateTime>("AssignedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("CompletedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("Deliverydate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("assignedTo")
-                        .HasColumnType("int");
-
-                    b.Property<int>("clientId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("clientName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("task")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<int>("taskTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("taskTypeName")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("varchar(40)");
-
-                    b.HasKey("id");
-
-                    b.ToTable("supportTicket");
                 });
 
             modelBuilder.Entity("iMARSARLIMS.Model.Master.tat_master", b =>

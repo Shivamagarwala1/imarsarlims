@@ -463,6 +463,7 @@ namespace iMARSARLIMS.Services
                                              tb.workOrderId,
                                              tb.transactionId,
                                              PatientName = tm.title + " " + tb.name,
+                                             Age= string.Concat(tb.ageYear,"Y /" , tb.gender),
                                              tb.netAmount,
                                              tb.grossAmount,
                                              testid= tbi.id,
@@ -473,6 +474,7 @@ namespace iMARSARLIMS.Services
                                              cm.companyName,
                                              cm.centrecode,
                                              tb.patientId,
+                                             tbi.isSampleCollected,
                                              Status = tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 1 ? "Approved" :
                                                       tbi.isSampleCollected == "Y" && tbi.isResultDone == 1 && tbi.isApproved == 0 ? "ResultDone" :
                                                       tbi.isSampleCollected == "Y" && tbi.isResultDone == 0 && tbi.isApproved == 0 ? "Sample Received" :
@@ -2224,7 +2226,7 @@ namespace iMARSARLIMS.Services
                         // Page Header
                         page.Header().Column(column =>
                         {
-                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(14).Bold()).AlignCenter();
                         });
 
                         // Table Layout
@@ -2236,26 +2238,25 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(1f, Unit.Centimetre); // # column
                                 columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
                                 columns.RelativeColumn();  // Patient Name
-                                columns.RelativeColumn();  // Booking Date
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Booking Date
                                 columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
                                 columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre);
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);
                                 // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre); // Net column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Net column
                             });
 
                             // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-
-                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("OnlineWallet").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Cash").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("OnlineWallet").Style(TextStyle.Default.FontSize(10).Bold());
 
                             // Populate table rows
                             int rowNumber = 1;
@@ -2483,12 +2484,12 @@ namespace iMARSARLIMS.Services
                             });
 
                             // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
 
                             // Populate table rows
                             int rowNumber = 1;

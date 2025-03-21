@@ -31,7 +31,7 @@ namespace iMARSARLIMS.Services
                                       BookingCentre = cm.companyName,
                                       io.LabId,
                                       ProcessingCentre = ol.labName,
-                                      io.departmentId,
+                                      io.departmentId,io.rate,
                                       ld.deptName,
                                       io.itemId,
                                       im.itemName,
@@ -147,6 +147,7 @@ namespace iMARSARLIMS.Services
                 itemId = item.itemId,
                 departmentId = item.departmentId,
                 isActive = item.isActive,
+                rate= item.rate,
                 createdById = item.createdById,
                 createdDateTime = item.createdDateTime,
             };

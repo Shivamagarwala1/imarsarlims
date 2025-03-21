@@ -201,6 +201,8 @@ builder.Services.AddScoped<IMarketingDashBoardServices, MarketingDashBoardServic
 builder.Services.AddScoped<IrouteMasterServices, routeMasterServices>();
 builder.Services.AddScoped<ItimeSlotMasterServices, timeSlotMasterServices>();
 builder.Services.AddScoped<IappointmentBookingServices, appointmentBookingServices>();
+builder.Services.AddScoped<IdoctorShareMasterServices, doctorShareMasterServices>();
+builder.Services.AddScoped<IsupportTicketServices, supportTicketServices>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

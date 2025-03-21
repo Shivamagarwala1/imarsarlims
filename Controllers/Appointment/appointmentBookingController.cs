@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Interface.appointment;
 using iMARSARLIMS.Model.Appointment;
+using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using iMARSARLIMS.Services.Appointment;
 using Microsoft.AspNetCore.Mvc;
@@ -39,11 +40,11 @@ namespace iMARSARLIMS.Controllers.Appointment
             }
         }
         [HttpPost("CancelAppointment")]
-        public async Task<ServiceStatusResponseModel> CancelAppointment(int AppointmentId, int isCancel, int userid)
+        public async Task<ServiceStatusResponseModel> CancelAppointment(int AppointmentId, int isCancel, int userid, string Reason)
         {
             try
             {
-                var result = await _appointmentBookingServices.CancelAppointment(AppointmentId,isCancel,userid);
+                var result = await _appointmentBookingServices.CancelAppointment(AppointmentId,isCancel,userid,Reason);
                 return result;
             }
             catch (Exception ex)
@@ -56,11 +57,11 @@ namespace iMARSARLIMS.Controllers.Appointment
             }
         }
         [HttpPost("rescheduleAppointment")]
-        public async Task<ServiceStatusResponseModel> rescheduleAppointment(int AppointmentId,  int userid)
+        public async Task<ServiceStatusResponseModel> rescheduleAppointment(int AppointmentId, int userid, DateTime RescheduleDate, string rescheduleReson)
         {
             try
             {
-                var result = await _appointmentBookingServices.rescheduleAppointment(AppointmentId,  userid);
+                var result = await _appointmentBookingServices.rescheduleAppointment(AppointmentId,  userid,RescheduleDate,rescheduleReson);
                 return result;
             }
             catch (Exception ex)
@@ -78,7 +79,43 @@ namespace iMARSARLIMS.Controllers.Appointment
         {
             try
             {
-                var result = await _appointmentBookingServices.CancelAppointment(AppointmentId, pheleboid, userid);
+                var result = await _appointmentBookingServices.AssignAppointment(AppointmentId, pheleboid, userid);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpGet("GetPhelebo")]
+        public async Task<ServiceStatusResponseModel> GetPhelebo(int pincode)
+        {
+            try
+            {
+                var result = await _appointmentBookingServices.GetPhelebo(pincode);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("UpdateSamplestatus")]
+        public async Task<ServiceStatusResponseModel> UpdateSamplestatus(List<appointmentSamplesStatusModel> sampleStatus)
+        {
+            try
+            {
+                var result = await _appointmentBookingServices.UpdateSamplestatus(sampleStatus);
                 return result;
             }
             catch (Exception ex)

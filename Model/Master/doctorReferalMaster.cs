@@ -44,5 +44,16 @@ namespace iMARSARLIMS.Model.Master
         public int? city { get; set; }
         public int? state { get; set; }
         public int type { get; set; }
+        public int centreID { get; set; }
+        [MaxLength(15)]
+        public string UserId { get; set; }
+        [MaxLength(15)]
+        public string password { get; set; }
+        [MaxLength(50)]
+        public string EmailReport { get; set; }
+        public byte OPDFee { get; set; } = 0;
+        public byte Discount { get; set; } = 0;
+        public byte OnlineLogin { get; set; } = 0;
+        public byte AllowOPD { get; set; } = 0;
     }
 }

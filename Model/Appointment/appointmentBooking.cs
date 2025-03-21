@@ -24,6 +24,10 @@ namespace iMARSARLIMS.Model.Appointment
         public DateTime? CancelDate { get; set; }
         public DateTime? rescheduleDate { get; set; }
         public int rescheduleBy { get; set; }
+        [MaxLength(50)]
+        public string? reschedulreason { get; set; }
+        [MaxLength(50)]
+        public string? cancelreason { get; set; }
 
     }
 }

@@ -13,7 +13,11 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<supportTicket> supportTicket { get; set; }
         public DbSet<routeMaster> routeMaster { get; set; }
+        public DbSet<DoctorSpecialization> DoctorSpecialization { get; set; }
+        public DbSet<doctorShareMaster> doctorShareMaster { get; set; }
+
         public DbSet<RouteMapping> RouteMapping { get; set; }
         public DbSet<timeSlotMaster> timeSlotMaster { get; set; }
         public DbSet<appointmentBooking> appointmentBooking { get; set; }
@@ -142,7 +146,10 @@ namespace iMARSARLIMS
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<area_master>().HasKey(x => x.id);
-            modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd(); 
+
+            modelBuilder.Entity<supportTicket>().HasKey(x => x.id);
+            modelBuilder.Entity<supportTicket>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
             modelBuilder.Entity<RolePageAccess>().HasKey(x => x.id);
             modelBuilder.Entity<RolePageAccess>().Property(x => x.id).ValueGeneratedOnAdd();
@@ -156,6 +163,9 @@ namespace iMARSARLIMS
             modelBuilder.Entity<InvestigationMasterUD>().HasKey(x => x.id);
             modelBuilder.Entity<InvestigationMasterUD>().Property(x => x.id).ValueGeneratedOnAdd();
             
+            modelBuilder.Entity<doctorShareMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<doctorShareMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+
             modelBuilder.Entity<Indent>().HasKey(x => x.indentId);
             modelBuilder.Entity<Indent>().Property(x => x.indentId).ValueGeneratedOnAdd();
             
@@ -266,6 +276,9 @@ namespace iMARSARLIMS
 
             modelBuilder.Entity<cityMaster>().HasKey(x => x.id);
             modelBuilder.Entity<cityMaster>().Property(x => x.id).ValueGeneratedOnAdd();
+            
+            modelBuilder.Entity<DoctorSpecialization>().HasKey(x => x.id);
+            modelBuilder.Entity<DoctorSpecialization>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<containerColorMaster>().HasKey(x => x.id);
             modelBuilder.Entity<containerColorMaster>().Property(x => x.id).ValueGeneratedOnAdd();

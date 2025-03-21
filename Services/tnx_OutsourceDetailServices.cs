@@ -74,7 +74,7 @@ namespace iMARSARLIMS.Services
                                                outSourcelabs = (from om in db.item_outsourcemaster
                                                                 join ol in db.outSourcelabmaster on om.LabId equals ol.id
                                                                 where om.itemId == tbi.itemId
-                                                                select new { ol.id, ol.labName }).ToList(),
+                                                                select new { ol.id, ol.labName,om.rate,outsourceRate= om.rate }).ToList(),
                                                OutsourceLabId = tos == null ? 0 : tos.outSourceLabID,
                                                OutsourceLabName = tos == null ? "" : tos.outSourceLabName,
                                                outsourceDetailId= tos == null ? 0 : tos.id
