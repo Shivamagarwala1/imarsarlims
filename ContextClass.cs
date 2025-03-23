@@ -540,6 +540,7 @@ namespace iMARSARLIMS
             modelBuilder.Entity<rateListData>().HasNoKey();
             modelBuilder.Entity<TatReportData>().HasNoKey();
             modelBuilder.Entity<WorkSheetResposeModel>().HasNoKey();
+
             //modelBuilder.Entity<LoginRequestModel>().HasNoKey();
 
         }

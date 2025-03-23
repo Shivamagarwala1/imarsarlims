@@ -6,6 +6,7 @@ namespace iMARSARLIMS.Interface
     public interface ICentrePaymentServices
     {
         Task<ServiceStatusResponseModel> SubmitPayment(CentrePaymentRequestModel centrePayments);
+        Task<ServiceStatusResponseModel> paymentRecieptUpload(IFormFile paymentReciept);
         Task<ServiceStatusResponseModel> PaymentApproveReject(CentrePaymetVerificationRequestModel CentrePaymetVerificationRequest);
         Task<ServiceStatusResponseModel> LedgerStatus(List<int> CentreId);
         Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate);
@@ -13,8 +14,8 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> CancelPatientReciept(string Workorderid,int Userid);
         Task<ServiceStatusResponseModel> GetPatientpaymentDetail(string Workorderid);
         Task<ServiceStatusResponseModel> ChangePatientpaymentDetail(List<ChangePaymentMode> PaymentMode);
-        Task<ServiceStatusResponseModel> GetRateList(int CentreId);
-        byte[] GetRateListPdf(int centreid);
+        Task<ServiceStatusResponseModel> GetRateList(int ratetypeID);
+        byte[] GetRateListPdf(int ratetypeID);
         Task<ServiceStatusResponseModel> TransferRateToRate(int FromRatetypeid, int ToRatetypeid);
         Task<ServiceStatusResponseModel> ClientDepositReport(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype);
         Task<ServiceStatusResponseModel> GetWorkOrderdetailCentreChange(string WorkOrderid);
@@ -22,11 +23,11 @@ namespace iMARSARLIMS.Interface
 
 
 
-        Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType);
-        Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate);
-        Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData);
-        Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate);
-        Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type);
+        //Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType);
+        //Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate);
+        //Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData);
+        //Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate);
+        //Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type);
        
     }
 }

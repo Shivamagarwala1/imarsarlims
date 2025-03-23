@@ -16,18 +16,18 @@ namespace iMARSARLIMS.Model.Master
         public string fName { get; set; }
         [Required, MaxLength(50)]
         public string lName { get; set; }
-        [ MaxLength(100)]
+        [MaxLength(100)]
         public string address { get; set; }
         public int? pinCode { get; set; }
         [Required, MaxLength(50)]
         public string email { get; set; }
-        [Required,MaxLength(10)]
+        [Required, MaxLength(10)]
         public string mobileNo { get; set; }
         [Required]
         public DateTime dob { get; set; }
         [MaxLength(50)]
         public string? qualification { get; set; }
-        [ MaxLength(5)]
+        [MaxLength(5)]
         public string? bloodGroup { get; set; }
         [Required]
         public int designationId { get; set; }
@@ -67,6 +67,8 @@ namespace iMARSARLIMS.Model.Master
         public int? district { get; set; }
         public byte? indentIssue { get; set; }
         public byte? IndentApprove { get; set; }
+        public byte? allowTicket { get; set; }
+        public int allowTicketRole { get; set; }
 
         [ForeignKey(nameof(empId))]
         public List<empCenterAccess>? addEmpCentreAccess { get; set; }
@@ -81,4 +83,5 @@ namespace iMARSARLIMS.Model.Master
         public List<chatMessage>? addChatchatMessage { get; set; }
 
     }
+
 }

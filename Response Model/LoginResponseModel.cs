@@ -8,5 +8,7 @@
         public string DefaultCenter { get; set; }
         public string tempPassword { get; set; }
         public string image { get; set; }
+        public byte? allowTicket { get; set; }
+        public int? allowTicketRole { get; set; }
     }
 }

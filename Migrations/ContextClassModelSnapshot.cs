@@ -2200,6 +2200,9 @@ namespace iMARSARLIMS.Migrations
                     b.Property<int>("ItemID")
                         .HasColumnType("int");
 
+                    b.Property<int>("absorbedBy")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("createdDate")
                         .HasColumnType("datetime(6)");
 
@@ -4906,6 +4909,10 @@ namespace iMARSARLIMS.Migrations
                     b.Property<DateTime?>("AssignedDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("CompleteRemark")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<DateTime?>("CompletedDate")
                         .HasColumnType("datetime(6)");
 
@@ -4916,7 +4923,6 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Document")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("Priority")
@@ -4943,17 +4949,56 @@ namespace iMARSARLIMS.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int?>("closedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("closedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("closedRemark")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<int>("completedBy")
                         .HasColumnType("int");
 
+                    b.Property<int?>("holdBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("holdDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("holdReason")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<byte>("isAssigned")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte?>("isClosed")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("isCompleted")
                         .HasColumnType("tinyint unsigned");
 
+                    b.Property<byte?>("isHold")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte?>("isRejected")
+                        .HasColumnType("tinyint unsigned");
+
                     b.Property<byte>("isReopen")
                         .HasColumnType("tinyint unsigned");
+
+                    b.Property<DateTime?>("rejectDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("rejectReason")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("rejectedBy")
+                        .HasColumnType("int");
 
                     b.Property<string>("task")
                         .IsRequired()

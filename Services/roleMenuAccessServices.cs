@@ -274,8 +274,12 @@ namespace iMARSARLIMS.Services
                 {
                     foreach (var rolePageAccess in Rolepage)
                     {
-                        db.RolePageAccess.Add(rolePageAccess);
-                        await db.SaveChangesAsync();
+                        var count= db.RolePageAccess.Where(r=>r.roleid==rolePageAccess.roleid && r.parentmenuid== rolePageAccess.parentmenuid && r.submenuId== rolePageAccess.submenuId).Count();
+                        if (count == 0)
+                        {
+                            db.RolePageAccess.Add(rolePageAccess);
+                            await db.SaveChangesAsync();
+                        }
                     }
                     await transaction.CommitAsync();
 

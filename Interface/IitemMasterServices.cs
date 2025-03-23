@@ -13,5 +13,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetMappedItem(int itemtype, int itemid);
         Task<ServiceStatusResponseModel> RemoveMapping(int Id);
         Task<ServiceStatusResponseModel> EvaluateTest(int itemid1, int itemid2, int itemid3);
+        byte[] DownloadDOS();
+        Task<ServiceStatusResponseModel> GetDOS();
     }
 }

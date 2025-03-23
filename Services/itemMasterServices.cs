@@ -4,6 +4,10 @@ using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace iMARSARLIMS.Services
 {
@@ -567,6 +571,143 @@ namespace iMARSARLIMS.Services
                 Data = groupedData
             };
 
+        }
+
+        public byte[] DownloadDOS()
+        {
+            try
+            {
+                var query = from im in db.itemMaster
+                join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
+                where  rt.rateTypeId==1
+            select new
+            {
+                im.itemName,
+                rt.mrp, rt.rate
+            };
+
+                
+
+                var result = query.ToList();
+
+
+                // If no data found, return an empty PDF
+                if (result == null)
+                {
+                    return new byte[0]; // Zero-byte return when no data exists
+                }
+
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+
+                        // Page Header
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                        });
+
+                        // Table Layout
+                        page.Content().Table(table =>
+                        {
+                            // Define the columns
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
+                                columns.RelativeColumn();// Patient Name
+                                columns.RelativeColumn();  // Booking Date
+                                
+                            });
+
+                            // Add table header
+                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Item Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Mrp").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Rate").Style(TextStyle.Default.FontSize(10).Bold());
+
+
+                            // Populate table rows
+                            int rowNumber = 1;
+                            var itemname = "";
+                            foreach (var item in result)
+                            {
+                                
+                                table.Cell().Text(""+ rowNumber).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text(item.itemName.ToString()).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text(item.mrp.ToString()).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Text(item.rate.ToString()).Style(TextStyle.Default.FontSize(10));
+
+                                rowNumber++;
+                            }
+                        });
+
+                        // Page Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().AlignCenter().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(8));
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                        });
+                    });
+                });
+
+                // Generate the PDF byte array
+                byte[] pdfBytes = document.GeneratePdf();
+
+                // Save the PDF to file for debugging (optional)
+                File.WriteAllBytes("collection_report.pdf", pdfBytes);
+
+                return pdfBytes;  // Return the generated PDF
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return empty byte array in case of error
+                return new byte[0];
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IitemMasterServices.GetDOS()
+        {
+            try
+            {
+                var query = await ( from im in db.itemMaster
+                            join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
+                            where rt.rateTypeId == 1
+                            select new
+                            {
+                                im.itemName,
+                                rt.mrp,
+                                rt.rate
+                            }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = query
+                };
+            }
+            catch(Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message,
+                };
+            }
         }
     }
 }

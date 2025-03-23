@@ -9,6 +9,8 @@ using MySqlX.XDevAPI.Common;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace iMARSARLIMS.Services
 {
@@ -2179,18 +2181,21 @@ namespace iMARSARLIMS.Services
             try
             {
                 var Query = from tb in db.tnx_Booking
+                            join em in db.empMaster on tb.createdById equals em.empId
                             join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tr.collectionDate >= collectiondata.FromDate && tr.collectionDate <= collectiondata.ToDate
-                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                            where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
+                            group new { tb, tr, em } by new { em.empId, empname = string.Concat(em.fName, " ", em.lName) } into grouped
                             select new
                             {
-                                centreId = grouped.Key.centreId,
-                                centrecode = grouped.Key.centrecode,
-                                companyName = grouped.Key.companyName,
+                                EmployeeId = grouped.Key.empId,
+                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
+                                EmployeeName = grouped.Key.empname,
                                 grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                                 discountSum = grouped.Sum(g => g.tb.discount),
                                 netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+
                                 cashAmtSum = grouped.Sum(g => g.tr.cashAmt),
                                 onlinewalletAmtSum = grouped.Sum(g => g.tr.onlinewalletAmt),
                                 NEFTamtSum = grouped.Sum(g => g.tr.NEFTamt),
@@ -2239,7 +2244,7 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
                                 columns.RelativeColumn();  // Patient Name
                                 columns.ConstantColumn(1.5f, Unit.Centimetre);  // Booking Date
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(3f, Unit.Centimetre);  // Gross column
                                 columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
                                 columns.ConstantColumn(1.5f, Unit.Centimetre);
                                 // Gross column
@@ -2249,8 +2254,8 @@ namespace iMARSARLIMS.Services
 
                             // Add table header
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("EmpCode").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Name").Style(TextStyle.Default.FontSize(10).Bold());
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
@@ -2263,8 +2268,8 @@ namespace iMARSARLIMS.Services
                             foreach (var item in collectionData)
                             {
                                 table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.centrecode).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.companyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
                                 table.Cell().Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
                                 table.Cell().Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
                                 table.Cell().Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
@@ -2314,18 +2319,20 @@ namespace iMARSARLIMS.Services
             {
 
                 var Query = from tb in db.tnx_Booking
+                            join em in db.empMaster on tb.createdById equals em.empId
                             join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tr.collectionDate >= collectiondata.FromDate && tr.collectionDate <= collectiondata.ToDate
-                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                            where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
+                            group new { tb, tr, em } by new { em.empId, empname = string.Concat(em.fName, " ", em.lName) } into grouped
                             select new
                             {
-                                centreId = grouped.Key.centreId,
-                                centrecode = grouped.Key.centrecode,
-                                companyName = grouped.Key.companyName,
+                                EmployeeId = grouped.Key.empId,
+                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
+                                EmployeeName = grouped.Key.empname,
                                 grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                                 discountSum = grouped.Sum(g => g.tb.discount),
                                 netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
                                 cashAmtSum = grouped.Sum(g => g.tr.cashAmt),
                                 onlinewalletAmtSum = grouped.Sum(g => g.tr.onlinewalletAmt),
                                 NEFTamtSum = grouped.Sum(g => g.tr.NEFTamt),
@@ -2374,18 +2381,21 @@ namespace iMARSARLIMS.Services
         public byte[] CollectionReportExcelSummury(collectionReportRequestModel collectiondata)
         {
             var Query = from tb in db.tnx_Booking
+                        join em in db.empMaster on tb.createdById equals em.empId
                         join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
-                        where tr.collectionDate >= collectiondata.FromDate && tr.collectionDate <= collectiondata.ToDate
-                        group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                        where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
+                        group new { tb, tr, em } by new { em.empId,empname= string.Concat(em.fName," ",em.lName) } into grouped
                         select new
                         {
-                            centreId = grouped.Key.centreId,
-                            centrecode = grouped.Key.centrecode,
-                            companyName = grouped.Key.companyName,
+                            EmployeeId = grouped.Key.empId,
+                            empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
+                            EmployeeName = grouped.Key.empname,
                             grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                             discountSum = grouped.Sum(g => g.tb.discount),
                             netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                            centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                            
                             cashAmtSum = grouped.Sum(g => g.tr.cashAmt),
                             onlinewalletAmtSum = grouped.Sum(g => g.tr.onlinewalletAmt),
                             NEFTamtSum = grouped.Sum(g => g.tr.NEFTamt),
@@ -2413,20 +2423,20 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                // Query for data
                 var Query = from tb in db.tnx_Booking
-                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join em in db.empMaster on tb.createdById equals em.empId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
-                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                            where tb.bookingDate >= collectionData.FromDate && tb.bookingDate <= collectionData.ToDate
+                            group new { tb, em, cm } by new { tb.createdById, empname = string.Concat(em.fName, " ", em.lName) } into grouped
                             select new
                             {
-                                centreId = grouped.Key.centreId,
-                                centrecode = grouped.Key.centrecode,
-                                companyName = grouped.Key.companyName,
+                                EmployeeId = grouped.Key.createdById,
+                                EmployeeName = grouped.Key.empname,
                                 grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                                 discountSum = grouped.Sum(g => g.tb.discount),
-                                netAmountSum = grouped.Sum(g => g.tb.netAmount)
+                                netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
                             };
 
                 // If empIds and centreIds are provided, filter the query
@@ -2441,6 +2451,7 @@ namespace iMARSARLIMS.Services
                 }
 
                 // Get the data
+                
                 var collectiondata = Query.ToList();
 
                 // If no data found, return an empty PDF
@@ -2485,8 +2496,8 @@ namespace iMARSARLIMS.Services
 
                             // Add table header
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Centre Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Code").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Name").Style(TextStyle.Default.FontSize(10).Bold());
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
                             table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
                             table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
@@ -2496,8 +2507,8 @@ namespace iMARSARLIMS.Services
                             foreach (var item in collectiondata)
                             {
                                 table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.centrecode).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.companyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
                                 table.Cell().Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
                                 table.Cell().Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
                                 table.Cell().Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
@@ -2544,22 +2555,25 @@ namespace iMARSARLIMS.Services
 
 
             var Query = from tb in db.tnx_Booking
-                        join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                        join em in db.empMaster on tb.createdById equals em.empId
                         join cm in db.centreMaster on tb.centreId equals cm.centreId
-                        where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
-                        group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                        where tb.bookingDate >= collectionData.FromDate && tb.bookingDate <= collectionData.ToDate
+                        group new { tb, em, cm } by new { tb.createdById, empname = string.Concat(em.fName, " ", em.lName) } into grouped
                         select new
                         {
-                            centreId = grouped.Key.centreId,
-                            centrecode = grouped.Key.centrecode,
-                            companyName = grouped.Key.companyName,
+                            EmployeeId = grouped.Key.createdById,
+                            EmployeeName = grouped.Key.empname,
                             grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                             discountSum = grouped.Sum(g => g.tb.discount),
-                            netAmountSum = grouped.Sum(g => g.tb.netAmount)
+                            netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                            centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                            empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
                         };
 
+            // If empIds and centreIds are provided, filter the query
             if (collectionData.empIds.Count > 0)
             {
+                // Filter by empIds (uncomment if needed)
                 // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
             }
             if (collectionData.centreIds.Count > 0)
@@ -2579,18 +2593,19 @@ namespace iMARSARLIMS.Services
             {
 
                 var Query = from tb in db.tnx_Booking
-                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join em in db.empMaster on tb.createdById equals em.empId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
-                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into grouped
+                            where tb.bookingDate >= collectionData.FromDate && tb.bookingDate <= collectionData.ToDate
+                            group new { tb, em, cm } by new { tb.createdById, empname=string.Concat(em.fName," ",em.lName) } into grouped
                             select new
                             {
-                                centreId = grouped.Key.centreId,
-                                centrecode = grouped.Key.centrecode,
-                                companyName = grouped.Key.companyName,
+                                EmployeeId = grouped.Key.createdById,
+                                EmployeeName = grouped.Key.empname,
                                 grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                                 discountSum = grouped.Sum(g => g.tb.discount),
-                                netAmountSum = grouped.Sum(g => g.tb.netAmount)
+                                netAmountSum = grouped.Sum(g => g.tb.netAmount),
+                                centreId= grouped.Select(g=> g.tb.centreId).FirstOrDefault(),
+                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
                             };
 
                 // If empIds and centreIds are provided, filter the query
@@ -2760,6 +2775,510 @@ namespace iMARSARLIMS.Services
                     };
 
                 }
+            }
+        }
+
+         byte[] ItnxBookingServices.ClientRevenueReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                // Query for data
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            select new
+                            {
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm tt"),
+                                tb.grossAmount,
+                                tb.discount,
+                                tb.netAmount,
+                                tr.cashAmt,
+                                tr.onlinewalletAmt,
+                                tr.NEFTamt,
+                                tr.chequeAmt,
+                                tr.receivedBy,
+                                tr.receivedID,
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName
+                            };
+
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                }
+
+                // Get the data
+                var collectiondata = Query.ToList();
+
+                // If no data found, return an empty PDF
+                if (collectiondata.Count == 0)
+                {
+                    return new byte[0]; // Zero-byte return when no data exists
+                }
+
+                // Log or Debug to confirm data is loaded
+                Console.WriteLine($"Found {collectiondata.Count} records.");
+
+                // QuestPDF document generation
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                // Handling the company logo
+                var image1 = _configuration["FileBase64:CompanyLogo1"];
+                byte[] image1Bytes = null;
+
+                if (!string.IsNullOrEmpty(image1))
+                {
+                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+                }
+
+                // Generate the PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+
+                        // Page Header
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                        });
+
+                        // Table Layout
+                        page.Content().Table(table =>
+                        {
+                            // Define the columns
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
+                                columns.RelativeColumn();  // Patient Name
+                                columns.RelativeColumn();  // Booking Date
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Cash column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Cheque column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Wallet column
+                            });
+
+                            // Add table header
+                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+
+                            // Populate table rows
+                            int rowNumber = 1;
+                            int centreid = 0;
+                            foreach (var item in collectiondata)
+                            {
+                                if(centreid!= item.centreId)
+                                {
+                                    table.Cell().ColumnSpan(10).Border(0.5f, Unit.Point).Text(item.companyName).Style(TextStyle.Default.FontSize(10)).AlignCenter();  // Serial number
+                                    centreid = item.centreId;
+                                }
+                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                rowNumber++;
+                            }
+                        });
+
+                        // Page Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().AlignCenter().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(8));
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                        });
+                    });
+                });
+
+                // Generate the PDF byte array
+                byte[] pdfBytes = document.GeneratePdf();
+
+                // Save the PDF to file for debugging (optional)
+                File.WriteAllBytes("collection_report.pdf", pdfBytes);
+
+                return pdfBytes;  // Return the generated PDF
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return empty byte array in case of error
+                return new byte[0];
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.ClientRevenueReportData(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                // Query for data
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            select new
+                            {
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                                tb.grossAmount,
+                                tb.discount,
+                                tb.netAmount,
+                                tr.cashAmt,
+                                tr.onlinewalletAmt,
+                                tr.NEFTamt,
+                                tr.chequeAmt,
+                                tr.receivedBy,
+                                tr.receivedID,
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName
+                            };
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                }
+
+                // Get the data
+                var collectiondata = await Query.ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = collectiondata
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public byte[] ClientRevenueReportExcel(collectionReportRequestModel collectionData)
+        {
+            
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            select new
+                            {
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                                tb.grossAmount,
+                                tb.discount,
+                                tb.netAmount,
+                                tr.cashAmt,
+                                tr.onlinewalletAmt,
+                                tr.NEFTamt,
+                                tr.chequeAmt,
+                                tr.receivedBy,
+                                tr.receivedID,
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName
+                            };
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                }
+
+                // Get the data
+                var collectiondata =  Query.ToList();
+                var excelByte = MyFunction.ExportToExcel(collectiondata, "CollectionReport");
+                return excelByte;
+           
+        }
+
+        public byte[] ClientRevenueReportSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                // Query for data
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into g
+                            select new
+                            {
+                                CentreId = g.Key.centreId,
+                                CentreCode = g.Key.centrecode,
+                                CompanyName = g.Key.companyName,
+                                TotalGrossAmount = g.Sum(x => x.tb.grossAmount),
+                                TotalDiscount = g.Sum(x => x.tb.discount),
+                                TotalNetAmount = g.Sum(x => x.tb.netAmount),
+                                TotalCashAmount = g.Sum(x => x.tr.cashAmt),
+                                TotalOnlineWalletAmount = g.Sum(x => x.tr.onlinewalletAmt),
+                                TotalNEFTAmount = g.Sum(x => x.tr.NEFTamt),
+                                TotalChequeAmount = g.Sum(x => x.tr.chequeAmt),
+                                TotalTransactions = g.Count()
+                            };
+
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.CentreId));
+                }
+
+                // Get the summarized data
+                var collectiondata = Query.ToList();
+
+                // If no data found, return an empty PDF
+                if (collectiondata.Count == 0)
+                {
+                    return new byte[0]; // Zero-byte return when no data exists
+                }
+
+                // Log or Debug to confirm data is loaded
+                Console.WriteLine($"Found {collectiondata.Count} records.");
+
+                // QuestPDF document generation
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                // Handling the company logo
+                var image1 = _configuration["FileBase64:CompanyLogo1"];
+                byte[] image1Bytes = null;
+
+                if (!string.IsNullOrEmpty(image1))
+                {
+                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+                }
+
+                // Generate the PDF document
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+
+                        // Page Header
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                        });
+
+                        // Table Layout
+                        page.Content().Table(table =>
+                        {
+                            // Define the columns
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
+                                columns.RelativeColumn();  // Patient Name
+                                columns.RelativeColumn();  // Booking Date
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cash column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cheque column
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Wallet column
+                            });
+
+                            // Add table header
+                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("CentreName").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+
+                            // Populate table rows
+                            int rowNumber = 1;
+                            int centreid = 0;
+                            foreach (var item in collectiondata)
+                            {
+                                
+                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                table.Cell().Text(item.CompanyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                table.Cell().Text(item.TotalCashAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                table.Cell().Text(item.TotalChequeAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                table.Cell().Text(item.TotalOnlineWalletAmount.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                rowNumber++;
+                            }
+                        });
+
+                        // Page Footer
+                        page.Footer().Column(column =>
+                        {
+                            column.Item().AlignCenter().Text(text =>
+                            {
+                                text.DefaultTextStyle(x => x.FontSize(8));
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                        });
+                    });
+                });
+
+                // Generate the PDF byte array
+                byte[] pdfBytes = document.GeneratePdf();
+
+                // Save the PDF to file for debugging (optional)
+                File.WriteAllBytes("collection_report.pdf", pdfBytes);
+
+                return pdfBytes;  // Return the generated PDF
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // Return empty byte array in case of error
+                return new byte[0];
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.ClientRevenueReportDataSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var Query = from tb in db.tnx_Booking
+                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                            join cm in db.centreMaster on tb.centreId equals cm.centreId
+                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                            group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into g
+                            select new
+                            {
+                                CentreId = g.Key.centreId,
+                                CentreCode = g.Key.centrecode,
+                                CompanyName = g.Key.companyName,
+                                TotalGrossAmount = g.Sum(x => x.tb.grossAmount),
+                                TotalDiscount = g.Sum(x => x.tb.discount),
+                                TotalNetAmount = g.Sum(x => x.tb.netAmount),
+                                TotalCashAmount = g.Sum(x => x.tr.cashAmt),
+                                TotalOnlineWalletAmount = g.Sum(x => x.tr.onlinewalletAmt),
+                                TotalNEFTAmount = g.Sum(x => x.tr.NEFTamt),
+                                TotalChequeAmount = g.Sum(x => x.tr.chequeAmt),
+                                TotalTransactions = g.Count()
+                            };
+
+                if (collectionData.centreIds.Count > 0)
+                {
+                    Query = Query.Where(q => collectionData.centreIds.Contains(q.CentreId));
+                }
+
+                // Get the summarized data
+                var summaryData = await Query.ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = summaryData
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public byte[] ClientRevenueReportExcelSummury(collectionReportRequestModel collectionData)
+        {
+            var Query = from tb in db.tnx_Booking
+                        join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                        join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                        group new { tb, tr, cm } by new { tb.centreId, cm.centrecode, cm.companyName } into g
+                        select new
+                        {
+                            CentreId = g.Key.centreId,
+                            CentreCode = g.Key.centrecode,
+                            CompanyName = g.Key.companyName,
+                            TotalGrossAmount = g.Sum(x => x.tb.grossAmount),
+                            TotalDiscount = g.Sum(x => x.tb.discount),
+                            TotalNetAmount = g.Sum(x => x.tb.netAmount),
+                            TotalCashAmount = g.Sum(x => x.tr.cashAmt),
+                            TotalOnlineWalletAmount = g.Sum(x => x.tr.onlinewalletAmt),
+                            TotalNEFTAmount = g.Sum(x => x.tr.NEFTamt),
+                            TotalChequeAmount = g.Sum(x => x.tr.chequeAmt),
+                            TotalTransactions = g.Count()
+                        };
+
+            if (collectionData.centreIds.Count > 0)
+            {
+                Query = Query.Where(q => collectionData.centreIds.Contains(q.CentreId));
+            }
+
+            // Get the summarized data
+            var summaryData = Query.ToList();
+            var excelByte = MyFunction.ExportToExcel(summaryData, "CollectionSummaryReport");
+            return excelByte;
+        }
+
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetPendingPayment(string workOrderId)
+        {
+            try
+            {
+                var pendingPay = (from tb in db.tnx_Booking
+                                  where tb.workOrderId == workOrderId
+                                  select new
+                                  {
+                                      DueAmt = tb.grossAmount - tb.paidAmount
+                                  }).FirstOrDefault();
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = pendingPay
+                };
+            }
+            catch(Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message= ex.Message
+                };
             }
         }
     }

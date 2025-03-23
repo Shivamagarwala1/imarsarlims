@@ -5,6 +5,7 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static QuestPDF.Helpers.Colors;
 
 namespace iMARSARLIMS.Services
 {
@@ -34,6 +35,8 @@ namespace iMARSARLIMS.Services
                           Name = string.Concat(em.fName, " ", em.lName),
                           DefaultRole = em.defaultrole.ToString(),
                           DefaultCenter = em.defaultcentre.ToString(),
+                            allowTicket = em.allowTicket,
+                          allowTicketRole= em.allowTicketRole,
                           tempPassword = string.IsNullOrEmpty(em.tempPassword) ? "" : em.tempPassword,
                           image = string.IsNullOrEmpty(em.fileName) ? _configuration["FileBase64:profilePic"] : em.fileName
                           // Optional: remove if unnecessary
@@ -102,6 +105,9 @@ namespace iMARSARLIMS.Services
                         await SaveEmpRoleAccess(empmaster.addEmpRoleAccess, employeeId);
                         await SaveEmpCentreAccess(empmaster.addEmpCentreAccess, employeeId);
                         await SaveEmpDepartmentAccess(empmaster.addEmpDepartmentAccess, employeeId);
+                        var roleids = empmaster.addEmpRoleAccess.Select(l => l.roleId).ToList();
+                        var menuAcccessdata = db.RolePageAccess.Where(r => roleids.Contains(r.roleid)).ToList();
+                        await saveRolemenuAccess(menuAcccessdata, employeeId);
                         await transaction.CommitAsync();
                         var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
@@ -193,11 +199,42 @@ namespace iMARSARLIMS.Services
                 isdeviceAuthentication = empmaster.isdeviceAuthentication,
                 tempPassword = empmaster.tempPassword,
                 indentIssue = empmaster.indentIssue,
-                IndentApprove = empmaster.IndentApprove
+                IndentApprove = empmaster.IndentApprove,
+                allowTicket= empmaster.allowTicket,
+                allowTicketRole= empmaster.allowTicketRole
 
             };
         }
 
+        private async Task<ServiceStatusResponseModel> saveRolemenuAccess(IEnumerable<RolePageAccess> pageacess, int employeeid)
+        {
+            if (pageacess != null)
+            {
+                var pageaccessData = pageacess.Select(page => CreateRolemenuAcess(page, employeeid)).ToList();
+                if (pageaccessData.Any())
+                {
+                    db.roleMenuAccess.AddRange(pageaccessData);
+                    await db.SaveChangesAsync();
+                }
+            }
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    
+                };
+        }
+        private roleMenuAccess CreateRolemenuAcess(RolePageAccess pageaccess, int employeeid)
+        {
+            return new roleMenuAccess
+            {
+                id=0,
+                roleId=pageaccess.roleid,
+                menuId= pageaccess.parentmenuid,
+                subMenuId= pageaccess.submenuId,
+                employeeId=employeeid,
+                isActive=true
+            };
+        }
         private async Task<ServiceStatusResponseModel> SaveEmpRoleAccess(IEnumerable<empRoleAccess> emproleaccess, int employeeId)
         {
             if (emproleaccess != null)
@@ -339,6 +376,8 @@ namespace iMARSARLIMS.Services
             EmpMaster.tempPassword = empmaster.tempPassword;
             EmpMaster.indentIssue = empmaster.indentIssue;
             EmpMaster.IndentApprove = empmaster.IndentApprove;
+            EmpMaster.allowTicket= empmaster.allowTicket;
+            EmpMaster.allowTicketRole= empmaster.allowTicketRole;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)

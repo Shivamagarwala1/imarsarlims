@@ -14,6 +14,7 @@ namespace iMARSARLIMS.Model.Master
         public double percentage { get; set; }
         public double Amount { get; set; }
         public byte type { get; set; }
+        public int absorbedBy { get; set; }
         public int CreatedBYID { get; set; }
         public string createdbyName { get; set; }
         public DateTime createdDate { get; set; }

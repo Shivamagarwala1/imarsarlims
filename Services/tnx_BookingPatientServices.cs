@@ -71,7 +71,8 @@ namespace iMARSARLIMS.Services
                         await SaveBookingStatus(TnxBookingData.addBookingStatus, patientId, transactionId);
                         var preprintedbarcode = db.centreMaster.Where(c => c.centreId == tnxBookingPatient.centreId).Select(c => c.isPrePrintedBarcode).FirstOrDefault();
                         var barcodeno = "";
-                        if (preprintedbarcode == 0)
+                        var isappointment = TnxBookingData.isAppointment;
+                        if (preprintedbarcode == 0 && isappointment==0)
                         {
                             barcodeno = _MySql_Function_Services.GetBarcodeno(tnxBookingPatient.centreId);
                             foreach (var item in TnxBookingData.addBookingItem)

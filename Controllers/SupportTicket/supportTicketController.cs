@@ -60,11 +60,11 @@ namespace iMARSARLIMS.Controllers.SupportTicket
             }
         }
         [HttpPost("closeTicket")]
-        public async Task<ServiceStatusResponseModel> closeTicket(int ticketId, string actionTaken, int UserId)
+        public async Task<ServiceStatusResponseModel> closeTicket(int ticketId, string closeRemark, int UserId)
         {
             try
             {
-                var result = await _supportTicketServices.closeTicket(ticketId, actionTaken,  UserId);
+                var result = await _supportTicketServices.closeTicket(ticketId, closeRemark,  UserId);
                 return result;
             }
             catch (Exception ex)
@@ -94,12 +94,65 @@ namespace iMARSARLIMS.Controllers.SupportTicket
             }
         }
 
-        [HttpGet("GetTicketDetails")]
-        public async Task<ServiceStatusResponseModel> GetTicketDetails()
+        [HttpPost("HoldTicket")]
+        public async Task<ServiceStatusResponseModel> HoldTicket(int ticketId, string HoldReason, int UserId)
         {
             try
             {
-                var result = await _supportTicketServices.GetTicketDetails();
+                var result = await _supportTicketServices.HoldTicket(ticketId, HoldReason, UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("RejectTicket")]
+        public async Task<ServiceStatusResponseModel> RejectTicket(int ticketId, string rejectedReason, int UserId)
+        {
+            try
+            {
+                var result = await _supportTicketServices.RejectTicket(ticketId, rejectedReason, UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("CompleteTicket")]
+        public async Task<ServiceStatusResponseModel> CompleteTicket(int ticketId, string ActionTaken, int UserId)
+        {
+            try
+            {
+                var result = await _supportTicketServices.CompleteTicket(ticketId, ActionTaken, UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
+        [HttpGet("GetTicketDetails")]
+        public async Task<ServiceStatusResponseModel> GetTicketDetails(DateTime FromDate, DateTime Todate, int Status,int assingedto, string Datetype, int roleid)
+        {
+            try
+            {
+                var result = await _supportTicketServices.GetTicketDetails(FromDate,Todate,Status, assingedto,Datetype,roleid);
                 return result;
             }
             catch (Exception ex)

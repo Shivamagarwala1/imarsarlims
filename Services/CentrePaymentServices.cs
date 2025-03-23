@@ -26,24 +26,8 @@ namespace iMARSARLIMS.Services
                 {
                     if (centrePayments.apprvoedByID == 0)
                     {
-                        var DocumentName = "";
-                        if (centrePayments.paymentRecieptFile != null)
-                        {
-                            var DocName = UploadPaymentReciept(centrePayments.paymentRecieptFile).ToString();
-                            if (DocName.Split("#")[1] == "1")
-                            {
-                                DocumentName = DocName.Split("#")[1];
-                            }
-                            else
-                            {
-                                return new ServiceStatusResponseModel
-                                {
-                                    Success = false,
-                                    Message = DocName.Split("#")[1]
-                                };
-                            }
-                        }
-                        var centerPaymentData = CreatePaymentData(centrePayments, DocumentName);
+
+                        var centerPaymentData = CreatePaymentData(centrePayments);
                         db.CentrePayment.Add(centerPaymentData);
                         await db.SaveChangesAsync();
                     }
@@ -78,7 +62,7 @@ namespace iMARSARLIMS.Services
 
             try
             {
-                string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedDocuments");
+                string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedPAymentReceipt");
                 if (!Directory.Exists(uploadPath))
                 {
                     Directory.CreateDirectory(uploadPath);
@@ -98,7 +82,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        public CentrePayment CreatePaymentData(CentrePaymentRequestModel centerpaymentmodel, string fileName)
+        public CentrePayment CreatePaymentData(CentrePaymentRequestModel centerpaymentmodel)
         {
             return new CentrePayment
             {
@@ -114,7 +98,7 @@ namespace iMARSARLIMS.Services
                 createdBy = centerpaymentmodel.createdBy,
                 createdDate = centerpaymentmodel.createdDate,
                 paymentType = centerpaymentmodel.paymentType,
-                documentName = fileName
+                documentName = centerpaymentmodel.fileName
 
             };
 
@@ -318,7 +302,7 @@ namespace iMARSARLIMS.Services
             try
             {
                 var result = await (from bp in db.tnx_Booking
-                                   // join bi in db.tnx_BookingItem on bp.workOrderId equals bi.workOrderId
+                                        // join bi in db.tnx_BookingItem on bp.workOrderId equals bi.workOrderId
                                     where bp.workOrderId == Workorderid && bp.isActive == 1
                                     select new
                                     {
@@ -511,7 +495,7 @@ namespace iMARSARLIMS.Services
             };
         }
 
-        async Task<ServiceStatusResponseModel> ICentrePaymentServices.GetRateList(int CentreId)
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.GetRateList(int ratetypeID)
         {
             try
             {
@@ -519,7 +503,7 @@ namespace iMARSARLIMS.Services
                                     join rttm in db.rateTypeTagging on rtm.rateTypeId equals rttm.rateTypeId
                                     join rtrl in db.rateTypeWiseRateList on rtm.rateTypeId equals rtrl.rateTypeId
                                     join im in db.itemMaster on rtrl.itemid equals im.itemId
-                                    where rtm.isActive == 1 && rttm.centreId == CentreId
+                                    where rtm.isActive == 1 && rttm.rateTypeId == ratetypeID
                                     orderby im.deptId, rtrl.itemid
                                     select new
                                     {
@@ -545,14 +529,14 @@ namespace iMARSARLIMS.Services
 
         }
 
-        byte[] ICentrePaymentServices.GetRateListPdf(int centreid)
+        byte[] ICentrePaymentServices.GetRateListPdf(int ratetypeID)
         {
             var result = (from rtm in db.rateTypeMaster
                           join rttm in db.rateTypeTagging on rtm.rateTypeId equals rttm.rateTypeId
                           join rtrl in db.rateTypeWiseRateList on rtm.rateTypeId equals rtrl.rateTypeId
                           join im in db.itemMaster on rtrl.itemid equals im.itemId
                           join cm in db.centreMaster on rttm.centreId equals cm.centreId
-                          where rtm.isActive == 1 && rttm.centreId == centreid
+                          where rtm.isActive == 1 && rttm.rateTypeId == ratetypeID
                           orderby im.deptId, rtrl.itemid
                           select new
                           {
@@ -671,7 +655,8 @@ namespace iMARSARLIMS.Services
                     };
                 }
                 catch (Exception ex)
-                {   await transaction.RollbackAsync();
+                {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -685,13 +670,13 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var result= ( from cm in db.centreMaster 
+                var result = (from cm in db.centreMaster
                               join cp in db.CentrePayment on cm.centreId equals cp.centreId
-                              where Centreids.Contains(cm.centreId) && cp.createdDate>=FromDate && cp.createdDate<=ToDate
+                              where Centreids.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
                               orderby cm.centreId
                               select new
                               {
-                                  CentreName= cm.companyName,
+                                  CentreName = cm.companyName,
                                   cp.paymentDate,
                                   cp.advancePaymentAmt,
                                   cp.paymentType,
@@ -705,7 +690,7 @@ namespace iMARSARLIMS.Services
                     Data = result
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ServiceStatusResponseModel
                 {
@@ -720,22 +705,22 @@ namespace iMARSARLIMS.Services
             try
             {
                 var result = await (from pb in db.tnx_Booking
-                              join pbi in db.tnx_BookingItem on pb.workOrderId equals pbi.workOrderId
-                              join cm in db.centreMaster on pb.centreId equals cm.centreId
-                              join rm in db.rateTypeMaster on pb.rateId equals rm.id
-                              join tm in db.titleMaster on pb.title_id equals tm.id
-                              where pb.workOrderId== WorkOrderid
-                              select new
-                              {
-                                  tm.title,
-                                  pb.name,
-                                  pb.mobileNo,
-                                  Centre = cm.companyName,
-                                  Ratetype = rm.rateType,
-                                  pbi.investigationName,
-                                  pbi.itemId,
-                                  pbi.rate
-                              }).ToListAsync();
+                                    join pbi in db.tnx_BookingItem on pb.workOrderId equals pbi.workOrderId
+                                    join cm in db.centreMaster on pb.centreId equals cm.centreId
+                                    join rm in db.rateTypeMaster on pb.rateId equals rm.id
+                                    join tm in db.titleMaster on pb.title_id equals tm.id
+                                    where pb.workOrderId == WorkOrderid
+                                    select new
+                                    {
+                                        tm.title,
+                                        pb.name,
+                                        pb.mobileNo,
+                                        Centre = cm.companyName,
+                                        Ratetype = rm.rateType,
+                                        pbi.investigationName,
+                                        pbi.itemId,
+                                        pbi.rate
+                                    }).ToListAsync();
 
                 return new ServiceStatusResponseModel
                 {
@@ -760,13 +745,13 @@ namespace iMARSARLIMS.Services
                 var result = await (from pbi in db.tnx_BookingItem
                                     join im in db.itemMaster on pbi.itemId equals im.itemId
                                     join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
-                                    where pbi.workOrderId== WorkOrderid && rt.rateTypeId==rateTypeId
-                              select new
-                              {
-                                  im.itemId,
-                                  im.itemName,
-                                  rt.rate
-                              }).ToListAsync();
+                                    where pbi.workOrderId == WorkOrderid && rt.rateTypeId == rateTypeId
+                                    select new
+                                    {
+                                        im.itemId,
+                                        im.itemName,
+                                        rt.rate
+                                    }).ToListAsync();
 
                 return new ServiceStatusResponseModel
                 {
@@ -784,29 +769,75 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        public Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
-        {
-            throw new NotImplementedException();
-        }
+        //public Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type)
+        //public Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public async Task<ServiceStatusResponseModel> paymentRecieptUpload(IFormFile paymentReciept)
         {
-            throw new NotImplementedException();
+            string extension = Path.GetExtension(paymentReciept.FileName).ToLower();
+            if (extension != ".pdf" && extension != ".jpg" && extension != ".jpeg" && extension != ".png")
+            {
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = "No valid file extension found. Valid file extensions are (.jpg, .pdf, .png)"
+                };
+                // testing git 
+                // testing git 1 
+            }
+
+            try
+            {
+                string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "UploadedPAymentReceipt");
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+                string fileName = Guid.NewGuid().ToString() + extension;
+                string filePath = Path.Combine(uploadPath, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await paymentReciept.CopyToAsync(stream);
+                }
+
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Message = filePath
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success= true,
+                    Message= ex.Message
+                };
+            }
+
         }
     }
 }

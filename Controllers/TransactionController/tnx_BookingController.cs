@@ -750,7 +750,7 @@ namespace iMARSARLIMS.Controllers.transactionController
         {
             try
             {
-                var result = await _tnxBookingServices.DiscountReportData(collectionData);
+                var result = await _tnxBookingServices.DiscountReportDataSummury(collectionData);
                 return result;
             }
             catch (Exception ex)
@@ -833,5 +833,137 @@ namespace iMARSARLIMS.Controllers.transactionController
             }
         }
 
+
+
+        [HttpPost("ClientRevenueReport")]
+        public IActionResult ClientRevenueReport(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.ClientRevenueReport(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "ClientRevenueReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("ClientRevenueReportData")]
+        public async Task<ServiceStatusResponseModel> ClientRevenueReportData(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.ClientRevenueReportData(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
+        [HttpPost("ClientRevenueReportExcel")]
+        public IActionResult ClientRevenueReportExcel(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.ClientRevenueReportExcel(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DiscountReport.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("ClientRevenueReportSummury")]
+        public IActionResult ClientRevenueReportSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.ClientRevenueReportSummury(collectionData);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "ClientRevenueReportSummury.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+
+        [HttpPost("ClientRevenueReportDataSummury")]
+        public async Task<ServiceStatusResponseModel> ClientRevenueReportDataSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.ClientRevenueReportDataSummury(collectionData);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+
+        [HttpPost("ClientRevenueReportExcelSummury")]
+        public IActionResult ClientRevenueReportExcelSummury(collectionReportRequestModel collectionData)
+        {
+            try
+            {
+                var result = _tnxBookingServices.ClientRevenueReportExcelSummury(collectionData);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ClientRevenueReportSummury.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("GetPendingPayment")]
+        public async Task<ServiceStatusResponseModel> GetPendingPayment(string workOrderId)
+        {
+            try
+            {
+                var result = await _tnxBookingServices.GetPendingPayment(workOrderId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }

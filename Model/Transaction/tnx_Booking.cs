@@ -83,7 +83,6 @@ namespace iMARSARLIMS.Model.Transaction
         public string? invoiceNo { get; set; } = "";
         public int? salesExecutiveID { get; set; }
         public int isAppointment { get; set; } = 0;
-
         [ForeignKey(nameof(transactionId))]
         public List<tnx_BookingStatus>? addBookingStatus { get; set; }
         [ForeignKey(nameof(transactionId))]

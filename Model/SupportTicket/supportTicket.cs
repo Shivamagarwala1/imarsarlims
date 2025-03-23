@@ -15,14 +15,13 @@ namespace iMARSARLIMS.Model.SupportTicket
         public int Priority { get; set; }
         [MaxLength(500)]
         public string task { get; set; }
-        public string Document { get; set; }
+        public string? Document { get; set; }
         public DateTime CreateDate { get; set; }
         public int assignedTo { get; set; }
         public int AssignedBy { get; set; }
         public DateTime? AssignedDate { get; set; }
         public byte isAssigned {  get; set; }
         public byte isCompleted { get; set; }
-
         public int completedBy { get; set; }
         public DateTime? CompletedDate { get; set; }
         public DateTime? Deliverydate { get; set; }
@@ -33,6 +32,24 @@ namespace iMARSARLIMS.Model.SupportTicket
         public DateTime? ReopenDate { get; set; }
         [MaxLength(100)]
         public string? ReopenReason { get; set; }
+        public byte? isHold { get; set; }
+        public int? holdBy { get; set; }
+        [MaxLength(100)]
+        public string? holdReason { get; set; }
+        public DateTime? holdDate   { get; set; }
+        public byte? isRejected { get; set; }
+        public int? rejectedBy { get; set; }
+        [MaxLength(100)]
+        public string? rejectReason { get; set; }
+        public DateTime? rejectDate { get; set; }
+        public byte? isClosed { get; set; }
+        public int? closedBy { get; set; }
+        [MaxLength(100)]
+        public string? closedRemark { get; set; }
+        public DateTime? closedDate { get; set; }
+        [MaxLength(100)]
+        public string? CompleteRemark { get; set; }
+        public int? roleId { get; set; } = 1;
 
     }
 }

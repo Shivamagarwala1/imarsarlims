@@ -53,5 +53,13 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> DiscountAfterBill(DicountAfterBillRequestModel DiscountData);
         Task<ServiceStatusResponseModel> patientDataDiscount(string workorderId);
         Task<ServiceStatusResponseModel> TestRefund(testRefundModel RefundData);
+
+        byte[] ClientRevenueReport(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> ClientRevenueReportData(collectionReportRequestModel collectionData);
+        byte[] ClientRevenueReportExcel(collectionReportRequestModel collectionData);
+        byte[] ClientRevenueReportSummury(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> ClientRevenueReportDataSummury(collectionReportRequestModel collectionData);
+        byte[] ClientRevenueReportExcelSummury(collectionReportRequestModel collectionData);
+        Task<ServiceStatusResponseModel> GetPendingPayment(string workOrderId);
     }
 }

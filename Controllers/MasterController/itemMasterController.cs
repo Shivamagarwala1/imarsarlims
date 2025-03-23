@@ -210,6 +210,44 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+
+        [HttpGet("DownloadDOS")]
+        public IActionResult DownloadDOS()
+        {
+            try
+            {
+                var result = _itemMasterServices.DownloadDOS();
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "DOS.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("GetDOS")]
+        public async Task<ServiceStatusResponseModel> GetDOS()
+        {
+            try
+            {
+                var result = await _itemMasterServices.GetDOS();
+                return result;
+                
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }
 

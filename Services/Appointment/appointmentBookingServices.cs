@@ -165,6 +165,7 @@ namespace iMARSARLIMS.Services.Appointment
                                 tb.grossAmount,
                                 tb.discount,
                                 tb.netAmount,
+                                tb.rateId,
                                 SceduleDate = ap.AppointmentScheduledOn.ToString("yyyy-MMM-dd hh:mm tt"),
                                 BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
                                 Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),

@@ -13,5 +13,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetRateTypeRateListData(int ratetypeid, int deptId, int itemid);
         Task<ServiceStatusResponseModel> GetItemrateListData(int itemid);
         Task<ServiceStatusResponseModel> SaveRateListFromExcel(IFormFile ratelistexcel);
+        Task<ServiceStatusResponseModel> GetRateType(int employeeId);
     }
 }

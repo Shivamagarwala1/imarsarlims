@@ -35,6 +35,7 @@ namespace iMARSARLIMS.Services
                                       im.itemName,
                                       im.deptId,
                                       deptname = "",
+                                      absorbedBy = (dsm != null) ? dsm.absorbedBy : 0,
                                       percentage = (dsm != null) ? dsm.percentage : 0,
                                       Amount = (dsm != null) ? dsm.Amount : 0
                                   }).ToListAsync();
@@ -52,6 +53,7 @@ namespace iMARSARLIMS.Services
                                       itemName = "",
                                       DeptId = ld.id,
                                       ld.deptName,
+                                      absorbedBy = (dsm != null) ? dsm.absorbedBy : 0,
                                       percentage = (dsm != null) ? dsm.percentage : 0,
                                       Amount = (dsm != null) ? dsm.Amount : 0
                                   }).ToListAsync();
@@ -127,6 +129,7 @@ namespace iMARSARLIMS.Services
                 Centreid = newdata.Centreid,
                 percentage = newdata.percentage,
                 Amount = newdata.Amount,
+                absorbedBy = newdata.absorbedBy,
                 type = newdata.type,
                 CreatedBYID = newdata.CreatedBYID,
                 createdbyName = newdata.createdbyName,
@@ -143,6 +146,7 @@ namespace iMARSARLIMS.Services
             olddata.percentage = newdata.percentage;
             olddata.Amount = newdata.Amount;
             olddata.type = newdata.type;
+            olddata.absorbedBy = newdata.absorbedBy;
             olddata.CreatedBYID = newdata.CreatedBYID;
             olddata.createdbyName = newdata.createdbyName;
             olddata.createdDate = newdata.createdDate;

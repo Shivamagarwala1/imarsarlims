@@ -1,4 +1,6 @@
-﻿namespace iMARSARLIMS.Request_Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace iMARSARLIMS.Request_Model
 {
     public class CentrePaymentRequestModel
     {
@@ -19,6 +21,8 @@
         public int? updateByID { get; set; }
         public int? apprvoedByID { get; set; }
         public byte? paymentType { get; set; }
-        public IFormFile paymentRecieptFile { get; set; }
+        [MaxLength(300)]
+        public string? fileName { get; set; }
+
     }
 }

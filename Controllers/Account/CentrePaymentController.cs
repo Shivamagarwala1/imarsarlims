@@ -28,6 +28,7 @@ namespace iMARSARLIMS.Controllers.Account
         public async Task<ServiceStatusResponseModel> SubmitPayment(CentrePaymentRequestModel centrePayments)
         {
             try
+
             {
                 var result = await _CentrePaymentServices.SubmitPayment(centrePayments);
                 return result;
@@ -42,7 +43,26 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
-        [HttpGet("LedgerStatus")]
+        [HttpPost("paymentRecieptUpload")]
+        public async Task<ServiceStatusResponseModel> paymentRecieptUpload(IFormFile paymentReciept)
+        {
+            try
+
+            {
+                var result = await _CentrePaymentServices.paymentRecieptUpload(paymentReciept);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        [HttpPost("LedgerStatus")]
         public async Task<ServiceStatusResponseModel> LedgerStatus(List<int> CentreId)
         {
             try
@@ -60,7 +80,7 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
-        [HttpGet("ClientLedgerStatus")]
+        [HttpPost("ClientLedgerStatus")]
         public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
         {
             try
@@ -149,7 +169,7 @@ namespace iMARSARLIMS.Controllers.Account
 
 
         [HttpPost("PaymentApproveReject")]
-        public async Task<ServiceStatusResponseModel> PaymentApproveReject(CentrePaymetVerificationRequestModel CentrePaymetVerificationRequest)
+        public async Task<ServiceStatusResponseModel> PaymentApproveReject1(CentrePaymetVerificationRequestModel CentrePaymetVerificationRequest)
         {
             try
             {
@@ -167,11 +187,11 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
         [HttpGet("GetRateList")]
-        public async Task<ServiceStatusResponseModel> GetRateList(int CentreId)
+        public async Task<ServiceStatusResponseModel> GetRateList(int ratetypeID)
         {
             try
             {
-                var result = await _CentrePaymentServices.GetRateList(CentreId);
+                var result = await _CentrePaymentServices.GetRateList(ratetypeID);
                 return result;
             }
             catch (Exception ex)
@@ -184,11 +204,11 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
         [HttpGet("GetRateListPdf")]
-        public IActionResult GetRateListPdf(int centreid)
+        public IActionResult GetRateListPdf(int ratetypeID)
         {
             try
             {
-                var result =  _CentrePaymentServices.GetRateListPdf(centreid);
+                var result =  _CentrePaymentServices.GetRateListPdf(ratetypeID);
                 MemoryStream ms = new MemoryStream(result);
                 return new FileStreamResult(ms, "application/pdf")
                 {
@@ -276,95 +296,97 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
-        [HttpPost("ChangeBillingCentre")]
-        public async Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
-        {
-            try
-            {
-                var result = await _CentrePaymentServices.ChangeBillingCentre(WorkOrderId,Centre, RateType);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
-        }
 
-        [HttpGet("GetPatientForSettelmet")]
-        public async Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
-        {
-            try
-            {
-                var result = await _CentrePaymentServices.GetPatientForSettelmet(CentreId,FromDate,ToDate);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
-        }
 
-        [HttpPost("UpdatePatientSettelment")]
-        public async Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
-        {
-            try
-            {
-                var result = await _CentrePaymentServices.UpdatePatientSettelment(SettelmentData);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
-        }
+        //[HttpPost("ChangeBillingCentre")]
+        //public async Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
+        //{
+        //    try
+        //    {
+        //        var result = await _CentrePaymentServices.ChangeBillingCentre(WorkOrderId,Centre, RateType);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ServiceStatusResponseModel
+        //        {
+        //            Success = false,
+        //            Message = ex.Message
+        //        };
+        //    }
+        //}
 
-        [HttpPost("CentreRateChange")]
-        public async Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
-        {
-            try
-            {
-                var result = await _CentrePaymentServices.CentreRateChange(Centre,FromDate,ToDate);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
-        }
+        //[HttpGet("GetPatientForSettelmet")]
+        //public async Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
+        //{
+        //    try
+        //    {
+        //        var result = await _CentrePaymentServices.GetPatientForSettelmet(CentreId,FromDate,ToDate);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ServiceStatusResponseModel
+        //        {
+        //            Success = false,
+        //            Message = ex.Message
+        //        };
+        //    }
+        //}
 
-        [HttpGet("LedgerStatement")]
-        public async Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate,string type)
-        {
-            try
-            {
-                var result = await _CentrePaymentServices.LedgerStatement(CentreId, FromDate, ToDate,type);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
-        }
+        //[HttpPost("UpdatePatientSettelment")]
+        //public async Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
+        //{
+        //    try
+        //    {
+        //        var result = await _CentrePaymentServices.UpdatePatientSettelment(SettelmentData);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ServiceStatusResponseModel
+        //        {
+        //            Success = false,
+        //            Message = ex.Message
+        //        };
+        //    }
+        //}
+
+        //[HttpPost("CentreRateChange")]
+        //public async Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
+        //{
+        //    try
+        //    {
+        //        var result = await _CentrePaymentServices.CentreRateChange(Centre,FromDate,ToDate);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ServiceStatusResponseModel
+        //        {
+        //            Success = false,
+        //            Message = ex.Message
+        //        };
+        //    }
+        //}
+
+        //[HttpGet("LedgerStatement")]
+        //public async Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate,string type)
+        //{
+        //    try
+        //    {
+        //        var result = await _CentrePaymentServices.LedgerStatement(CentreId, FromDate, ToDate,type);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ServiceStatusResponseModel
+        //        {
+        //            Success = false,
+        //            Message = ex.Message
+        //        };
+        //    }
+        //}
 
     }
 }

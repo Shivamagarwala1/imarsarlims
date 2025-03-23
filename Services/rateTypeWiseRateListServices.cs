@@ -317,5 +317,31 @@ namespace iMARSARLIMS.Services
                 };
             }
         }
+
+        async Task<ServiceStatusResponseModel> IrateTypeWiseRateListServices.GetRateType(int employeeId)
+        {
+            try
+            {
+                var centreids = db.empCenterAccess.Where(e => e.empId == employeeId).Select(e => e.centreId).ToList();
+                var ratetype=await  ( from rt in db.rateTypeMaster
+                                join rtt in db.rateTypeTagging on rt.id equals rtt.rateTypeId
+                                where centreids.Contains(rtt.centreId )
+                                select new
+                                {
+                                    rt.id,
+                                    rt.rateName
+                                }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = ratetype
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                { Success = false, Message = ex.Message };
+            }
+        }
     }
 }

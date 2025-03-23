@@ -76,6 +76,111 @@ namespace iMARSARLIMS.Controllers.MasterController
 
             }
         }
+        [HttpGet("DoctorBussinessReport")]
+        public async Task<ServiceStatusResponseModel> DoctorBussinessReport(string DoctorId,string centreID, DateTime FromDate,DateTime ToDate )
+        {
+            try
+            {
+                var result = await _doctorReferalServices.DoctorBussinessReport( DoctorId,centreID,FromDate,ToDate);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+        [HttpGet("DoctorBussinessReportSummury")]
+        public async Task<ServiceStatusResponseModel> DoctorBussinessReportSummury(string DoctorId, string centreID, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = await _doctorReferalServices.DoctorBussinessReportSummury(DoctorId, centreID, FromDate, ToDate);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+
+            }
+        }
+
+        [HttpGet("DoctorBussinessReportPdf")]
+        public IActionResult DoctorBussinessReportPdf(string DoctorId, string centreID, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result =  _doctorReferalServices.DoctorBussinessReportPdf(DoctorId, centreID, FromDate, ToDate);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "DoctorBussinessReport.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("DoctorBussinessReportSummuryPdf")]
+        public IActionResult DoctorBussinessReportSummuryPdf(string DoctorId, string centreID, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = _doctorReferalServices.DoctorBussinessReportSummuryPdf(DoctorId, centreID, FromDate, ToDate);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "DoctorBussinessreportsummury.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+        }
+
+        [HttpGet("DoctorBussinessReportExcel")]
+        public IActionResult DoctorBussinessReportExcel(string DoctorId, string centreID, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = _doctorReferalServices.DoctorBussinessReportExcel(DoctorId, centreID, FromDate, ToDate);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DoctorBussinessReport.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("DoctorBussinessReportSummuryExcel")]
+        public IActionResult DoctorBussinessReportSummuryExcel(string DoctorId, string centreID, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = _doctorReferalServices.DoctorBussinessReportSummuryExcel(DoctorId, centreID, FromDate, ToDate);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DoctorBussinessReportSummury.xlsx");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+
+            }
+        }
+
 
     }
 }

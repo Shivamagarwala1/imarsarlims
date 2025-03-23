@@ -3,6 +3,7 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
 
 namespace iMARSARLIMS.Controllers.MasterController
 {
@@ -108,6 +109,25 @@ namespace iMARSARLIMS.Controllers.MasterController
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("GetRateType")]
+        public async Task<ServiceStatusResponseModel> GetRateType(int employeeId)
+        {
+            try
+            {
+                var result = await _rateTypeWiseRateListServices.GetRateType(employeeId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
             }
         }
     }
