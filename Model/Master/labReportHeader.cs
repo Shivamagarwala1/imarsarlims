@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Master
 {
@@ -7,7 +8,29 @@ namespace iMARSARLIMS.Model.Master
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
-        public string? headerCSS { get; set; }
+        [MaxLength(50)]
+        public string Name { get; set; }
+        [MaxLength(50)]
+        public string Label { get; set; }
+        public int printOrder { get; set; }
+        [MaxLength(50)]
+        public string Fname { get; set; }
+        [MaxLength(50)]
+        public int Fsize { get; set; }
+        [MaxLength(5)]
+        public string Bold { get; set; }
+        [MaxLength(5)]
+        public string Italic { get; set; }
+        [MaxLength(5)]
+        public string Under { get; set; }
+        [MaxLength(8)]
+        public string Alignment { get; set; }
+        public int Print { get; set; }
+        [MaxLength(20)]
+        public string P_forecolor { get; set; }
+     
+        public int Width { get; set; }
+        public int Height { get; set; }
 
     }
 }

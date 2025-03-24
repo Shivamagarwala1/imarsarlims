@@ -65,7 +65,7 @@ namespace iMARSARLIMS.Services
                                   }).ToList();
 
                 string htmlContent = "";
-                string HeaderContent = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).FirstOrDefault();
+                string HeaderContent =   db.ReportHeader.Select(l => l.reportHeader.ToString()).First();
                 StringBuilder sb = new StringBuilder();
 
                 var deptname = "";
@@ -123,7 +123,7 @@ namespace iMARSARLIMS.Services
                 htmlToPdfConverter.Document.PageSize = PdfPageSize.A4;   // A4 page size
                 htmlToPdfConverter.Document.PageOrientation = PdfPageOrientation.Portrait;
 
-                string htmlContent = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).FirstOrDefault();
+                string htmlContent = "";//  db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).FirstOrDefault();
 
                 StringBuilder sb = new StringBuilder();
                 sb.Append("<table border='1' style='border-collapse: collapse; width: 100%;'>"); // Add border and styles for clarity
