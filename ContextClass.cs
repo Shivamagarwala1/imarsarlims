@@ -1,6 +1,7 @@
 ﻿using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Model.Appointment;
 using iMARSARLIMS.Model.Master;
+using iMARSARLIMS.Model.Sales;
 using iMARSARLIMS.Model.Store;
 using iMARSARLIMS.Model.SupportTicket;
 using iMARSARLIMS.Model.Transaction;
@@ -14,8 +15,10 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<SupportTicketRemarks> SupportTicketRemarks { get; set; }
         public DbSet<supportTicket> supportTicket { get; set; }
         public DbSet<SupportTicketType> SupportTicketType { get; set; }
+        public DbSet<ReportHeader> ReportHeader { get; set; }
         public DbSet<routeMaster> routeMaster { get; set; }
         public DbSet<DoctorSpecialization> DoctorSpecialization { get; set; }
         public DbSet<doctorShareMaster> doctorShareMaster { get; set; }
@@ -131,6 +134,7 @@ namespace iMARSARLIMS
         public DbSet<machineObservationMapping> machineObservationMapping { get; set; }
         public DbSet<labDepartment> labDepartment { get; set; }
         public DbSet<centreInvoice> centreInvoice { get; set; }
+        public DbSet<SalesEmployeeTagging> SalesEmployeeTagging { get; set; }
         public DbSet<CentrePayment> CentrePayment { get; set; }
         public DbSet<ThemeColour> ThemeColour { get; set; }
         public DbSet<menuIconMaster> menuIconMaster { get; set; }
@@ -148,8 +152,11 @@ namespace iMARSARLIMS
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<area_master>().HasKey(x => x.id);
-            modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd(); 
+            modelBuilder.Entity<area_master>().Property(x => x.id).ValueGeneratedOnAdd();
 
+            modelBuilder.Entity<SupportTicketRemarks>().HasKey(x => x.id);
+            modelBuilder.Entity<SupportTicketRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
+            
             modelBuilder.Entity<supportTicket>().HasKey(x => x.id);
             modelBuilder.Entity<supportTicket>().Property(x => x.id).ValueGeneratedOnAdd(); 
 
@@ -175,7 +182,13 @@ namespace iMARSARLIMS
             modelBuilder.Entity<Indent>().Property(x => x.indentId).ValueGeneratedOnAdd();
             
             modelBuilder.Entity<indentDetail>().HasKey(x => x.id);
-            modelBuilder.Entity<indentDetail>().Property(x => x.id).ValueGeneratedOnAdd();
+            modelBuilder.Entity<indentDetail>().Property(x => x.id).ValueGeneratedOnAdd();// ReportHeader
+
+            modelBuilder.Entity<SalesEmployeeTagging>().HasKey(x => x.id);
+            modelBuilder.Entity<SalesEmployeeTagging>().Property(x => x.id).ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<ReportHeader>().HasKey(x => x.id);
+            modelBuilder.Entity<ReportHeader>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<ItemMasterStore>().HasKey(x => x.itemId);
             modelBuilder.Entity<ItemMasterStore>().Property(x => x.itemId).ValueGeneratedOnAdd();

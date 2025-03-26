@@ -171,6 +171,7 @@ namespace iMARSARLIMS.Services
                                         {
                                             pd.id,
                                             Name = em.fName + " " + em.lName,
+                                            em.empId,
                                             MenuMame = mm.menuName,
                                             SubMenuName = mm1.menuName,
                                             rm.roleName

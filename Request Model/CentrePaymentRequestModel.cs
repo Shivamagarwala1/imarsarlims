@@ -21,6 +21,8 @@ namespace iMARSARLIMS.Request_Model
         public int? updateByID { get; set; }
         public int? apprvoedByID { get; set; }
         public byte? paymentType { get; set; }
+        public string ChequeNo { get; set; }
+        public DateTime ChequeDate { get; set; }
         [MaxLength(300)]
         public string? fileName { get; set; }
 

@@ -48,7 +48,27 @@ namespace iMARSARLIMS.Services.SupportTicket
                                 st.isRejected,
                                 st.Document,st.roleId,
                                 ticketstatus = st.isClosed == 1 ? "closed" : st.isCompleted == 1 ? "Completed":st.isHold==1?"Hold":st.isRejected==1?"Rejected":st.isAssigned==1?"Assigned":"New",
-                                st.isClosed, CreateDateFilter= st.CreateDate,AssignedDatefilter= st.AssignedDate,DeliveryDatefilter= st.Deliverydate
+                                st.isClosed, CreateDateFilter= st.CreateDate,AssignedDatefilter= st.AssignedDate,DeliveryDatefilter= st.Deliverydate,
+                                completeRemarks = db.SupportTicketRemarks
+                            .Where(e => e.ticketId == st.id && e.status == "Complete")
+                            .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })
+                            .ToList(),
+                                closedRemarks = db.SupportTicketRemarks
+                            .Where(e => e.ticketId == st.id && e.status == "Closed")
+                            .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })
+                            .ToList(),
+                                reopenReasons = db.SupportTicketRemarks
+                            .Where(e => e.ticketId == st.id && e.status == "ReOpen")
+                            .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })
+                            .ToList(),
+                                holdRemarks = db.SupportTicketRemarks
+                            .Where(e => e.ticketId == st.id && e.status == "Hold")
+                            .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })
+                            .ToList(),
+                                rejectedRemarks = db.SupportTicketRemarks
+                            .Where(e => e.ticketId == st.id && e.status == "Reject")
+                            .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })
+                            .ToList()
                             };
                 if (roleid>0)
                 {
@@ -82,17 +102,21 @@ namespace iMARSARLIMS.Services.SupportTicket
                 {
                     Query = Query.Where(q => q.isHold == 1);
                 }
-                else if (Status == 3)
+                else if (Status == 4)
                 {
                     Query = Query.Where(q => q.isHold == 1);
                 }
-                else if (Status == 3)
+                else if (Status == 5)
                 {
                     Query = Query.Where(q => q.isRejected == 1);
                 }
-                else 
+                else if (Status == 6)
                 {
                     Query = Query.Where(q => q.isReopen == 1);
+                }
+                else 
+                {
+                   
                 }
                 if (assingedto > 0)
                 {
@@ -141,6 +165,7 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.assignedTo = AssigneTo;
                         ticket.Deliverydate = DeliveryDate;
                         ticket.AssignedBy = UserId;
+                        ticket.AssignedDate= DateTime.Now;
                         db.supportTicket.Update(ticket);
                         await db.SaveChangesAsync();
                         await transaction.CommitAsync();
@@ -186,6 +211,17 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.closedRemark= closeRemark;
                         db.supportTicket.Update(ticket);
                         await db.SaveChangesAsync();
+                        var remarkdata = new SupportTicketRemarks
+                        {
+                            id = 0,
+                            ticketId = ticketId,
+                            Remarks = closeRemark,
+                            status = "Closed",
+                            AddedDate = DateTime.UtcNow,
+                            addedBy = UserId
+                        };
+                        db.SupportTicketRemarks.Add(remarkdata);
+                        await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
                         {
@@ -228,6 +264,17 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.ReopenReason = reOpenReason;
                         ticket.ReopenDate = DateTime.Now;
                         db.supportTicket.Update(ticket);
+                        await db.SaveChangesAsync();
+                        var remarkdata = new SupportTicketRemarks
+                        {
+                            id = 0,
+                            ticketId = ticketId,
+                            Remarks = reOpenReason,
+                            status = "ReOpen",
+                            AddedDate = DateTime.UtcNow,
+                            addedBy = UserId
+                        };
+                        db.SupportTicketRemarks.Add(remarkdata);
                         await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
@@ -313,6 +360,17 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.holdDate= DateTime.Now;
                         db.supportTicket.Update(ticket);
                         await db.SaveChangesAsync();
+                        var remarkdata = new SupportTicketRemarks
+                        {
+                            id = 0,
+                            ticketId = ticketId,
+                            Remarks = HoldReason,
+                            status = "Hold",
+                            AddedDate = DateTime.UtcNow,
+                            addedBy = UserId
+                        };
+                        db.SupportTicketRemarks.Add(remarkdata);
+                        await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
                         {
@@ -356,6 +414,17 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.rejectDate = DateTime.Now;
                         db.supportTicket.Update(ticket);
                         await db.SaveChangesAsync();
+                        var remarkdata = new SupportTicketRemarks
+                        {
+                            id = 0,
+                            ticketId = ticketId,
+                            Remarks = rejectedReason,
+                            status = "Reject",
+                            AddedDate = DateTime.UtcNow,
+                            addedBy = UserId
+                        };
+                        db.SupportTicketRemarks.Add(remarkdata);
+                        await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
                         {
@@ -398,6 +467,17 @@ namespace iMARSARLIMS.Services.SupportTicket
                         ticket.completedBy = UserId;
                         ticket.CompletedDate = DateTime.Now;
                         db.supportTicket.Update(ticket);
+                        await db.SaveChangesAsync();
+                        var remarkdata = new SupportTicketRemarks
+                        {
+                            id = 0,
+                            ticketId = ticketId,
+                            Remarks = actionTaken,
+                            status = "Complete",
+                            AddedDate = DateTime.UtcNow,
+                            addedBy= UserId
+                        };
+                        db.SupportTicketRemarks.Add(remarkdata);
                         await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel

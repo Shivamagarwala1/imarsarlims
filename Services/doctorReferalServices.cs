@@ -229,8 +229,6 @@ namespace iMARSARLIMS.Services
                 {
                     Query = Query.Where(q => DoctorIds.Contains(q.DoctorId));
                 }
-                
-
                 var data = await Query.ToListAsync();
 
                 if (data.Count > 0)
@@ -271,15 +269,17 @@ namespace iMARSARLIMS.Services
                 var Query = from tb in db.tnx_Booking
                             join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
                             where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate && CentreIds.Contains(tb.centreId)
+                            orderby tb.refID1
                             select new
                             {
+                                tb.centreId,
                                 BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
                                 patientName = tb.name,
                                 tb.workOrderId,
                                 dr.doctorName,
                                 dr.doctorId,
                                 tb.grossAmount,
-                                tb.centreId,
+                                
                                 tb.discount,
                                 tb.netAmount,
                                 tb.paidAmount,
@@ -288,15 +288,28 @@ namespace iMARSARLIMS.Services
                 {
                     Query = Query.Where(q => DoctorIds.Contains(q.doctorId));
                 }
-               
+
                 var data = Query.ToList();
+                var totalRow = new
+                {
+                    centreId=0,
+                    BookingDate = "",
+                    patientName = "",
+                    workOrderId = "Total",
+                    doctorName = "",
+                    doctorId = 0,
+                    grossAmount = data.Sum(item => item.grossAmount),
+                    discount = data.Sum(item => item.discount),
+                    netAmount = data.Sum(item => item.netAmount),
+                    paidAmount= data.Sum(item => item.paidAmount)
+                };
+                data.Add(totalRow);
 
                 // If no data found, return an empty PDF
                 if (data.Count == 0)
                 {
                     return new byte[0]; // Zero-byte return when no data exists
                 }
-
                 QuestPDF.Settings.License = LicenseType.Community;
 
                 var document = Document.Create(container =>
@@ -328,33 +341,47 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(2f, Unit.Centimetre);// Net column
                             });
 
-                            // Add table header
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("VisitId").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Paid").Style(TextStyle.Default.FontSize(10).Bold());
-
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "Visit ID", "Patient Name", "Gross", "Discount", "Net","Paid" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
                             // Populate table rows
                             int rowNumber = 1;
                             int DoctorId = 0;
                             foreach (var item in data)
                             {
-                                if(DoctorId!=item.doctorId)
+                                if (DoctorId != item.doctorId)
                                 {
-                                    table.Cell().ColumnSpan(7).Border(0.5f,Unit.Point).Text(item.doctorName).Style(TextStyle.Default.FontSize(10)).AlignCenter();  // Visit ID
+                                    table.Cell().ColumnSpan(7).Border(0.5f, Unit.Point).Text(item.doctorName).Style(TextStyle.Default.FontSize(10)).AlignCenter();  // Visit ID
                                     DoctorId = item.doctorId;
                                 }
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.patientName).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
-                                table.Cell().Text(item.paidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                if (item.workOrderId != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.patientName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.paidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                }
+                                else
+                                {
+                                    table.Cell().Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.patientName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.paidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
 
+                                }
                                 rowNumber++;
                             }
                         });
@@ -399,11 +426,14 @@ namespace iMARSARLIMS.Services
                 List<int> DoctorIds = DoctorId.Split(',').Select(int.Parse).ToList();
                 List<int> CentreIds = centreID.Split(',').Select(int.Parse).ToList();
                 // Query for data
+                bool filterByDoctorIds = DoctorIds?.Count > 0;
+
                 var Query = from tb in db.tnx_Booking
                             join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
-                            where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate && CentreIds.Contains(tb.centreId)
+                            where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate
+                                  && CentreIds.Contains(tb.centreId)
+                                  && (!filterByDoctorIds || DoctorIds.Contains(dr.doctorId)) // Apply doctor filter inline
                             group tb by new { dr.doctorId, dr.doctorName } into g
-                           
                             select new
                             {
                                 DoctorId = g.Key.doctorId,
@@ -414,14 +444,18 @@ namespace iMARSARLIMS.Services
                                 TotalPaidAmount = g.Sum(x => x.paidAmount),
                             };
 
-                if (DoctorIds.Count > 0)
-                {
-                    Query = Query.Where(q => DoctorIds.Contains(q.DoctorId));
-                }
-               
-
+                // Execute the query
                 var data = Query.ToList();
-
+                var totalRow = new
+                {
+                    DoctorId = 0,
+                    DoctorName = "Total",
+                    TotalGrossAmount = data.Sum(item => item.TotalGrossAmount),
+                    TotalDiscount = data.Sum(item => item.TotalDiscount),
+                    TotalNetAmount = data.Sum(item => item.TotalNetAmount),
+                    TotalPaidAmount = data.Sum(item => item.TotalPaidAmount)
+                };
+                data.Add(totalRow);
                 // If no data found, return an empty PDF
                 if (data.Count == 0)
                 {
@@ -458,24 +492,38 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
                             });
 
-                            // Add table header
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("DoctorName").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Paid").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "DoctorName", "Gross", "Discount", "Net", "Paid" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
 
-                            
                             int rowNumber = 1;
                             foreach (var item in data)
                             {
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.DoctorName).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.TotalPaidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                if (item.DoctorName != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.DoctorName).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.TotalPaidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                }
+                                else
+                                {
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.DoctorName).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.TotalPaidAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                }
                                 rowNumber++;
                             }
                         });
@@ -524,15 +572,17 @@ namespace iMARSARLIMS.Services
                 var Query = from tb in db.tnx_Booking
                             join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
                             where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate
+                            orderby tb.refID1
                             select new
                             {
+                                tb.centreId,
                                 BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
                                 patientName = tb.name,
                                 tb.workOrderId,
                                 dr.doctorName,
                                 dr.doctorId,
                                 tb.grossAmount,
-                                tb.centreId,
+                                
                                 tb.discount,
                                 tb.netAmount,
                                 tb.paidAmount,
@@ -546,6 +596,23 @@ namespace iMARSARLIMS.Services
                     Query = Query.Where(q => CentreIds.Contains(q.centreId));
                 }
                 var data = Query.ToList();
+                if (data.Count > 0)
+                {
+                    var totalRow = new
+                    {
+                        centreId = 0,
+                        BookingDate = "",
+                        patientName = "",
+                        workOrderId = "Total",
+                        doctorName = "",
+                        doctorId = 0,
+                        grossAmount = data.Sum(item => item.grossAmount),
+                        discount = data.Sum(item => item.discount),
+                        netAmount = data.Sum(item => item.netAmount),
+                        paidAmount = data.Sum(item => item.paidAmount)
+                    };
+                    data.Add(totalRow);
+                }
 
                 var excelByte = MyFunction.ExportToExcel(data, "LedgerReportExcel");
                 return excelByte;
@@ -562,10 +629,13 @@ namespace iMARSARLIMS.Services
             {
                 List<int> DoctorIds = DoctorId.Split(',').Select(int.Parse).ToList();
                 List<int> CentreIds = centreID.Split(',').Select(int.Parse).ToList();
-                // Query for data
+                bool filterByDoctorIds = DoctorIds?.Count > 0;
+
                 var Query = from tb in db.tnx_Booking
                             join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
-                            where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate &&  CentreIds.Contains(tb.centreId)
+                            where tb.bookingDate >= FromDate && tb.bookingDate <= ToDate
+                                  && CentreIds.Contains(tb.centreId)
+                                  && (!filterByDoctorIds || DoctorIds.Contains(dr.doctorId)) // Apply doctor filter inline
                             group tb by new { dr.doctorId, dr.doctorName } into g
                             select new
                             {
@@ -577,13 +647,19 @@ namespace iMARSARLIMS.Services
                                 TotalPaidAmount = g.Sum(x => x.paidAmount),
                             };
 
-                if (DoctorIds.Count > 0)
-                {
-                    Query = Query.Where(q => DoctorIds.Contains(q.DoctorId));
-                }
-               
-
+                // Execute the query
                 var data = Query.ToList();
+                var totalRow = new
+                {
+                    DoctorId = 0,
+                    DoctorName = "Total",
+                    TotalGrossAmount = data.Sum(item => item.TotalGrossAmount),
+                    TotalDiscount = data.Sum(item => item.TotalDiscount),
+                    TotalNetAmount = data.Sum(item => item.TotalNetAmount),
+                    TotalPaidAmount = data.Sum(item => item.TotalPaidAmount)
+                };
+                data.Add(totalRow);
+
                 var excelByte = MyFunction.ExportToExcel(data, "LedgerReportExcel");
                 return excelByte;
 

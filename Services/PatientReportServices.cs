@@ -9,6 +9,7 @@ using IronBarCode;
 using iMARSARLIMS.Response_Model;
 using System.Text;
 using Microsoft.Extensions.Primitives;
+using HiQPdf;
 
 
 namespace iMARSARLIMS.Services
@@ -276,15 +277,17 @@ namespace iMARSARLIMS.Services
             // Query to fetch report data from multiple tables
             var Reportdata = (from tb in db.tnx_Booking
                               join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
+
                               join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                              join im in db.itemMaster on tbi.itemId equals im.itemId
                               join tos in db.tnx_Observations on tbi.id equals tos.testId
                               join tm in db.titleMaster on tb.title_id equals tm.id
                               join cm in db.centreMaster on tb.centreId equals cm.centreId
-                              join da in db.doctorApprovalMaster on tbi.approvalDoctor equals da.doctorId
+                             // join da in db.doctorApprovalMaster on tbi.approvalDoctor equals da.doctorId
                               where testIds.Contains(tbi.id) && tos.showInReport == 1
                               select new
                               {
-                                  da.signature,
+                                 // da.signature,
                                   tb.workOrderId,
                                   BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"), // Date formatting
                                   tm.title,
@@ -298,6 +301,7 @@ namespace iMARSARLIMS.Services
                                   tb.gender,
                                   tbi.barcodeNo,
                                   tbi.departmentName,
+                                  testId = tbi.id,
                                   tbi.investigationName,
                                   tos.observationName,
                                   tos.value,
@@ -312,6 +316,7 @@ namespace iMARSARLIMS.Services
                                   tos.isHeader,
                                   tbi.sampleTypeName,
                                   tos.isBold,
+                                  im.reportType,
                                   SampleCollectionDate = tbi.sampleCollectionDate,
                                   ResultDate = tbi.resultDate
                               }).ToList();
@@ -323,61 +328,88 @@ namespace iMARSARLIMS.Services
                 var headerSpace = 200;
                 var left = 30;
                 var right = 30;
+                PdfDocument pdfDocument = new PdfDocument();
+                PdfDocument tempDocument = new PdfDocument();
                 StringBuilder htmlContent = new StringBuilder();
+                var Header = db.ReportHeader.Select(l => l.reportHeader.ToString()).First();
 
-                // Define header template with placeholders for dynamic data
-                var Header = db.labReportHeader.Where(l => l.isActive == 1).Select(l => l.headerCSS.ToString()).First();
-                string investigationname = "";
-                htmlContent.AppendFormat("<div style='margin-left:{0}px; margin-right:{1}px'>",  left, right);
-
-                foreach (var item in Reportdata)
+                var dtTemp = db.labReportHeader.Where(l => l.isActive == 1).ToList();
+                var width = 0;
+                foreach (var dr in dtTemp)
                 {
-                    if (investigationname == "" || investigationname != item.investigationName)
-                    {
-                        if (!string.IsNullOrEmpty(investigationname))
-                        {
-                            htmlContent.AppendFormat("<div><img src='data:{0}' alt='Image' /></div>",item.signature);
-                            htmlContent.Append("<div style='page-break-before:always;'></div>"); 
-                        }
-                        var headerHtml = string.Format(Header,
-                            item.workOrderId,
-                            item.name,
-                            item.name,
-                            item.Age,
-                            "Dr. X", // Replace with actual data for referring doctor
-                            item.companyName,
-                            item.BookingDate,
-                            item.SampleCollectionDate,
-                            item.ResultDate,
-                            item.ResultDate,
-                            item.centrecode);
-
-                        htmlContent.AppendFormat("<div style='height:{0}px; margin-left:{1}px; margin-right:{2}px'></div>", headerSpace, left, right);
-                        htmlContent.Append(headerHtml); 
-                    }
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append("<table style='width:100%'>");
-                    if (investigationname != item.investigationName)
-                    {
-
-                        sb.AppendFormat("<tr><td colspan=4 >{0}</td></tr>", item.departmentName);
-                        sb.Append("<tr><td style='width:40%' >TestName</td><td style='width:20%'>Value</td><td style='width:20%'>Unit</td><td style='width:20%' >Display Reading</td></tr>");
-                        investigationname = item.investigationName;
-                    }
-                    sb.AppendFormat("<tr><td style='width:40%'>{0}</td><td style='width:20%' >{1}</td><td style='width:20%'>{2}</td><td style='width:20%' >{3}</td></tr>", item.observationName, item.value, item.unit, item.displayReading);
-                    htmlContent.Append(sb.ToString());
-                    htmlContent.Append("</div>");
+                    if (dr.Print == 1)
+                        width = width + dr.Width;
                 }
-                //string footerHtml = @" <div style='text-align:center; font-size:12px; margin-top:30px; margin-bottom:20px;'> <hr /><p>Powered by MyLab - 2025</p></div>";
-                //htmlContent.Append(footerHtml);
 
-                // Convert HTML content to PDF
+                StringBuilder sbCss = new StringBuilder();
+                sbCss.Append("<style>");
+                sbCss.Append(".divContent{page-break-inside:avoid;} ");
+                sbCss.Append(".tbData{width:" + width.ToString() + "px;}");
+                sbCss.Append(".tbData th{font-weight:bold;padding-bottom:5px;}");
+                sbCss.Append("table.tbOrganism { border-collapse: collapse;}");
+                sbCss.Append("table.tbOrganism, td.tbOrganism, th.tbOrganism{  border: 1px solid black;}");
+
+                foreach (var dr in dtTemp)
+                {
+                    sbCss.Append("." + dr.Name + "{font-family:" + dr.Fname + ";font-size:" + dr.Fsize.ToString() + "px;text-align:" + dr.Alignment.ToString() + ";");
+
+                    if (dr.Bold.ToString() == "Y")
+                        sbCss.Append("font-weight:bold;");
+
+                    if (dr.Under.ToString() == "1")
+                        sbCss.Append("text-decoration:underline;");
+
+                    if (dr.Italic.ToString() == "1")
+                        sbCss.Append("font-style:italic;");
+
+                    sbCss.Append("width:" + dr.Width.ToString() + "px;height:" + dr.Height.ToString() + "px; }");
+                }
+                sbCss.Append("</style>");
+                bool _FirstRow = true, _LastRow = false;
+
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i <= Reportdata.Count(); i++)
+                {
+                    if (_FirstRow)
+                    {
+                        sb.Append(sbCss.ToString());
+                        sb.Append("<div class='" + (Reportdata[i].reportType != 1 ? "" : "divContent") + "'><table class='tbData' >");
+                    }
+
+                    if (i == Reportdata.Count() - 1)
+                        _LastRow = true;
+
+                    if ((_FirstRow) ? (Reportdata.Count() == 1) : (Reportdata[i - 1].testId.ToString() != Reportdata[i].ToString()))
+                        sb.Append("</table></div>");
+
+                    if ((_FirstRow) ? (Reportdata.Count() == 1) : (Reportdata[i - 1].testId.ToString() != Reportdata[i].testId.ToString()))
+                    {
+                        sb.Append(sbCss.ToString());
+                        sb.Append("<div class='" + (Reportdata[i].reportType != 1 ? "" : "divContent") + "'><table class='tbData' >");
+                    }
+
+                    if ((_FirstRow) ? true : (Reportdata[i - 1].testId.ToString() != Reportdata[i].testId.ToString()))
+                    {
+                        sb.Append("<tr valign='top'>");
+                        sb.Append("<th colSpan='" + Reportdata.Count() + "' class='InvName'>" + Reportdata[i].investigationName.ToString() + "</th>");
+                        sb.Append("</tr>");
+                    }
+                    if (Reportdata[i].value.ToString() == "HEAD")
+                    {
+                        sb.Append("<tr valign='top'>");
+                        sb.Append("<th class='SubHeader' colspan='" + Reportdata.Count() + "'>" + Reportdata[i].observationName.ToString() + "</th>");
+                        sb.Append("</tr>");
+
+                    }
+                }
+                htmlContent.Append(sb.ToString());
                 byte[] pdfBytes = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent.ToString(), null);
-                return pdfBytes; 
+                return pdfBytes;
             }
             else
             {
-                return new byte[0]; 
+                return new byte[0];
             }
         }
 

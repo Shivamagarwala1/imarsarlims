@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using iMARSARLIMS;
 
@@ -10,9 +11,11 @@ using iMARSARLIMS;
 namespace iMARSARLIMS.Migrations
 {
     [DbContext(typeof(ContextClass))]
-    partial class ContextClassModelSnapshot : ModelSnapshot
+    [Migration("20250325051918_empmodelEdit")]
+    partial class empmodelEdit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4777,29 +4780,6 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("zoneMaster");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.Sales.SalesEmployeeTagging", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("SalesEmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TaggedById")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TaggedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("TaggedToId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("SalesEmployeeTagging");
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.Store.Indent", b =>
                 {
                     b.Property<int>("indentId")
@@ -4969,32 +4949,6 @@ namespace iMARSARLIMS.Migrations
                     b.ToTable("indentIssueDetail");
                 });
 
-            modelBuilder.Entity("iMARSARLIMS.Model.SupportTicket.SupportTicketRemarks", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("AddedDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Remarks")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<string>("status")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("ticketId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.ToTable("SupportTicketRemarks");
-                });
-
             modelBuilder.Entity("iMARSARLIMS.Model.SupportTicket.SupportTicketType", b =>
                 {
                     b.Property<int>("id")
@@ -5034,8 +4988,8 @@ namespace iMARSARLIMS.Migrations
 
                     b.Property<string>("ActionTaken")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("AssignedBy")
                         .HasColumnType("int");
@@ -5044,8 +4998,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CompleteRemark")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("CompletedDate")
                         .HasColumnType("datetime(6)");
@@ -5069,13 +5023,13 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ReopenReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("TicketSubject")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("assignedTo")
                         .HasColumnType("int");
@@ -5095,8 +5049,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("closedRemark")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("completedBy")
                         .HasColumnType("int");
@@ -5108,8 +5062,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("holdReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<byte>("isAssigned")
                         .HasColumnType("tinyint unsigned");
@@ -5133,8 +5087,8 @@ namespace iMARSARLIMS.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("rejectReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int?>("rejectedBy")
                         .HasColumnType("int");

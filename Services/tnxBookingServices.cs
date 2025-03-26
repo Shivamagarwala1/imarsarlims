@@ -4,6 +4,7 @@ using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 using MySqlX.XDevAPI.Common;
 using QuestPDF.Fluent;
@@ -128,7 +129,8 @@ namespace iMARSARLIMS.Services
                                 tb.centreId,
                                 tb.paymentMode,
                                 documnet = !string.IsNullOrEmpty(tb.uploadDocument) ? 1 : 0,
-                                DueAmt = tb.netAmount - tb.paidAmount
+                                DueAmt = tb.netAmount - tb.paidAmount,
+                                Status = cm.paymentModeId == 2 ? "Credit" : tb.paidAmount == 0 ? "UnPaid" :( tb.paidAmount < tb.netAmount &&tb.paidAmount>0)  ? "Partial Paid" : "Paid"
                             };
 
                 var fromDate = patientdata.FromDate.Date; // Strip the time portion
@@ -465,10 +467,10 @@ namespace iMARSARLIMS.Services
                                              tb.workOrderId,
                                              tb.transactionId,
                                              PatientName = tm.title + " " + tb.name,
-                                             Age= string.Concat(tb.ageYear,"Y /" , tb.gender),
+                                             Age = string.Concat(tb.ageYear, "Y /", tb.gender),
                                              tb.netAmount,
                                              tb.grossAmount,
-                                             testid= tbi.id,
+                                             testid = tbi.id,
                                              tbi.investigationName,
                                              tb.discount,
                                              tb.paidAmount,
@@ -511,7 +513,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetDispatchData(DispatchDataRequestModel patientdata)
+        async Task<ServiceStatusResponseModel> ItnxBookingServices.GetDispatchData(ODataQueryOptions<DispatchDataModel> queryOptions, DispatchDataRequestModel patientdata)
         {
             var query = from tb in db.tnx_Booking
                         join tbi in db.tnx_BookingItem on tb.transactionId equals tbi.transactionId
@@ -520,40 +522,47 @@ namespace iMARSARLIMS.Services
                         join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
                         join tm in db.titleMaster on tb.title_id equals tm.id
                         join em in db.empMaster on tb.createdById equals em.empId
-                        select new
+                        select new DispatchDataModel
                         {
                             bookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),
-                            tb.workOrderId,
+                            workOrderId= tb.workOrderId,
                             SampleRecievedDate = tbi.sampleReceiveDate.HasValue ? tbi.sampleReceiveDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             ApproveDate = tbi.approvedDate.HasValue ? tbi.approvedDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                             PatientName = string.Concat(tm.title, " ", tb.name),
                             Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D/", tb.gender),
-                            tbi.barcodeNo,
-                            tb.mobileNo,
+                            barcodeNo= tbi.barcodeNo,
+                            mobileNo = tb.mobileNo,
                             investigationName = tbi.isPackage == 1 ? string.Concat(tbi.packageName, "-", tbi.investigationName) : tbi.investigationName,
                             Remark = tb.labRemarks,
-                            cm.centrecode,
+                            centrecode=cm.centrecode,
                             centreName = cm.companyName,
-                            tbi.departmentName,
-                            tbi.isSampleCollected,
-                            tb.transactionId,
-                            tbi.sampleCollectionDate,
-                            im.reportType,
+                            departmentName = tbi.departmentName,
+                            isSampleCollected= tbi.isSampleCollected,
+                            transactionId= tb.transactionId,
+                            sampleCollectionDate = tbi.sampleCollectionDate,
+                            reportType=  (int)im.reportType,
                             Comment = "",
                             resultdone = tbi.isResultDone,
                             Approved = tbi.isApproved,
                             BokkingDateFilter = tb.bookingDate,
                             approvedDateFilter = tbi.approvedDate,
                             sampleReceiveDateFilter = tbi.sampleReceiveDate,
-                            tbi.centreId,
-                            tbi.itemId,
-                            tbi.deptId,
+                            centreId= tbi.centreId,
+                            itemId= tbi.itemId,
+                            deptId = tbi.deptId,
                             ReferDoctor = dr.doctorName,
                             CreatedBy = em.fName,
                             testId = tbi.id,
                             Email = tbi.isEmailsent,
                             Whatsapp = tbi.isWhatsApp,
-                            isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count()
+                            isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count(),
+                            status= tbi.Isprint==1?"Report print":tbi.hold==1?"Hold":tbi.isrerun==1?"Rerun":tbi.isApproved==1?"Approved":(tbi.isApproved==0 && tbi.isResultDone==1)?"ReSult Done":
+                            (tbi.isApproved==0 && tbi.isResultDone==0 && tbi.isSampleCollected=="Y")?"Sample Rec.":
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "S") ? "Sample Collected":
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "N") ? "Sample Not Collected" :
+                            (tbi.isSampleCollected == "R") ? "Sample Rejected":
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "Y" && (db.machine_result.Where(e=>e.testId==tbi.id).Count()>0)) ? "Machine Data":
+                            (db.tnx_OutsourceDetail.Where(o=>o.testId==tbi.id).Count()>0)?"OutSource":"",
 
 
                         };
@@ -604,11 +613,20 @@ namespace iMARSARLIMS.Services
 
 
             query = query.OrderBy(q => q.workOrderId).ThenBy(q => q.deptId);
-            var result = await query.ToListAsync();
+           // var result = await query.ToListAsync();
+
+            var totalCount = await query.CountAsync();
+            var paginatedData = (IQueryable<DispatchDataModel>)queryOptions.ApplyTo(query, new ODataQuerySettings
+            {
+                HandleNullPropagation = HandleNullPropagationOption.False
+            });
+
+            var result = await paginatedData.ToListAsync();
             return new ServiceStatusResponseModel
             {
                 Success = true,
-                Data = result
+                Data = result,
+                Count= totalCount
             };
         }
 
@@ -844,20 +862,18 @@ namespace iMARSARLIMS.Services
                                     columns.ConstantColumn(1.5f, Unit.Centimetre);
                                     columns.ConstantColumn(1.5f, Unit.Centimetre);
                                 });
-                                table.Cell().Text("Sr.No").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("BookingDate").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("VisitId").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("PatientName").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("TestName").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("Department").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("Centre").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("Coll.Date").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("Rec.Date").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("Res.Date").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("App.Date").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("BTOS").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("STOD").Style(TextStyle.Default.FontSize(10).Bold());
-                                table.Cell().Text("DTOR").Style(TextStyle.Default.FontSize(10).Bold());
+                               
+                                table.Header(header =>
+                                {
+                                    string[] headers = { "#", "BookingDate", "VisitId", "PatientName", "TestName", "Department", "Centre", "Coll.Date", "Rec.Date", "Res.Date", "App.Date", "BTOS", "STOD","DTOR" };
+                                    foreach (var title in headers)
+                                    {
+                                        header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                            .Text(title)
+                                            .Style(TextStyle.Default.FontSize(10).Bold());
+                                    }
+                                });
+
                                 var i = 0;
                                 foreach (var item in result)
                                 {
@@ -1605,14 +1621,18 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                // Query for data
-                var Query = from tb in db.tnx_Booking
+                var query = from tb in db.tnx_Booking
                             join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
                             where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
                             select new
                             {
-                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName,
+                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm tt"),
                                 tb.grossAmount,
                                 tb.discount,
                                 tb.netAmount,
@@ -1621,50 +1641,47 @@ namespace iMARSARLIMS.Services
                                 tr.NEFTamt,
                                 tr.chequeAmt,
                                 tr.receivedBy,
-                                tr.receivedID,
-                                tb.workOrderId,
-                                tb.name,
-                                tb.centreId,
-                                cm.centrecode,
-                                cm.companyName
+                                tr.receivedID
                             };
 
-                // If empIds and centreIds are provided, filter the query
-                if (collectionData.empIds.Count > 0)
+                // Apply filters before materializing data
+                if (collectionData.empIds.Any())
+                    query = query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+
+                if (collectionData.centreIds.Any())
+                    query = query.Where(q => collectionData.centreIds.Contains(q.centreId));
+
+                var collectiondata = query.ToList();
+
+                if (collectiondata.Any())
                 {
-                    // Filter by empIds (uncomment if needed)
-                    // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                    var totalRow = new
+                    {
+                        workOrderId = "",
+                        name = "",
+                        centreId = 0,
+                        centrecode = "",
+                        companyName = "Total",
+                        collectionDate = "",
+                        grossAmount = collectiondata.Sum(item => item.grossAmount),
+                        discount = collectiondata.Sum(item => item.discount),
+                        netAmount = collectiondata.Sum(item => item.netAmount),
+                        cashAmt = collectiondata.Sum(item => item.cashAmt),
+                        onlinewalletAmt = collectiondata.Sum(item => item.onlinewalletAmt),
+                        NEFTamt = collectiondata.Sum(item => item.NEFTamt),
+                        chequeAmt = collectiondata.Sum(item => item.chequeAmt),
+                        receivedBy = "",
+                        receivedID = (int?)null
+                    };
+                    collectiondata.Add(totalRow);
                 }
-                if (collectionData.centreIds.Count > 0)
+                else
                 {
-                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+                    return new byte[0]; // Return empty PDF if no data found
                 }
 
-                // Get the data
-                var collectiondata = Query.ToList();
-
-                // If no data found, return an empty PDF
-                if (collectiondata.Count == 0)
-                {
-                    return new byte[0]; // Zero-byte return when no data exists
-                }
-
-                // Log or Debug to confirm data is loaded
-                Console.WriteLine($"Found {collectiondata.Count} records.");
-
-                // QuestPDF document generation
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // Handling the company logo
-                var image1 = _configuration["FileBase64:CompanyLogo1"];
-                byte[] image1Bytes = null;
-
-                if (!string.IsNullOrEmpty(image1))
-                {
-                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
-                }
-
-                // Generate the PDF document
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -1673,93 +1690,95 @@ namespace iMARSARLIMS.Services
                         page.Margin(0.5f, Unit.Centimetre);
                         page.PageColor(Colors.White);
 
-                        // Page Header
-                        page.Header().Column(column =>
-                        {
-                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
-                        });
+                        // Header - Report Title
+                        page.Header().AlignCenter().Text("Collection Report")
+                            .Style(TextStyle.Default.FontSize(16).Bold());
 
-                        // Table Layout
+                        // Table with repeating header
                         page.Content().Table(table =>
                         {
-                            // Define the columns
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
-                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
-                                columns.RelativeColumn();  // Patient Name
-                                columns.RelativeColumn();  // Booking Date
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cash column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cheque column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Wallet column
+                                columns.ConstantColumn(1f, Unit.Centimetre);  // #
+                                columns.ConstantColumn(2f, Unit.Centimetre);  // Visit ID
+                                columns.RelativeColumn();                   // Name
+                                columns.ConstantColumn(4.0f, Unit.Centimetre); // Booking Date
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Gross
+                                columns.ConstantColumn(2f, Unit.Centimetre); // Discount
+                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Net
+                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Cash
+                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Cheque
+                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Wallet
                             });
 
-                            // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
+                            // **Repeating Header Row on Every Page**
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "Visit ID", "Patient Name", "Booking Date", "Gross", "Discount", "Net", "Cash", "Cheque", "Wallet" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
 
-                            // Populate table rows
+
                             int rowNumber = 1;
                             foreach (var item in collectiondata)
                             {
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
-                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
-                                table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
-                                table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
-                                table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                if (item.companyName != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.grossAmount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.discount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.netAmount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+
+                                }
+                                else
+                                {
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Total").Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.grossAmount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.discount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.netAmount.ToString("F2")).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                }
                                 rowNumber++;
                             }
+
                         });
 
-                        // Page Footer
-                        page.Footer().Column(column =>
+                        // Footer with Page Numbers
+                        page.Footer().AlignCenter().Text(text =>
                         {
-                            column.Item().AlignCenter().Text(text =>
-                            {
-                                text.DefaultTextStyle(x => x.FontSize(8));
-                                text.CurrentPageNumber();
-                                text.Span(" of ");
-                                text.TotalPages();
-                            });
+                            text.DefaultTextStyle(x => x.FontSize(8));
+                            text.CurrentPageNumber();
+                            text.Span(" of ");
+                            text.TotalPages();
                         });
                     });
                 });
 
-                // Generate the PDF byte array
-                byte[] pdfBytes = document.GeneratePdf();
-
-                // Save the PDF to file for debugging (optional)
-                File.WriteAllBytes("collection_report.pdf", pdfBytes);
-
-                return pdfBytes;  // Return the generated PDF
+                return document.GeneratePdf();
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
                 Console.WriteLine($"Error: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
-                // Return empty byte array in case of error
                 return new byte[0];
             }
         }
-
 
         public byte[] DiscountReport(collectionReportRequestModel collectionData)
         {
@@ -1772,20 +1791,19 @@ namespace iMARSARLIMS.Services
                             where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
                             select new
                             {
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName,
                                 collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
                                 tb.grossAmount,
                                 tb.discount,
                                 tb.netAmount,
                                 tr.receivedBy,
-                                tr.receivedID,
-                                tb.workOrderId,
-                                tb.name,
-                                tb.centreId,
-                                cm.centrecode,
-                                cm.companyName
-                            };
+                                receivedID = (int)tr.receivedID
 
-                // If empIds and centreIds are provided, filter the query
+                            };
                 if (collectionData.empIds.Count > 0)
                 {
                     // Filter by empIds (uncomment if needed)
@@ -1796,10 +1814,26 @@ namespace iMARSARLIMS.Services
                     Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
                 }
 
-                // Get the data
                 var collectiondata = Query.ToList();
 
-                // If no data found, return an empty PDF
+                if (collectiondata.Any())
+                {
+                    var totalRow = new
+                    {
+                        workOrderId = "",
+                        name = "",
+                        centreId = 0,
+                        centrecode = "",
+                        companyName = "Total",
+                        collectionDate = "",
+                        grossAmount = collectiondata.Sum(item => item.grossAmount),
+                        discount = collectiondata.Sum(item => item.discount),
+                        netAmount = collectiondata.Sum(item => item.netAmount),
+                        receivedBy = "",
+                        receivedID = 0
+                    };
+                    collectiondata.Add(totalRow);
+                }
                 if (collectiondata.Count == 0)
                 {
                     return new byte[0]; // Zero-byte return when no data exists
@@ -1811,16 +1845,6 @@ namespace iMARSARLIMS.Services
                 // QuestPDF document generation
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // Handling the company logo
-                var image1 = _configuration["FileBase64:CompanyLogo1"];
-                byte[] image1Bytes = null;
-
-                if (!string.IsNullOrEmpty(image1))
-                {
-                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
-                }
-
-                // Generate the PDF document
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -1845,31 +1869,46 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
                                 columns.RelativeColumn();  // Patient Name
                                 columns.RelativeColumn();  // Booking Date
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Net column
                             });
 
-                            // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "Visit ID", "Patient Name", "Booking Date", "Gross", "Discount", "Net" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
 
                             // Populate table rows
                             int rowNumber = 1;
                             foreach (var item in collectiondata)
                             {
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
-                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                if (item.companyName != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                    table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));
+                                }// Net
+                                else
+                                {
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));
+                                }
                                 rowNumber++;
                             }
                         });
@@ -2105,17 +2144,18 @@ namespace iMARSARLIMS.Services
                         where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
                         select new
                         {
-                            collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
-                            tb.grossAmount,
-                            tb.discount,
-                            tb.netAmount,
-                            tr.receivedBy,
-                            tr.receivedID,
                             tb.workOrderId,
                             tb.name,
                             tb.centreId,
                             cm.centrecode,
-                            cm.companyName
+                            cm.companyName,
+                            collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                            tb.grossAmount,
+                            tb.discount,
+                            tb.netAmount,
+                            receivedBy = tr.receivedBy.ToString(),
+                            tr.receivedID,
+
                         };
 
             if (collectionData.empIds.Count > 0)
@@ -2127,8 +2167,29 @@ namespace iMARSARLIMS.Services
                 Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
             }
 
-            // Get the data
             var collectiondata = Query.ToList();
+            var totalgross = collectiondata.Sum(item => item.grossAmount);
+            var totaldis = collectiondata.Sum(item => item.discount);
+            var totalNet = collectiondata.Sum(item => item.netAmount);
+
+            // Add total row
+            var totalRow = new
+            {
+                workOrderId = "",
+                name = "",
+                centreId = 0,
+                centrecode = "",
+                companyName = "Total",
+                collectionDate = "",  // Convert to string
+                grossAmount = totalgross,
+                discount = totaldis,
+                netAmount = totalNet,
+                receivedBy = "",
+                receivedID = (int?)null  // Ensure it's nullable int, not a string
+            };
+
+            collectiondata.Add(totalRow);
+
             var excelByte = MyFunction.ExportToExcel(collectiondata, "DiscountReport");
             return excelByte;
         }
@@ -2142,6 +2203,11 @@ namespace iMARSARLIMS.Services
                         where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
                         select new
                         {
+                            tb.workOrderId,
+                            tb.name,
+                            tb.centreId,
+                            cm.centrecode,
+                            cm.companyName,
                             collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
                             tb.grossAmount,
                             tb.discount,
@@ -2151,15 +2217,9 @@ namespace iMARSARLIMS.Services
                             tr.NEFTamt,
                             tr.chequeAmt,
                             tr.receivedBy,
-                            tr.receivedID,
-                            tb.workOrderId,
-                            tb.name,
-                            tb.centreId,
-                            cm.centrecode,
-                            cm.companyName
-                        };
+                            tr.receivedID
 
-            // If empIds and centreIds are provided, filter the query
+                        };
             if (collectionData.empIds.Count > 0)
             {
                 // Filter by empIds (uncomment if needed)
@@ -2169,9 +2229,32 @@ namespace iMARSARLIMS.Services
             {
                 Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
             }
-
-            // Get the data
             var collectiondata = Query.ToList();
+
+            if (collectiondata.Count > 0)
+            {
+                var totalRow = new
+                {
+                    workOrderId = "",
+                    name = "",
+                    centreId = 0,
+                    centrecode = "",
+                    companyName = "Total",
+                    collectionDate = "",
+                    grossAmount = collectiondata.Sum(item => item.grossAmount),
+                    discount = collectiondata.Sum(item => item.discount),
+                    netAmount = collectiondata.Sum(item => item.netAmount),
+                    cashAmt = collectiondata.Sum(item => item.cashAmt),  // Move these four above receivedBy and receivedID
+                    onlinewalletAmt = collectiondata.Sum(item => item.onlinewalletAmt),
+                    NEFTamt = collectiondata.Sum(item => item.NEFTamt),
+                    chequeAmt = collectiondata.Sum(item => item.chequeAmt),
+                    receivedBy = "",
+                    receivedID = (int?)null
+                };
+
+                collectiondata.Add(totalRow);
+
+            }
             var excelByte = MyFunction.ExportToExcel(collectiondata, "CollectionReport");
             return excelByte;
         }
@@ -2180,44 +2263,59 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var Query = from tb in db.tnx_Booking
-                            join em in db.empMaster on tb.createdById equals em.empId
-                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
-                            join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
-                            group new { tb, tr, em } by new { em.empId, empname = string.Concat(em.fName, " ", em.lName) } into grouped
-                            select new
-                            {
-                                EmployeeId = grouped.Key.empId,
-                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
-                                EmployeeName = grouped.Key.empname,
-                                grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
-                                discountSum = grouped.Sum(g => g.tb.discount),
-                                netAmountSum = grouped.Sum(g => g.tb.netAmount),
-                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                var Query = (from tb in db.tnx_Booking
+                             join em in db.empMaster on tb.createdById equals em.empId
+                             join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                             join cm in db.centreMaster on tb.centreId equals cm.centreId
+                             where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
+                             group new { tb, tr, em } by new { em.empId, empname = string.Concat(em.fName, " ", em.lName) } into grouped
+                             select new
+                             {
+                                 EmployeeId = grouped.Key.empId.ToString(), // Keep it as string in the database query
+                                 empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
+                                 EmployeeName = grouped.Key.empname,
+                                 grossAmountSum = grouped.Sum(g => (double?)g.tb.grossAmount) ?? 0.00,
+                                 discountSum = grouped.Sum(g => (double?)g.tb.discount) ?? 0.00,
+                                 netAmountSum = grouped.Sum(g => (double?)g.tb.netAmount) ?? 0.00,
+                                 centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                                 cashAmtSum = grouped.Sum(g => (double?)g.tr.cashAmt) ?? 0,
+                                 onlinewalletAmtSum = grouped.Sum(g => (double?)g.tr.onlinewalletAmt) ?? 0,
+                                 NEFTamtSum = grouped.Sum(g => (double?)g.tr.NEFTamt) ?? 0,
+                                 chequeAmtSum = grouped.Sum(g => (double?)g.tr.chequeAmt) ?? 0
+                             }).AsEnumerable(); // Convert query results to an in-memory collection
 
-                                cashAmtSum = grouped.Sum(g => g.tr.cashAmt),
-                                onlinewalletAmtSum = grouped.Sum(g => g.tr.onlinewalletAmt),
-                                NEFTamtSum = grouped.Sum(g => g.tr.NEFTamt),
-                                chequeAmtSum = grouped.Sum(g => g.tr.chequeAmt)
-                            };
-
-                if (collectiondata.empIds.Count > 0)
+                // Apply filters AFTER fetching data from the database
+                if (collectiondata.empIds?.Any() == true)
                 {
-                    // Uncomment to filter by empIds if needed
-                    // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                    Query = Query.Where(q => collectiondata.empIds.Contains(int.Parse(q.EmployeeId)));
                 }
-                if (collectiondata.centreIds.Count > 0)
+                if (collectiondata.centreIds?.Any() == true)
                 {
                     Query = Query.Where(q => collectiondata.centreIds.Contains(q.centreId));
                 }
 
-                // Get the data
+                // Convert to list after filtering
                 var collectionData = Query.ToList();
-                if (collectionData.Count == 0)
+
+                if (!collectionData.Any()) return new byte[0];
+
+                var totalRow = new
                 {
-                    return new byte[0]; // Zero-byte return when no data exists
-                }
+                    EmployeeId = "",
+                    empCode = "",
+                    EmployeeName = "Total",
+
+                    grossAmountSum = collectionData.Sum(item => item.grossAmountSum),
+                    discountSum = collectionData.Sum(item => item.discountSum),
+                    netAmountSum = collectionData.Sum(item => item.netAmountSum),
+                    centreId = 0,
+                    cashAmtSum = collectionData.Sum(item => item.cashAmtSum),
+                    onlinewalletAmtSum = collectionData.Sum(item => item.onlinewalletAmtSum),
+                    NEFTamtSum = collectionData.Sum(item => item.NEFTamtSum),
+                    chequeAmtSum = collectionData.Sum(item => item.chequeAmtSum)
+                };
+                collectionData.Add(totalRow);
+
                 QuestPDF.Settings.License = LicenseType.Community;
 
                 var document = Document.Create(container =>
@@ -2228,87 +2326,80 @@ namespace iMARSARLIMS.Services
                         page.Margin(0.5f, Unit.Centimetre);
                         page.PageColor(Colors.White);
 
-                        // Page Header
-                        page.Header().Column(column =>
-                        {
-                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(14).Bold()).AlignCenter();
-                        });
+                        page.Header().Text("Collection Report Summary").Style(TextStyle.Default.FontSize(14).Bold()).AlignCenter();
 
-                        // Table Layout
                         page.Content().Table(table =>
                         {
-                            // Define the columns
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
-                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
-                                columns.RelativeColumn();  // Patient Name
-                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Booking Date
-                                columns.ConstantColumn(3f, Unit.Centimetre);  // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(1f, Unit.Centimetre);
+                                columns.ConstantColumn(2f, Unit.Centimetre);
+                                columns.RelativeColumn();
+                                columns.ConstantColumn(3f, Unit.Centimetre);
+                                columns.ConstantColumn(2f, Unit.Centimetre);
+                                columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                columns.ConstantColumn(2.0f, Unit.Centimetre);
                                 columns.ConstantColumn(1.5f, Unit.Centimetre);
-                                // Gross column
-                                columns.ConstantColumn(1.5f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(1.5f, Unit.Centimetre); // Net column
+                                columns.ConstantColumn(1.5f, Unit.Centimetre);
                             });
 
-                            // Add table header
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("EmpCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Cash").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("OnlineWallet").Style(TextStyle.Default.FontSize(10).Bold());
+                            string[] headers = { "#", "EmpCode", "Emp Name", "Gross", "Discount", "Net", "Cash", "Cheque", "Wallet" };
+                            table.Header(header =>
+                            {
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
 
-                            // Populate table rows
                             int rowNumber = 1;
                             foreach (var item in collectionData)
                             {
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
-                                table.Cell().Text(item.cashAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.chequeAmtSum.ToString()).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.onlinewalletAmtSum.ToString()).Style(TextStyle.Default.FontSize(10));  // Net
+                                if (item.EmployeeName != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.grossAmountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().Text(item.discountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().Text(item.netAmountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().Text(item.cashAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().Text(item.chequeAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().Text(item.onlinewalletAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                }
+                                else
+                                {
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.empCode).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.grossAmountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.discountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.netAmountSum.ToString("F2")).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.cashAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.chequeAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.onlinewalletAmtSum.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                }
                                 rowNumber++;
                             }
                         });
 
-                        // Page Footer
-                        page.Footer().Column(column =>
+                        page.Footer().AlignCenter().Text(text =>
                         {
-                            column.Item().AlignCenter().Text(text =>
-                            {
-                                text.DefaultTextStyle(x => x.FontSize(8));
-                                text.CurrentPageNumber();
-                                text.Span(" of ");
-                                text.TotalPages();
-                            });
+                            text.DefaultTextStyle(x => x.FontSize(8));
+                            text.CurrentPageNumber();
+                            text.Span(" of ");
+                            text.TotalPages();
                         });
                     });
                 });
 
-                // Generate the PDF byte array
-                byte[] pdfBytes = document.GeneratePdf();
-
-                // Save the PDF to file for debugging (optional)
-                File.WriteAllBytes("discount_report.pdf", pdfBytes);
-
-                return pdfBytes;  // Return the generated PDF
+                return document.GeneratePdf();
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
-                // Return empty byte array in case of error
+                Console.WriteLine($"Error: {ex.Message}\nStack Trace: {ex.StackTrace}");
                 return new byte[0];
             }
         }
@@ -2380,43 +2471,66 @@ namespace iMARSARLIMS.Services
 
         public byte[] CollectionReportExcelSummury(collectionReportRequestModel collectiondata)
         {
-            var Query = from tb in db.tnx_Booking
-                        join em in db.empMaster on tb.createdById equals em.empId
-                        join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
-                        join cm in db.centreMaster on tb.centreId equals cm.centreId
-                        where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
-                        group new { tb, tr, em } by new { em.empId,empname= string.Concat(em.fName," ",em.lName) } into grouped
-                        select new
-                        {
-                            EmployeeId = grouped.Key.empId,
-                            empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
-                            EmployeeName = grouped.Key.empname,
-                            grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
-                            discountSum = grouped.Sum(g => g.tb.discount),
-                            netAmountSum = grouped.Sum(g => g.tb.netAmount),
-                            centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
-                            
-                            cashAmtSum = grouped.Sum(g => g.tr.cashAmt),
-                            onlinewalletAmtSum = grouped.Sum(g => g.tr.onlinewalletAmt),
-                            NEFTamtSum = grouped.Sum(g => g.tr.NEFTamt),
-                            chequeAmtSum = grouped.Sum(g => g.tr.chequeAmt)
-                        };
-
-            if (collectiondata.empIds.Count > 0)
+            if (collectiondata == null || collectiondata.FromDate == null || collectiondata.ToDate == null)
             {
-                // Uncomment to filter by empIds if needed
-                // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                throw new ArgumentNullException(nameof(collectiondata), "Collection data and date range cannot be null.");
             }
-            if (collectiondata.centreIds.Count > 0)
+
+
+            var Query = (from tb in db.tnx_Booking
+                         join em in db.empMaster on tb.createdById equals em.empId
+                         join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                         where tb.bookingDate >= collectiondata.FromDate && tb.bookingDate <= collectiondata.ToDate
+                         group new { tb, tr, em } by new { em.empId, empname = string.Concat(em.fName, " ", em.lName) } into grouped
+                         select new
+                         {
+                             EmployeeId = grouped.Key.empId.ToString(), // Keep it as string in the database query
+                             empCode = grouped.Select(g => g.em.empCode).FirstOrDefault(),
+                             EmployeeName = grouped.Key.empname,
+                             grossAmountSum = grouped.Sum(g => (double?)g.tb.grossAmount) ?? 0.00,
+                             discountSum = grouped.Sum(g => (double?)g.tb.discount) ?? 0.00,
+                             netAmountSum = grouped.Sum(g => (double?)g.tb.netAmount) ?? 0.00,
+                             centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
+                             cashAmtSum = grouped.Sum(g => (double?)g.tr.cashAmt) ?? 0,
+                             onlinewalletAmtSum = grouped.Sum(g => (double?)g.tr.onlinewalletAmt) ?? 0,
+                             NEFTamtSum = grouped.Sum(g => (double?)g.tr.NEFTamt) ?? 0,
+                             chequeAmtSum = grouped.Sum(g => (double?)g.tr.chequeAmt) ?? 0
+                         }).AsEnumerable(); // Convert query results to an in-memory collection
+
+            // Apply filters AFTER fetching data from the database
+            if (collectiondata.empIds?.Any() == true)
+            {
+                Query = Query.Where(q => collectiondata.empIds.Contains(int.Parse(q.EmployeeId)));
+            }
+            if (collectiondata.centreIds?.Any() == true)
             {
                 Query = Query.Where(q => collectiondata.centreIds.Contains(q.centreId));
             }
 
-            // Get the data
+            // Convert to list after filtering
             var collectionData = Query.ToList();
-            var excelByte = MyFunction.ExportToExcel(collectionData, "CollectionReport");
-            return excelByte;
 
+            if (!collectionData.Any()) return new byte[0];
+
+            var totalRow = new
+            {
+                EmployeeId = "",
+                empCode = "",
+                EmployeeName = "Total",
+
+                grossAmountSum = collectionData.Sum(item => item.grossAmountSum),
+                discountSum = collectionData.Sum(item => item.discountSum),
+                netAmountSum = collectionData.Sum(item => item.netAmountSum),
+                centreId = 0,
+                cashAmtSum = collectionData.Sum(item => item.cashAmtSum),
+                onlinewalletAmtSum = collectionData.Sum(item => item.onlinewalletAmtSum),
+                NEFTamtSum = collectionData.Sum(item => item.NEFTamtSum),
+                chequeAmtSum = collectionData.Sum(item => item.chequeAmtSum)
+            };
+            collectionData.Add(totalRow);
+            // Export to Excel
+            return MyFunction.ExportToExcel(collectionData, "CollectionReportSummury");
         }
 
         public byte[] DiscountReportSummury(collectionReportRequestModel collectionData)
@@ -2431,39 +2545,45 @@ namespace iMARSARLIMS.Services
                             select new
                             {
                                 EmployeeId = grouped.Key.createdById,
+                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault() ?? "", // Handle potential nulls
                                 EmployeeName = grouped.Key.empname,
-                                grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
-                                discountSum = grouped.Sum(g => g.tb.discount),
-                                netAmountSum = grouped.Sum(g => g.tb.netAmount),
-                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
-                                empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
+                                grossAmountSum = grouped.Sum(g => (double?)g.tb.grossAmount) ?? 0.0,
+                                discountSum = grouped.Sum(g => (double?)g.tb.discount) ?? 0.0,
+                                netAmountSum = grouped.Sum(g => (double?)g.tb.netAmount) ?? 0.0,
+                                centreId = grouped.Select(g => g.tb.centreId).First()
                             };
 
-                // If empIds and centreIds are provided, filter the query
-                if (collectionData.empIds.Count > 0)
+                // Apply filters if provided
+                if (collectionData.empIds?.Any() == true)
                 {
-                    // Filter by empIds (uncomment if needed)
-                    // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                    Query = Query.Where(q => collectionData.empIds.Contains((int)q.EmployeeId));
                 }
-                if (collectionData.centreIds.Count > 0)
+                if (collectionData.centreIds?.Any() == true)
                 {
                     Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
                 }
 
-                // Get the data
-                
+                // Execute the query and fetch the data
                 var collectiondata = Query.ToList();
-
-                // If no data found, return an empty PDF
-                if (collectiondata.Count == 0)
+                if (collectiondata.Any())
+                {
+                    var totalRow = new
+                    {
+                        EmployeeId = (int?)0, // Ensure nullable type
+                        empCode = "Total",
+                        EmployeeName = "",
+                        grossAmountSum = collectiondata.Sum(item => item.grossAmountSum),
+                        discountSum = collectiondata.Sum(item => item.discountSum),
+                        netAmountSum = collectiondata.Sum(item => item.netAmountSum),
+                        centreId = 0
+                    };
+                    collectiondata.Add(totalRow);
+                }
+                else
                 {
                     return new byte[0]; // Zero-byte return when no data exists
                 }
 
-                // Log or Debug to confirm data is loaded
-                Console.WriteLine($"Found {collectiondata.Count} records.");
-
-                // QuestPDF document generation
                 QuestPDF.Settings.License = LicenseType.Community;
 
                 var document = Document.Create(container =>
@@ -2477,7 +2597,7 @@ namespace iMARSARLIMS.Services
                         // Page Header
                         page.Header().Column(column =>
                         {
-                            column.Item().Text("Collection Report").Style(TextStyle.Default.FontSize(16).Bold());
+                            column.Item().Text("Discount Report Summury").Style(TextStyle.Default.FontSize(16).Bold());
                         });
 
                         // Table Layout
@@ -2489,29 +2609,43 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(1f, Unit.Centimetre); // # column
                                 columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
                                 columns.RelativeColumn();  // Patient Name
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Gross column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Discount column
+                                columns.ConstantColumn(2.5f, Unit.Centimetre);  // Net column
                             });
 
-                            // Add table header
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Code").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Emp Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().BorderBottom(0.5f,Unit.Point).BorderTop(0.5f,Unit.Point).Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "EmpCode", "Emp Name", "Gross", "Discount", "Net" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
                             // Populate table rows
                             int rowNumber = 1;
                             foreach (var item in collectiondata)
                             {
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                if (item.empCode != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));
+                                }
+                                else
+                                {
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.empCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.EmployeeName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.grossAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Gross
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.discountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point).Text(item.netAmountSum.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                }
                                 rowNumber++;
                             }
                         });
@@ -2562,27 +2696,40 @@ namespace iMARSARLIMS.Services
                         select new
                         {
                             EmployeeId = grouped.Key.createdById,
+                            empCode = grouped.Select(g => g.em.empCode).FirstOrDefault() ?? "", // Handle potential nulls
                             EmployeeName = grouped.Key.empname,
-                            grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
-                            discountSum = grouped.Sum(g => g.tb.discount),
-                            netAmountSum = grouped.Sum(g => g.tb.netAmount),
-                            centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
-                            empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
+                            grossAmountSum = grouped.Sum(g => (double?)g.tb.grossAmount) ?? 0.0,
+                            discountSum = grouped.Sum(g => (double?)g.tb.discount) ?? 0.0,
+                            netAmountSum = grouped.Sum(g => (double?)g.tb.netAmount) ?? 0.0,
+                            centreId = grouped.Select(g => g.tb.centreId).First()
                         };
 
-            // If empIds and centreIds are provided, filter the query
-            if (collectionData.empIds.Count > 0)
+            // Apply filters if provided
+            if (collectionData.empIds?.Any() == true)
             {
-                // Filter by empIds (uncomment if needed)
-                // Query = Query.Where(q => collectionData.empIds.Contains((int)q.receivedID));
+                Query = Query.Where(q => collectionData.empIds.Contains((int)q.EmployeeId));
             }
-            if (collectionData.centreIds.Count > 0)
+            if (collectionData.centreIds?.Any() == true)
             {
                 Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
             }
 
-            // Get the data
+            // Execute the query and fetch the data
             var collectiondata = Query.ToList();
+            if (collectiondata.Any())
+            {
+                var totalRow = new
+                {
+                    EmployeeId = (int?)0, // Ensure nullable type
+                    empCode = "Total",
+                    EmployeeName = "",
+                    grossAmountSum = collectiondata.Sum(item => item.grossAmountSum),
+                    discountSum = collectiondata.Sum(item => item.discountSum),
+                    netAmountSum = collectiondata.Sum(item => item.netAmountSum),
+                    centreId = 0
+                };
+                collectiondata.Add(totalRow);
+            }
             var excelByte = MyFunction.ExportToExcel(collectiondata, "DiscountReport");
             return excelByte;
         }
@@ -2596,7 +2743,7 @@ namespace iMARSARLIMS.Services
                             join em in db.empMaster on tb.createdById equals em.empId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
                             where tb.bookingDate >= collectionData.FromDate && tb.bookingDate <= collectionData.ToDate
-                            group new { tb, em, cm } by new { tb.createdById, empname=string.Concat(em.fName," ",em.lName) } into grouped
+                            group new { tb, em, cm } by new { tb.createdById, empname = string.Concat(em.fName, " ", em.lName) } into grouped
                             select new
                             {
                                 EmployeeId = grouped.Key.createdById,
@@ -2604,7 +2751,7 @@ namespace iMARSARLIMS.Services
                                 grossAmountSum = grouped.Sum(g => g.tb.grossAmount),
                                 discountSum = grouped.Sum(g => g.tb.discount),
                                 netAmountSum = grouped.Sum(g => g.tb.netAmount),
-                                centreId= grouped.Select(g=> g.tb.centreId).FirstOrDefault(),
+                                centreId = grouped.Select(g => g.tb.centreId).FirstOrDefault(),
                                 empCode = grouped.Select(g => g.em.empCode).FirstOrDefault()
                             };
 
@@ -2645,19 +2792,19 @@ namespace iMARSARLIMS.Services
                 {
                     var bookingData = db.tnx_Booking.Where(b => b.workOrderId == DiscountData.workOrderId).FirstOrDefault();
                     var discPer = 0.00;
-                    if(bookingData!=null)
+                    if (bookingData != null)
                     {
                         discPer = DiscountData.discountAmt * 100 / bookingData.grossAmount;
                         bookingData.discount = DiscountData.discountAmt;
                         bookingData.netAmount = bookingData.grossAmount - DiscountData.discountAmt;
-                        
+
                         db.tnx_Booking.Update(bookingData);
                         await db.SaveChangesAsync();
                         var bookingitem = db.tnx_BookingItem.Where(bi => bi.workOrderId == DiscountData.workOrderId).ToList();
                         foreach (var item in bookingitem)
                         {
                             item.discount = item.rate * discPer;
-                            item.netAmount= item.rate- (item.rate*discPer);
+                            item.netAmount = item.rate - (item.rate * discPer);
                         }
                         db.tnx_BookingItem.UpdateRange(bookingitem);
                         await db.SaveChangesAsync();
@@ -2693,26 +2840,26 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var bookingData = await(from tb in db.tnx_Booking
-                                        join tm in db.titleMaster on tb.title_id equals tm.id
-                                        join cm in db.centreMaster on tb.centreId equals cm.centreId
-                                        join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
-                                        where tb.workOrderId == workorderId
-                                        select new
-                                        {
-                                            tb.bookingDate,
-                                            tb.workOrderId,
-                                            tb.transactionId,
-                                            PatientName = tm.title + " " + tb.name,
-                                            tb.netAmount,
-                                            tb.grossAmount,
-                                            tb.discount,
-                                            tb.paidAmount,
-                                            tb.mobileNo,
-                                            cm.companyName,
-                                            cm.centrecode,
-                                            tb.patientId,
-                                        }).ToListAsync();
+                var bookingData = await (from tb in db.tnx_Booking
+                                         join tm in db.titleMaster on tb.title_id equals tm.id
+                                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                         join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
+                                         where tb.workOrderId == workorderId
+                                         select new
+                                         {
+                                             tb.bookingDate,
+                                             tb.workOrderId,
+                                             tb.transactionId,
+                                             PatientName = tm.title + " " + tb.name,
+                                             tb.netAmount,
+                                             tb.grossAmount,
+                                             tb.discount,
+                                             tb.paidAmount,
+                                             tb.mobileNo,
+                                             cm.companyName,
+                                             cm.centrecode,
+                                             tb.patientId,
+                                         }).ToListAsync();
 
                 if (bookingData != null)
                 {
@@ -2748,7 +2895,7 @@ namespace iMARSARLIMS.Services
             {
                 try
                 {
-                    var bookingitem= db.tnx_BookingItem.Where(bi=> RefundData.testIds.Contains(bi.id)).ToList();
+                    var bookingitem = db.tnx_BookingItem.Where(bi => RefundData.testIds.Contains(bi.id)).ToList();
                     foreach (var item in bookingitem)
                     {
                         item.isRemoveItem = 1;
@@ -2778,7 +2925,7 @@ namespace iMARSARLIMS.Services
             }
         }
 
-         byte[] ItnxBookingServices.ClientRevenueReport(collectionReportRequestModel collectionData)
+        byte[] ItnxBookingServices.ClientRevenueReport(collectionReportRequestModel collectionData)
         {
             try
             {
@@ -2789,6 +2936,11 @@ namespace iMARSARLIMS.Services
                             where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
                             select new
                             {
+                                tb.workOrderId,
+                                tb.name,
+                                tb.centreId,
+                                cm.centrecode,
+                                cm.companyName,
                                 collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm tt"),
                                 tb.grossAmount,
                                 tb.discount,
@@ -2798,12 +2950,8 @@ namespace iMARSARLIMS.Services
                                 tr.NEFTamt,
                                 tr.chequeAmt,
                                 tr.receivedBy,
-                                tr.receivedID,
-                                tb.workOrderId,
-                                tb.name,
-                                tb.centreId,
-                                cm.centrecode,
-                                cm.companyName
+                                tr.receivedID
+
                             };
 
                 if (collectionData.centreIds.Count > 0)
@@ -2819,6 +2967,30 @@ namespace iMARSARLIMS.Services
                 {
                     return new byte[0]; // Zero-byte return when no data exists
                 }
+                else
+                {
+                    var totalRow = new
+                    {
+                        workOrderId = "",
+                        name = "",
+                        centreId = 0,
+                        centrecode = "Total",
+                        companyName = "",
+                        collectionDate = "",
+                        grossAmount = collectiondata.Sum(item => item.grossAmount),
+                        discount = collectiondata.Sum(item => item.discount),
+                        netAmount = collectiondata.Sum(item => item.netAmount),
+                        cashAmt = collectiondata.Sum(item => item.cashAmt),
+                        onlinewalletAmt = collectiondata.Sum(item => item.onlinewalletAmt),
+                        NEFTamt = collectiondata.Sum(item => item.NEFTamt),
+                        chequeAmt = collectiondata.Sum(item => item.chequeAmt),
+                        receivedBy = "",
+                        receivedID = (int?)null
+
+                    };
+                    collectiondata.Add(totalRow);
+
+                }
 
                 // Log or Debug to confirm data is loaded
                 Console.WriteLine($"Found {collectiondata.Count} records.");
@@ -2826,16 +2998,6 @@ namespace iMARSARLIMS.Services
                 // QuestPDF document generation
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // Handling the company logo
-                var image1 = _configuration["FileBase64:CompanyLogo1"];
-                byte[] image1Bytes = null;
-
-                if (!string.IsNullOrEmpty(image1))
-                {
-                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
-                }
-
-                // Generate the PDF document
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -2868,38 +3030,52 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(1.5f, Unit.Centimetre);  // Wallet column
                             });
 
-                            // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Visit Id").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Patient Name").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Booking Date").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-
-                            // Populate table rows
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "Visit ID", "Patient Name","Booking Date", "Gross", "Discount", "Net", "Cash","Cheque","Wallet" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
                             int rowNumber = 1;
                             int centreid = 0;
                             foreach (var item in collectiondata)
                             {
-                                if(centreid!= item.centreId)
+                                if (centreid != item.centreId)
                                 {
                                     table.Cell().ColumnSpan(10).Border(0.5f, Unit.Point).Text(item.companyName).Style(TextStyle.Default.FontSize(10)).AlignCenter();  // Serial number
                                     centreid = item.centreId;
                                 }
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
-                                table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
-                                table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
-                                table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
-                                table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                if (item.centrecode != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.workOrderId).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                    table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                    table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                    table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                }
+                                else
+                                {
+
+                                    table.Cell().Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.centrecode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.name).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.collectionDate).Style(TextStyle.Default.FontSize(10));  // Booking Date
+                                    table.Cell().Text(item.grossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().Text(item.discount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.netAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.cashAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                    table.Cell().Text(item.chequeAmt.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                    table.Cell().Text(item.onlinewalletAmt.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                }
                                 rowNumber++;
                             }
                         });
@@ -2989,46 +3165,70 @@ namespace iMARSARLIMS.Services
 
         public byte[] ClientRevenueReportExcel(collectionReportRequestModel collectionData)
         {
-            
-                var Query = from tb in db.tnx_Booking
-                            join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
-                            join cm in db.centreMaster on tb.centreId equals cm.centreId
-                            where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
-                            select new
-                            {
-                                collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
-                                tb.grossAmount,
-                                tb.discount,
-                                tb.netAmount,
-                                tr.cashAmt,
-                                tr.onlinewalletAmt,
-                                tr.NEFTamt,
-                                tr.chequeAmt,
-                                tr.receivedBy,
-                                tr.receivedID,
-                                tb.workOrderId,
-                                tb.name,
-                                tb.centreId,
-                                cm.centrecode,
-                                cm.companyName
-                            };
-                if (collectionData.centreIds.Count > 0)
-                {
-                    Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
-                }
 
-                // Get the data
-                var collectiondata =  Query.ToList();
-                var excelByte = MyFunction.ExportToExcel(collectiondata, "CollectionReport");
-                return excelByte;
-           
+            var Query = from tb in db.tnx_Booking
+                        join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
+                        join cm in db.centreMaster on tb.centreId equals cm.centreId
+                        where tr.collectionDate >= collectionData.FromDate && tr.collectionDate <= collectionData.ToDate
+                        select new
+                        {
+                            tb.workOrderId,
+                            tb.name,
+                            tb.centreId,
+                            cm.centrecode,
+                            cm.companyName,
+                            collectionDate = tr.collectionDate.Value.ToString("dd-MMM-yyyy hh:mm TT"),
+                            tb.grossAmount,
+                            tb.discount,
+                            tb.netAmount,
+                            tr.cashAmt,
+                            tr.onlinewalletAmt,
+                            tr.NEFTamt,
+                            tr.chequeAmt,
+                            tr.receivedBy,
+                            tr.receivedID
+
+                        };
+            if (collectionData.centreIds.Count > 0)
+            {
+                Query = Query.Where(q => collectionData.centreIds.Contains(q.centreId));
+            }
+
+            // Get the data
+            var collectiondata = Query.ToList();
+            if (collectiondata.Any())
+            {
+                var totalRow = new
+                {
+                    workOrderId = "",
+                    name = "",
+                    centreId = 0,
+                    centrecode = "Total",
+                    companyName = "",
+                    collectionDate = "",
+                    grossAmount = collectiondata.Sum(item => item.grossAmount),
+                    discount = collectiondata.Sum(item => item.discount),
+                    netAmount = collectiondata.Sum(item => item.netAmount),
+                    cashAmt = collectiondata.Sum(item => item.cashAmt),
+                    onlinewalletAmt = collectiondata.Sum(item => item.onlinewalletAmt),
+                    NEFTamt = collectiondata.Sum(item => item.NEFTamt),
+                    chequeAmt = collectiondata.Sum(item => item.chequeAmt),
+                    receivedBy = "",
+                    receivedID = (int?)null
+
+                };
+                collectiondata.Add(totalRow);
+
+            }
+            var excelByte = MyFunction.ExportToExcel(collectiondata, "ClientRevenueReport");
+            return excelByte;
+
         }
 
         public byte[] ClientRevenueReportSummury(collectionReportRequestModel collectionData)
         {
             try
             {
-                // Query for data
                 var Query = from tb in db.tnx_Booking
                             join tr in db.tnx_ReceiptDetails on tb.workOrderId equals tr.workOrderId
                             join cm in db.centreMaster on tb.centreId equals cm.centreId
@@ -3046,39 +3246,37 @@ namespace iMARSARLIMS.Services
                                 TotalOnlineWalletAmount = g.Sum(x => x.tr.onlinewalletAmt),
                                 TotalNEFTAmount = g.Sum(x => x.tr.NEFTamt),
                                 TotalChequeAmount = g.Sum(x => x.tr.chequeAmt),
-                                TotalTransactions = g.Count()
+
                             };
 
                 if (collectionData.centreIds.Count > 0)
                 {
                     Query = Query.Where(q => collectionData.centreIds.Contains(q.CentreId));
                 }
-
-                // Get the summarized data
                 var collectiondata = Query.ToList();
-
-                // If no data found, return an empty PDF
                 if (collectiondata.Count == 0)
+                { return new byte[0]; }
+                else
                 {
-                    return new byte[0]; // Zero-byte return when no data exists
+                    var totalRow = new
+                    {
+                        CentreId = 0,
+                        CentreCode = "Total",
+                        CompanyName = "",
+                        TotalGrossAmount = collectiondata.Sum(item => item.TotalGrossAmount),
+                        TotalDiscount = collectiondata.Sum(item => item.TotalDiscount),
+                        TotalNetAmount = collectiondata.Sum(item => item.TotalNetAmount),
+                        TotalCashAmount = collectiondata.Sum(item => item.TotalCashAmount),
+                        TotalOnlineWalletAmount = collectiondata.Sum(item => item.TotalOnlineWalletAmount),
+                        TotalNEFTAmount = collectiondata.Sum(item => item.TotalNEFTAmount),
+                        TotalChequeAmount = collectiondata.Sum(item => item.TotalChequeAmount)
+                    };
+                    collectiondata.Add(totalRow);
+
                 }
 
-                // Log or Debug to confirm data is loaded
-                Console.WriteLine($"Found {collectiondata.Count} records.");
-
-                // QuestPDF document generation
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // Handling the company logo
-                var image1 = _configuration["FileBase64:CompanyLogo1"];
-                byte[] image1Bytes = null;
-
-                if (!string.IsNullOrEmpty(image1))
-                {
-                    image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
-                }
-
-                // Generate the PDF document
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -3099,44 +3297,58 @@ namespace iMARSARLIMS.Services
                             // Define the columns
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(1f, Unit.Centimetre); // # column
-                                columns.ConstantColumn(2f, Unit.Centimetre); // Visit ID column
-                                columns.RelativeColumn();  // Patient Name
-                                columns.RelativeColumn();  // Booking Date
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Gross column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Discount column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Net column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cash column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Cheque column
-                                columns.ConstantColumn(2f, Unit.Centimetre);  // Wallet column
+                                columns.ConstantColumn(1f, Unit.Centimetre); 
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
+                                columns.RelativeColumn();  
+                                columns.RelativeColumn();  
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
+                                columns.ConstantColumn(2f, Unit.Centimetre); 
                             });
 
                             // Add table header
-                            table.Cell().Text("#").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("CentreCode").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("CentreName").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Gross").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-                            table.Cell().Text("Discount").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Net").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cash").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Cheque").Style(TextStyle.Default.FontSize(10).Bold());
-                            table.Cell().Text("Wallet").Style(TextStyle.Default.FontSize(10).Bold()).AlignRight();
-
+                            
+                            table.Header(header =>
+                            {
+                                string[] headers = { "#", "CentreCode", "Centre Name", "Gross", "Discount", "Net", "Cash","Cheque","Wallet" };
+                                foreach (var title in headers)
+                                {
+                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                        .Text(title)
+                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                }
+                            });
                             // Populate table rows
                             int rowNumber = 1;
                             int centreid = 0;
                             foreach (var item in collectiondata)
                             {
-                                
-                                table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
-                                table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
-                                table.Cell().Text(item.CompanyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
-                                table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
-                                table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
-                                table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
-                                table.Cell().Text(item.TotalCashAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
-                                table.Cell().Text(item.TotalChequeAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
-                                table.Cell().Text(item.TotalOnlineWalletAmount.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Wallet
+                                if (item.CentreCode != "Total")
+                                {
+                                    table.Cell().Text(rowNumber.ToString()).Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.CompanyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.TotalCashAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                    table.Cell().Text(item.TotalChequeAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                    table.Cell().Text(item.TotalOnlineWalletAmount.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                }
+                                else
+                                {
+                                    table.Cell().Text("").Style(TextStyle.Default.FontSize(10));  // Serial number
+                                    table.Cell().Text(item.CentreCode).Style(TextStyle.Default.FontSize(10));  // Visit ID
+                                    table.Cell().Text(item.CompanyName).Style(TextStyle.Default.FontSize(10));  // Patient Name
+                                    table.Cell().Text(item.TotalGrossAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10)).AlignRight();  // Gross
+                                    table.Cell().Text(item.TotalDiscount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Discount
+                                    table.Cell().Text(item.TotalNetAmount.ToString("0.00")).Style(TextStyle.Default.FontSize(10));  // Net
+                                    table.Cell().Text(item.TotalCashAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cash
+                                    table.Cell().Text(item.TotalChequeAmount.ToString()).Style(TextStyle.Default.FontSize(10));  // Cheque
+                                    table.Cell().Text(item.TotalOnlineWalletAmount.ToString()).Style(TextStyle.Default.FontSize(10)).AlignRight();
+                                }// Wallet
                                 rowNumber++;
                             }
                         });
@@ -3241,7 +3453,7 @@ namespace iMARSARLIMS.Services
                             TotalOnlineWalletAmount = g.Sum(x => x.tr.onlinewalletAmt),
                             TotalNEFTAmount = g.Sum(x => x.tr.NEFTamt),
                             TotalChequeAmount = g.Sum(x => x.tr.chequeAmt),
-                            TotalTransactions = g.Count()
+
                         };
 
             if (collectionData.centreIds.Count > 0)
@@ -3251,6 +3463,24 @@ namespace iMARSARLIMS.Services
 
             // Get the summarized data
             var summaryData = Query.ToList();
+
+            if (summaryData.Any())
+            {
+                var totalRow = new
+                {
+                    CentreId = 0,
+                    CentreCode = "Total",
+                    CompanyName = "",
+                    TotalGrossAmount = summaryData.Sum(item => item.TotalGrossAmount),
+                    TotalDiscount = summaryData.Sum(item => item.TotalDiscount),
+                    TotalNetAmount = summaryData.Sum(item => item.TotalNetAmount),
+                    TotalCashAmount = summaryData.Sum(item => item.TotalCashAmount),
+                    TotalOnlineWalletAmount = summaryData.Sum(item => item.TotalOnlineWalletAmount),
+                    TotalNEFTAmount = summaryData.Sum(item => item.TotalNEFTAmount),
+                    TotalChequeAmount = summaryData.Sum(item => item.TotalChequeAmount)
+                };
+                summaryData.Add(totalRow);
+            }
             var excelByte = MyFunction.ExportToExcel(summaryData, "CollectionSummaryReport");
             return excelByte;
         }
@@ -3272,12 +3502,12 @@ namespace iMARSARLIMS.Services
                     Data = pendingPay
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ServiceStatusResponseModel
                 {
                     Success = false,
-                    Message= ex.Message
+                    Message = ex.Message
                 };
             }
         }

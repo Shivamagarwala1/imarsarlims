@@ -1,10 +1,12 @@
 using iMARSARLIMS;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Interface.appointment;
+using iMARSARLIMS.Interface.Sales;
 using iMARSARLIMS.Interface.Store;
 using iMARSARLIMS.Interface.SupportTicket;
 using iMARSARLIMS.Services;
 using iMARSARLIMS.Services.Appointment;
+using iMARSARLIMS.Services.Sales;
 using iMARSARLIMS.Services.Store;
 using iMARSARLIMS.Services.SupportTicket;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -205,6 +207,7 @@ builder.Services.AddScoped<ItimeSlotMasterServices, timeSlotMasterServices>();
 builder.Services.AddScoped<IappointmentBookingServices, appointmentBookingServices>();
 builder.Services.AddScoped<IdoctorShareMasterServices, doctorShareMasterServices>();
 builder.Services.AddScoped<IsupportTicketServices, supportTicketServices>();
+builder.Services.AddScoped<ISalesEmployeeTaggingService, SalesEmployeeTaggingService>();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 

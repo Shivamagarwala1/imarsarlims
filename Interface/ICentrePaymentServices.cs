@@ -9,15 +9,18 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> paymentRecieptUpload(IFormFile paymentReciept);
         Task<ServiceStatusResponseModel> PaymentApproveReject(CentrePaymetVerificationRequestModel CentrePaymetVerificationRequest);
         Task<ServiceStatusResponseModel> LedgerStatus(List<int> CentreId);
-        Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate);
+        Task<ServiceStatusResponseModel> ClientLedgerStatus(int CentreId, DateTime FromDate, DateTime ToDate);
         Task<ServiceStatusResponseModel> GetPatientBillDetail(string Workorderid);
         Task<ServiceStatusResponseModel> CancelPatientReciept(string Workorderid,int Userid);
         Task<ServiceStatusResponseModel> GetPatientpaymentDetail(string Workorderid);
         Task<ServiceStatusResponseModel> ChangePatientpaymentDetail(List<ChangePaymentMode> PaymentMode);
         Task<ServiceStatusResponseModel> GetRateList(int ratetypeID);
         byte[] GetRateListPdf(int ratetypeID);
-        Task<ServiceStatusResponseModel> TransferRateToRate(int FromRatetypeid, int ToRatetypeid);
-        Task<ServiceStatusResponseModel> ClientDepositReport(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype);
+        Task<ServiceStatusResponseModel> TransferRateToRate(int FromRatetypeid, int ToRatetypeid ,string type, double Percentage);
+        Task<ServiceStatusResponseModel> ClientDepositReport(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype,int status);
+        Task<ServiceStatusResponseModel> ClientDeposit(int centreid,  string Paymenttype, int status);
+        byte[] ClientDepositReportExcel(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status);
+        byte[] ClientDepositReportPdf(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status);
         Task<ServiceStatusResponseModel> GetWorkOrderdetailCentreChange(string WorkOrderid);
         Task<ServiceStatusResponseModel> GetWorkOrderNewRate(string WorkOrderid, int RatetypeId);
 

@@ -3,6 +3,7 @@ using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers.transactionController
@@ -40,11 +41,11 @@ namespace iMARSARLIMS.Controllers.transactionController
             }
         }
         [HttpPost("GetDispatchData")]
-        public async Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata)
+        public async Task<ServiceStatusResponseModel> GetDispatchData(ODataQueryOptions<DispatchDataModel> queryOptions, DispatchDataRequestModel patientdata)
         {
             try
             {
-                var result = await _tnxBookingServices.GetDispatchData(patientdata);
+                var result = await _tnxBookingServices.GetDispatchData(queryOptions, patientdata);
                 return result;
             }
             catch (Exception ex)
@@ -626,7 +627,7 @@ namespace iMARSARLIMS.Controllers.transactionController
 
                 return new FileStreamResult(ms, "application/pdf")
                 {
-                    FileDownloadName = "CollectionReport.pdf"
+                    FileDownloadName = "CollectionReportSummury.pdf"
                 };
             }
             catch (Exception ex)

@@ -2,6 +2,7 @@
 using iMARSARLIMS.Model.Account;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using iText.Kernel.XMP.Impl;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,5 +73,53 @@ namespace iMARSARLIMS.Controllers.Account
                 });
             }
         }
+
+
+
+
+
+    //    [HttpPost("create-order")]
+    //    public IActionResult CreateOrder([FromBody] OrderRequest orderRequest)
+    //    {
+    //        var client = _razorpayService.CreateRazorpayClient();
+    //        var options = new Dictionary<string, object>
+    //    {
+    //        { "amount", orderRequest.Amount * 100 }, // Amount in paise
+    //        { "currency", "INR" },
+    //        { "receipt", orderRequest.Receipt },
+    //        { "payment_capture", 1 }
+    //    };
+
+    //        var order = client.Order.Create(options);
+    //        return Ok(new { orderId = order["id"] });
+    //        return Ok(new { orderId = order["id"] });
+    //    }
+    //    public class OrderRequest
+    //    {
+    //        public decimal Amount { get; set; }
+    //        public string Receipt { get; set; }
+    //    }
+    //    [HttpPost("verify-payment")]
+    //    public IActionResult VerifyPayment([FromBody] PaymentVerificationRequest verificationRequest)
+    //    {
+    //        var client = _razorpayService.CreateRazorpayClient();
+    //        var attributes = new Dictionary<string, string>
+    //{
+    //    { "razorpay_payment_id", verificationRequest.PaymentId }, // pay_Q4G7e3e949pwtR
+    //    { "razorpay_order_id", verificationRequest.OrderId }, //order_Q4G7ISJSZgYykF
+    //    { "razorpay_signature", verificationRequest.Signature } //26224dfda977e4e48353a7899878ea10d78c1715b5a4010401200499a8e27378
+    //};
+
+    //        Utils.verifyPaymentSignature(attributes);
+
+    //        return Ok(new { status = "success" });
+    //    }
+
+    //    public class PaymentVerificationRequest
+    //    {
+    //        public string PaymentId { get; set; }
+    //        public string OrderId { get; set; }
+    //        public string Signature { get; set; }
+    //    }
     }
 }

@@ -1,10 +1,13 @@
-﻿using iMARSARLIMS.Controllers;
+﻿using Grpc.Core;
+using iMARSARLIMS.Controllers;
 using iMARSARLIMS.Interface;
 using iMARSARLIMS.Model.Master;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
 using MySqlX.XDevAPI.Common;
+using System.Net.Mail;
+using System.Net;
 
 namespace iMARSARLIMS.Services
 {
@@ -89,7 +92,7 @@ namespace iMARSARLIMS.Services
                             if (centremaster.centretype == "Sub-Franchisee")
                                 roleId = 9;
 
-                            var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max();
+                            var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max()+1;
                             var empcode = string.Concat("IMS", maxempid.ToString("D2"));
                             var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId, empcode);
                             var EmployeeData = db.empMaster.Add(EmployeeRegData);
@@ -103,6 +106,8 @@ namespace iMARSARLIMS.Services
                             await db.SaveChangesAsync();
                         }
                         await SaveEmpCentreAccessData(centremaster.addEmpCenterAccess, centreId);
+                        await SendWellcomeMail(centremaster.companyName,centremaster.email);
+
                         message1 = "Saved Successful";
                     }
 
@@ -266,8 +271,8 @@ namespace iMARSARLIMS.Services
                 state = centremaster.state,
                 defaultcentre = centreId,
                 fileName = "",
-                isActive = centremaster.isActive
-
+                isActive = centremaster.isActive,
+                employeeCentretype= centremaster.centretype
 
             };
 
@@ -455,6 +460,73 @@ namespace iMARSARLIMS.Services
                 Data = empcentreaccess
             };
 
+        }
+        public async Task<ServiceStatusResponseModel> SendWellcomeMail(string CentreName, string Email)
+        {
+            if (!string.IsNullOrEmpty(Email))
+            {
+                try
+                {
+                    string EmailBody = @"Welcome [ClientName],
+
+We are excited to welcome you to the WDPL Diagnostic Pvt Ltd family! Our mission is to ensure you have a smooth and rewarding experience with our [products/services].
+
+Here’s what’s next:
+📅 Schedule a Kickoff Call – Let’s discuss your needs and goals. Book a time here: [8010201635]
+📂 Access Your Client Portal – Login here: Lablis.in
+📧 Your Main Point of Contact – [8826-991-992]
+
+We’re here to support you every step of the way. If you have any questions, just reply to this email, and we’ll be happy to assist.
+
+Looking forward to working together!
+
+Best Regards,  
+WDPL Family";
+
+                    EmailBody = EmailBody.Replace("[ClientName]", CentreName);
+
+                    var fromEmailId = "t.shubh94@gmail.com"; // Use a valid email address
+                    var fromPassword = "nnokrcggogiphcbh"; // Use a secure way to store this
+                    var smtpClient = new SmtpClient("smtp.gmail.com")
+                    {
+                        Port = 587,
+                        Credentials = new NetworkCredential(fromEmailId, fromPassword),
+                        EnableSsl = true
+                    };
+                    smtpClient.UseDefaultCredentials = false;
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress(fromEmailId),
+                        Subject = "Welcome to WDPL Diagnostic Pvt Ltd",
+                        Body = EmailBody,
+                        IsBodyHtml = false
+                    };
+                    var Email1 = "shubham.tiwari@imarsar.com";
+                    mailMessage.To.Add(Email1);
+
+                    await smtpClient.SendMailAsync(mailMessage);
+
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Email sent successfully"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = $"Error sending email: {ex.Message}"
+                    };
+                }
+            }
+
+            return new ServiceStatusResponseModel
+            {
+                Success = false,
+                Message = "Invalid email address"
+            };
         }
 
         private empCenterAccess CreateEmpCentreData(empCenterAccess empcentreaccess, int CentreId)

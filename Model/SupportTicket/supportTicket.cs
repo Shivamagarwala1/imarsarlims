@@ -25,31 +25,32 @@ namespace iMARSARLIMS.Model.SupportTicket
         public int completedBy { get; set; }
         public DateTime? CompletedDate { get; set; }
         public DateTime? Deliverydate { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string ActionTaken { get; set; }
         public byte isReopen {  get; set; }
         public int ReopenBy { get; set; }
         public DateTime? ReopenDate { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string? ReopenReason { get; set; }
         public byte? isHold { get; set; }
         public int? holdBy { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string? holdReason { get; set; }
         public DateTime? holdDate   { get; set; }
         public byte? isRejected { get; set; }
         public int? rejectedBy { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string? rejectReason { get; set; }
         public DateTime? rejectDate { get; set; }
         public byte? isClosed { get; set; }
         public int? closedBy { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string? closedRemark { get; set; }
         public DateTime? closedDate { get; set; }
-        [MaxLength(100)]
+        [MaxLength(500)]
         public string? CompleteRemark { get; set; }
         public int? roleId { get; set; } = 1;
-
+        [MaxLength(150)]
+        public string TicketSubject { get; set; }
     }
 }

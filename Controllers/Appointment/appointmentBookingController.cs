@@ -23,11 +23,11 @@ namespace iMARSARLIMS.Controllers.Appointment
 
 
         [HttpGet("GetAppointmentData")]
-        public async Task<ServiceStatusResponseModel> GetAppointmentData(DateTime FromDate, DateTime Todate, int CentreID)
+        public async Task<ServiceStatusResponseModel> GetAppointmentData(DateTime FromDate, DateTime Todate, int CentreID, int status)
         {
             try
             {
-                var result = await _appointmentBookingServices.GetAppointmentData(FromDate,Todate,CentreID);
+                var result = await _appointmentBookingServices.GetAppointmentData(FromDate,Todate,CentreID, status);
                 return result;
             }
             catch (Exception ex)

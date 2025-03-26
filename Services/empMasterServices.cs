@@ -201,7 +201,8 @@ namespace iMARSARLIMS.Services
                 indentIssue = empmaster.indentIssue,
                 IndentApprove = empmaster.IndentApprove,
                 allowTicket= empmaster.allowTicket,
-                allowTicketRole= empmaster.allowTicketRole
+                allowTicketRole= empmaster.allowTicketRole,
+                employeeCentretype= empmaster.employeeCentretype
 
             };
         }
@@ -378,6 +379,7 @@ namespace iMARSARLIMS.Services
             EmpMaster.IndentApprove = empmaster.IndentApprove;
             EmpMaster.allowTicket= empmaster.allowTicket;
             EmpMaster.allowTicketRole= empmaster.allowTicketRole;
+            EmpMaster.employeeCentretype= empmaster.employeeCentretype;
         }
 
         private async Task<ServiceStatusResponseModel> UpdateEmpCentreAccess(IEnumerable<empCenterAccess> empcenteraccess, int employeeId)
@@ -587,7 +589,7 @@ namespace iMARSARLIMS.Services
                            from parentIcon in parentIcons.DefaultIfEmpty()
                            join mi1 in db.menuIconMaster on 4 equals mi1.id into childIcons
                            from childIcon in childIcons.DefaultIfEmpty()
-                           where employeeId == rma.employeeId.ToString() && roleId == rma.roleId.ToString()
+                           where employeeId == rma.employeeId.ToString() && roleId == rma.roleId.ToString() && mm.isActive==1
                  
                            select new
                            {

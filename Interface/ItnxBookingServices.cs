@@ -1,5 +1,6 @@
 ﻿using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
+using Microsoft.AspNetCore.OData.Query;
 using OfficeOpenXml.Table.PivotTable;
 
 namespace iMARSARLIMS.Interface
@@ -13,7 +14,7 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetHistoresult(int testid);
         Task<ServiceStatusResponseModel> GetMicroresult(int testid,int reportStatus);
         Task<ServiceStatusResponseModel> GetPatientDetail(string workorderId);
-        Task<ServiceStatusResponseModel> GetDispatchData(DispatchDataRequestModel patientdata);
+        Task<ServiceStatusResponseModel> GetDispatchData(ODataQueryOptions<DispatchDataModel> queryOptions, DispatchDataRequestModel patientdata);
         Task<ServiceStatusResponseModel> GetTestInfo(string TestId);
         Task<ServiceStatusResponseModel> GetbarcodeChangedetail(string WorkOrderId);
         Task<ServiceStatusResponseModel> UpdateBarcode(List<barcodeChangeRequest> NewBarcodeData);

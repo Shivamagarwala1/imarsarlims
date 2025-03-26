@@ -143,16 +143,18 @@ namespace iMARSARLIMS.Services.Appointment
             }
         }
 
-        async Task<ServiceStatusResponseModel> IappointmentBookingServices.GetAppointmentData(DateTime FromDate, DateTime Todate, int CentreID)
+        async Task<ServiceStatusResponseModel> IappointmentBookingServices.GetAppointmentData(DateTime FromDate, DateTime Todate, int CentreID,int status)
         {
             try
             {
+                var startDate = FromDate.Date;
+                var endDate = Todate.Date.AddDays(1).AddTicks(-1);
                 var Query = from tb in db.tnx_Booking
                             join ap in db.appointmentBooking on tb.transactionId equals ap.transactionId
                             join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
                             join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
                             join im in db.itemMaster on tbi.itemId equals im.itemId
-                            where tb.bookingDate >= FromDate && tb.bookingDate <= Todate
+                            where tb.bookingDate >= startDate && tb.bookingDate <= endDate
                             select new
                             {
                                 AppointmentId = ap.appointmentId,
@@ -173,7 +175,9 @@ namespace iMARSARLIMS.Services.Appointment
                                 tbi.investigationName,
                                 tbi.isSampleCollected,
                                 im.defaultsampletype,
-                                TestId= tbi.id,
+                                TestId= tbi.id,tbi.barcodeNo,
+                                Status1= ap.Status,
+                                Assinedphelebo = db.empMaster.Where(e => e.empId == ap.AssignedPhlebo).Select(e => e.fName).FirstOrDefault(),
                                 sampletypedata = (db.itemSampleTypeMapping.Where(i => i.itemId == im.itemId).Select(i => new { i.sampleTypeId, i.sampleTypeName })).ToList(),
                                 status = ap.Status == 1 ? "Asigned" : ap.Status == 2 ? "Rescheduled" : ap.Status == 0 ? "New Appointment" : "Cancel"
                             };
@@ -181,7 +185,12 @@ namespace iMARSARLIMS.Services.Appointment
                 {
                     Query = Query.Where(q => q.centreId == CentreID);
                 }
-
+                if (status >= 0 && status<5)
+                {
+                    Query = Query.Where(q => q.Status1 == status);
+                }
+                
+                
                 var data = await Query.ToListAsync();
                 return new ServiceStatusResponseModel
                 {
@@ -256,6 +265,7 @@ namespace iMARSARLIMS.Services.Appointment
                             data.sampleCollectedID = sample.collectedBy;
                             data.sampleReceivedBY = sample.collectedBy.ToString();
                             data.sampleReceiveDate = DateTime.Now;
+                            data.barcodeNo = sample.barcodeno;
                             db.tnx_BookingItem.Update(data);
                             await db.SaveChangesAsync();
                         }

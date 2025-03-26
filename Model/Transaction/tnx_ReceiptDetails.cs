@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Transaction
 {
@@ -29,6 +30,7 @@ namespace iMARSARLIMS.Model.Transaction
         public string? cancelReason { get; set; }
         public int? bookingCentreId { get; set; }
         public int? settlementCentreID { get; set; }
+        [MaxLength(100)]
         public string? receivedBy { get; set; }
         public int? receivedID { get; set; }
         public DateTime? collectionDate { get; set; }

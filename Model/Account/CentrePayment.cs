@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iMARSARLIMS.Model.Account
 {
@@ -24,5 +25,9 @@ namespace iMARSARLIMS.Model.Account
         public int? apprvoedByID { get; set; }
         public byte? paymentType { get; set; }
         public string? documentName { get; set; }
+        [MaxLength(30)]
+        public string ChequeNo { get; set; }
+        public DateTime ChequeDate { get; set; }
+
     }
 }

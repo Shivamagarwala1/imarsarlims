@@ -81,7 +81,7 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
         [HttpPost("ClientLedgerStatus")]
-        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
+        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(int CentreId, DateTime FromDate, DateTime ToDate)
         {
             try
             {
@@ -224,11 +224,11 @@ namespace iMARSARLIMS.Controllers.Account
 
 
         [HttpPost("TransferRateToRate")]
-        public async Task<ServiceStatusResponseModel> TransferRateToRate(int FromRatetypeid, int ToRatetypeid)
+        public async Task<ServiceStatusResponseModel> TransferRateToRate(int FromRatetypeid, int ToRatetypeid, string type, double Percentage)
         {
             try
             {
-                var result = await _CentrePaymentServices.TransferRateToRate(FromRatetypeid, ToRatetypeid);
+                var result = await _CentrePaymentServices.TransferRateToRate(FromRatetypeid, ToRatetypeid,type, Percentage);
                 return result;
             }
             catch (Exception ex)
@@ -241,12 +241,12 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
 
-        [HttpGet("ClientDepositReport")]
-        public async Task<ServiceStatusResponseModel> ClientDepositReport(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype)
+        [HttpPost("ClientDepositReport")]
+        public async Task<ServiceStatusResponseModel> ClientDepositReport(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
         {
             try
             {
-                var result = await _CentrePaymentServices.ClientDepositReport(centreid, FromDate, ToDate, Paymenttype);
+                var result = await _CentrePaymentServices.ClientDepositReport(centreid, FromDate, ToDate, Paymenttype, status);
                 return result;
             }
             catch (Exception ex)
@@ -259,7 +259,55 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
+        [HttpPost("ClientDeposit")]
+        public async Task<ServiceStatusResponseModel> ClientDeposit(int centreid, string Paymenttype, int status)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.ClientDeposit(centreid, Paymenttype,status);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
+        [HttpPost("ClientDepositReportExcel")]
+        public IActionResult ClientDepositReportExcel(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
+        {
+            try
+            {
+                var result =  _CentrePaymentServices.ClientDepositReportExcel(centreid, FromDate, ToDate, Paymenttype, status);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "TatReport.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("ClientDepositReportPdf")]
+        public IActionResult ClientDepositReportPdf(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
+        {
+            try
+            {
+                var result =  _CentrePaymentServices.ClientDepositReportPdf(centreid, FromDate, ToDate, Paymenttype, status);
+                MemoryStream ms = new MemoryStream(result);
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = $"RateList.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpGet("GetWorkOrderdetailCentreChange")]
         public async Task<ServiceStatusResponseModel> GetWorkOrderdetailCentreChange(string WorkOrderid)

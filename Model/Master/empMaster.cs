@@ -69,7 +69,9 @@ namespace iMARSARLIMS.Model.Master
         public byte? IndentApprove { get; set; }
         public byte? allowTicket { get; set; }
         public int allowTicketRole { get; set; }
-
+        [MaxLength(30)]
+        public string? employeeCentretype { get; set; } = "";
+        
         [ForeignKey(nameof(empId))]
         public List<empCenterAccess>? addEmpCentreAccess { get; set; }
         [ForeignKey(nameof(empId))]
