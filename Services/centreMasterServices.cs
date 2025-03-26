@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlX.XDevAPI.Common;
 using System.Net.Mail;
 using System.Net;
+using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace iMARSARLIMS.Services
 {
@@ -92,7 +93,7 @@ namespace iMARSARLIMS.Services
                             if (centremaster.centretype == "Sub-Franchisee")
                                 roleId = 9;
 
-                            var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max()+1;
+                            var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max() + 1;
                             var empcode = string.Concat("IMS", maxempid.ToString("D2"));
                             var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId, empcode);
                             var EmployeeData = db.empMaster.Add(EmployeeRegData);
@@ -106,7 +107,7 @@ namespace iMARSARLIMS.Services
                             await db.SaveChangesAsync();
                         }
                         await SaveEmpCentreAccessData(centremaster.addEmpCenterAccess, centreId);
-                        await SendWellcomeMail(centremaster.companyName,centremaster.email);
+                        await SendWellcomeMail(centremaster.companyName, centremaster.centrecode, centreId, centremaster.mobileNo, centremaster.email);
 
                         message1 = "Saved Successful";
                     }
@@ -272,7 +273,7 @@ namespace iMARSARLIMS.Services
                 defaultcentre = centreId,
                 fileName = "",
                 isActive = centremaster.isActive,
-                employeeCentretype= centremaster.centretype
+                employeeCentretype = centremaster.centretype
 
             };
 
@@ -461,7 +462,7 @@ namespace iMARSARLIMS.Services
             };
 
         }
-        public async Task<ServiceStatusResponseModel> SendWellcomeMail(string CentreName, string Email)
+        public async Task<ServiceStatusResponseModel> SendWellcomeMail(string CentreName, string centrecode, int centreId, string mobileNo, string Email)
         {
             if (!string.IsNullOrEmpty(Email))
             {
@@ -473,7 +474,8 @@ We are excited to welcome you to the WDPL Diagnostic Pvt Ltd family! Our mission
 
 Here’s what’s next:
 📅 Schedule a Kickoff Call – Let’s discuss your needs and goals. Book a time here: [8010201635]
-📂 Access Your Client Portal – Login here: Lablis.in
+📂 Access Your Client Portal – Login here: Lablis.in  
+UserName= [Id] & Password= [Password]
 📧 Your Main Point of Contact – [8826-991-992]
 
 We’re here to support you every step of the way. If you have any questions, just reply to this email, and we’ll be happy to assist.
@@ -484,9 +486,12 @@ Best Regards,
 WDPL Family";
 
                     EmailBody = EmailBody.Replace("[ClientName]", CentreName);
+                    EmailBody = EmailBody.Replace("[Id]", centrecode);
+                    EmailBody = EmailBody.Replace("[Password]", mobileNo);
 
                     var fromEmailId = "t.shubh94@gmail.com"; // Use a valid email address
                     var fromPassword = "nnokrcggogiphcbh"; // Use a secure way to store this
+
                     var smtpClient = new SmtpClient("smtp.gmail.com")
                     {
                         Port = 587,
@@ -504,8 +509,33 @@ WDPL Family";
                     var Email1 = "shubham.tiwari@imarsar.com";
                     mailMessage.To.Add(Email1);
 
-                    await smtpClient.SendMailAsync(mailMessage);
+                    ////  smtpClient.SendMailAsync(mailMessage);
+                    var EmailData = new centreWelcomeEmail
+                    {
+                        id = 0,
+                        centreCode = CentreName,
+                        centreId = centreId,
+                        emailBody = EmailBody,
+                        emailId = Email,
+                        createdByID = 1,
+                        sendDate = DateTime.Now,
+                        isSent = 1,
+                        subject = "Welcome to WDPL Diagnostic Pvt Ltd",
+                        errorMsg = ""
+                    };
+                    try
+                    {
+                        await smtpClient.SendMailAsync(mailMessage);
+                        EmailData.isSent = 1;
+                    }
+                    catch (Exception ex)
+                    {
+                        EmailData.isSent = 0;
+                        EmailData.errorMsg = ex.Message;
+                    }
 
+                    db.centreWelcomeEmail.Add(EmailData);
+                    await db.SaveChangesAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = true,

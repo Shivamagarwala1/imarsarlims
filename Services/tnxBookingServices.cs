@@ -556,13 +556,13 @@ namespace iMARSARLIMS.Services
                             Email = tbi.isEmailsent,
                             Whatsapp = tbi.isWhatsApp,
                             isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count(),
-                            status= tbi.Isprint==1?"Report print":tbi.hold==1?"Hold":tbi.isrerun==1?"Rerun":tbi.isApproved==1?"Approved":(tbi.isApproved==0 && tbi.isResultDone==1)?"ReSult Done":
+                            status= tbi.Isprint==1? "Report Print" : tbi.hold==1? "Report Hold" : tbi.isrerun==1? "Sample Rerun" : tbi.isApproved==1? "Approved Report" : (tbi.isApproved==0 && tbi.isResultDone==1)? "Report Save" :
                             (tbi.isApproved==0 && tbi.isResultDone==0 && tbi.isSampleCollected=="Y")?"Sample Rec.":
-                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "S") ? "Sample Collected":
-                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "N") ? "Sample Not Collected" :
-                            (tbi.isSampleCollected == "R") ? "Sample Rejected":
-                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "Y" && (db.machine_result.Where(e=>e.testId==tbi.id).Count()>0)) ? "Machine Data":
-                            (db.tnx_OutsourceDetail.Where(o=>o.testId==tbi.id).Count()>0)?"OutSource":"",
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "S") ? "Sample Collected" :
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "N") ? "Not Coll." :
+                            (tbi.isSampleCollected == "R") ? "Reject-Sample" :
+                            (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "Y" && (db.machine_result.Where(e=>e.testId==tbi.id).Count()>0)) ? "Machine Data" :
+                            (db.tnx_OutsourceDetail.Where(o=>o.testId==tbi.id).Count()>0)? "Out Source" :tbi.isUrgent==1? "Urgent Sample": "Pending Report",
 
 
                         };

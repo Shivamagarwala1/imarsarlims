@@ -198,23 +198,25 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var result = await (from cm in db.centreMaster
-                                    join ci in db.centreInvoice on cm.centreId equals ci.centreid
-                                    join em in db.empMaster on ci.createdBy equals em.empId
+                var result = await (from ci in db.centreInvoice
+                                    join cm in db.centreMaster on ci.centreid equals cm.centreId
                                     where CentreId.Contains(cm.centreId)
-                                    orderby ci.InvoiceDate descending 
-                                    group new { ci, cm, em } by cm.centreId into grouped
+                                    && ci.InvoiceDate == (
+                                        db.centreInvoice
+                                        .Where(ci2 => ci2.centreid == ci.centreid)
+                                        .Max(ci2 => ci2.InvoiceDate))
+                                    orderby ci.InvoiceDate descending
                                     select new
                                     {
-                                        centreId = grouped.Key,
-                                        invoiceNo = grouped.FirstOrDefault().ci.id,
-                                        CompanyName = grouped.FirstOrDefault().cm.companyName,
-                                        invoiceDate = grouped.FirstOrDefault().ci.InvoiceDate,
-                                        FromDate = grouped.FirstOrDefault().ci.fromDate,
-                                        ToDate = grouped.FirstOrDefault().ci.toDate,
-                                        Rate = grouped.FirstOrDefault().ci.rate,
-                                        CreatedBy = string.Concat(grouped.FirstOrDefault().em.fName, " ", grouped.FirstOrDefault().em.lName)
+                                        centreId = ci.centreid,
+                                        invoiceNo = ci.id,
+                                        CompanyName = cm.companyName,
+                                        invoiceDate = ci.InvoiceDate,
+                                        FromDate = ci.fromDate,
+                                        ToDate = ci.toDate,
+                                        Rate = ci.rate
                                     }).ToListAsync();
+
 
                 return new ServiceStatusResponseModel
                 {
