@@ -63,7 +63,7 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
         [HttpPost("LedgerStatus")]
-        public async Task<ServiceStatusResponseModel> LedgerStatus(List<int> CentreId)
+        public async Task<ServiceStatusResponseModel> LedgerStatus(string CentreId)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
         [HttpPost("ClientLedgerStatus")]
-        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(int CentreId, DateTime FromDate, DateTime ToDate)
+        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
         {
             try
             {

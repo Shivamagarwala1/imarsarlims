@@ -12,17 +12,16 @@ namespace iMARSARLIMS.Model.Master
         public string Name { get; set; }
         [MaxLength(50)]
         public string Label { get; set; }
-        public int printOrder { get; set; }
         [MaxLength(50)]
         public string Fname { get; set; }
         [MaxLength(50)]
         public int Fsize { get; set; }
         [MaxLength(5)]
-        public string Bold { get; set; }
+        public int Bold { get; set; }
         [MaxLength(5)]
-        public string Italic { get; set; }
+        public int Italic { get; set; }
         [MaxLength(5)]
-        public string Under { get; set; }
+        public int Under { get; set; }
         [MaxLength(8)]
         public string Alignment { get; set; }
         public int Print { get; set; }
@@ -31,6 +30,7 @@ namespace iMARSARLIMS.Model.Master
      
         public int Width { get; set; }
         public int Height { get; set; }
+        public int printOrder { get; set; }
 
     }
 }

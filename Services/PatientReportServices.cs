@@ -331,7 +331,7 @@ namespace iMARSARLIMS.Services
                 PdfDocument pdfDocument = new PdfDocument();
                 PdfDocument tempDocument = new PdfDocument();
                 StringBuilder htmlContent = new StringBuilder();
-                var Header = db.ReportHeader.Select(l => l.reportHeader.ToString()).First();
+                var Header = db.ReportHeader.Select(l => l.reportHeader).First();
 
                 var dtTemp = db.labReportHeader.Where(l => l.isActive == 1).ToList();
                 var width = 0;
@@ -362,7 +362,7 @@ namespace iMARSARLIMS.Services
                     if (dr.Italic.ToString() == "1")
                         sbCss.Append("font-style:italic;");
 
-                    sbCss.Append("width:" + dr.Width.ToString() + "px;height:" + dr.Height.ToString() + "px; }");
+                    sbCss.Append("width:" + dr.Width + "px;height:" + dr.Height + "px; }");
                 }
                 sbCss.Append("</style>");
                 bool _FirstRow = true, _LastRow = false;
@@ -392,13 +392,13 @@ namespace iMARSARLIMS.Services
                     if ((_FirstRow) ? true : (Reportdata[i - 1].testId.ToString() != Reportdata[i].testId.ToString()))
                     {
                         sb.Append("<tr valign='top'>");
-                        sb.Append("<th colSpan='" + Reportdata.Count() + "' class='InvName'>" + Reportdata[i].investigationName.ToString() + "</th>");
+                        sb.Append("<th colSpan=2 class='InvName'>" + Reportdata[i].investigationName.ToString() + "</th>");
                         sb.Append("</tr>");
                     }
                     if (Reportdata[i].value.ToString() == "HEAD")
                     {
                         sb.Append("<tr valign='top'>");
-                        sb.Append("<th class='SubHeader' colspan='" + Reportdata.Count() + "'>" + Reportdata[i].observationName.ToString() + "</th>");
+                        sb.Append("<th class='SubHeader' colspan=2>" + Reportdata[i].observationName.ToString() + "</th>");
                         sb.Append("</tr>");
 
                     }

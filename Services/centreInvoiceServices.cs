@@ -5,17 +5,20 @@ using iMARSARLIMS.Model.Transaction;
 using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.EntityFrameworkCore;
-using MySqlX.XDevAPI.Common;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace iMARSARLIMS.Services
 {
     public class centreInvoiceServices : IcentreInvoiceServices
     {
         private readonly ContextClass db;
-        public centreInvoiceServices(ContextClass context, ILogger<BaseController<centreInvoice>> logger)
+        private readonly IConfiguration _configuration;
+        public centreInvoiceServices(ContextClass context, ILogger<BaseController<centreInvoice>> logger, IConfiguration configuration)
         {
             db = context;
+            this._configuration = configuration;
         }
         async Task<ServiceStatusResponseModel> IcentreInvoiceServices.CreateInvoice(centreInvoiceRequestModel CentreInvoice)
         {
@@ -32,24 +35,20 @@ namespace iMARSARLIMS.Services
                         var InvoiceNo = InvoiceData.Entity.id;
                         if (InvoiceNo > 0)
                         {
-                            // Get the related booking items
                             var invoiceItemData = db.tnx_BookingItem
                                 .Where(b => CentreInvoice.LabNo.Contains(b.transactionId.ToString()) && string.IsNullOrEmpty(b.invoiceNo))
                                 .ToList();
 
                             if (invoiceItemData.Any())
                             {
-                                // Update the items
                                 foreach (var item in invoiceItemData)
                                 {
                                     UpdateItemMasterCreateInvoice(item, CentreInvoice, InvoiceNo);
                                 }
-
                                 db.tnx_BookingItem.UpdateRange(invoiceItemData); // Corrected Update method
                                 await db.SaveChangesAsync();
                             }
-
-                            await transaction.CommitAsync(); // Commit the transaction
+                            await transaction.CommitAsync();
                         }
 
                         return new ServiceStatusResponseModel
@@ -60,12 +59,12 @@ namespace iMARSARLIMS.Services
                     }
                     else // Updating an existing invoice
                     {
-                        if(CentreInvoice.cancelReason=="")
+                        if (CentreInvoice.cancelReason == "")
                         {
                             return new ServiceStatusResponseModel
                             {
                                 Success = false,
-                                Message ="Invoice CancelReason Required"
+                                Message = "Invoice CancelReason Required"
                             };
                         }
                         var invoiceData = db.centreInvoice.FirstOrDefault(i => i.id == CentreInvoice.id);
@@ -150,7 +149,7 @@ namespace iMARSARLIMS.Services
             InvoiceItem.isInvoiceCreated = 0;
         }
 
-       async Task<ServiceStatusResponseModel> IcentreInvoiceServices.SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreIds)
+        async Task<ServiceStatusResponseModel> IcentreInvoiceServices.SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreIds)
         {
             try
             {
@@ -183,7 +182,7 @@ namespace iMARSARLIMS.Services
                     Data = invoiceData
                 };
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return new ServiceStatusResponseModel
                 {
@@ -232,6 +231,186 @@ namespace iMARSARLIMS.Services
                     Message = ex.Message,
                 };
             }
+        }
+
+        public byte[] PrintInvoice(string InvoiceNo)
+        {
+            var result = (from cm in db.centreMaster
+                          join cp in db.centreInvoice on cm.centreId equals cp.centreid
+                          join em in db.empMaster on cp.centreid equals em.centreId
+                          where cp.invoiceNo == InvoiceNo
+                          select new
+                          {
+                              CentreName = cm.companyName,
+
+                              cm.centrecode,
+                              fromDate = cp.fromDate.ToString("yyyy-MMM-dd"),
+                              todate = cp.toDate.ToString("yyyy-MMM-dd"),
+                              cp.invoiceNo,
+                              InvoiceDate = cp.InvoiceDate.ToString("yyyy-MMM-dd"),
+                              cp.rate,
+                              Invoice = cp.InvoiceDate.ToString("MMMM-yyyyy"),
+                          }).ToList();
+
+            if (result.Count > 0)
+            {
+                QuestPDF.Settings.License = LicenseType.Community;
+                var image1 = _configuration["FileBase64:CompanyLogo1"];
+                var image1Bytes = Convert.FromBase64String(image1.Split(',')[1]);
+                var document = Document.Create(container =>
+                {
+
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+
+                        page.MarginTop(2.5f, Unit.Centimetre);
+                        page.MarginLeft(0.5f, Unit.Centimetre);
+                        page.MarginRight(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.Foreground();
+                        page.DefaultTextStyle(x => x.FontFamily("TimesNewRoman"));
+                        page.DefaultTextStyle(x => x.FontSize(10));
+                        page.Header()
+                        .Column(column =>
+                         {
+                             // Header row with GST, Company Name, and Mobile No.
+                             column.Item()
+                              .Table(table =>
+                              {
+                                  table.ColumnsDefinition(columns =>
+                                  {
+                                      columns.RelativeColumn();
+                                      columns.RelativeColumn();
+                                      columns.RelativeColumn();
+                                      columns.RelativeColumn();
+                                      columns.RelativeColumn();
+                                      columns.RelativeColumn();
+                                  });
+                                  table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                  table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
+                                  table.Cell().RowSpan(3).ColumnSpan(2).AlignBottom().Image(image1Bytes);
+                                  table.Cell().ColumnSpan(2).AlignCenter().Text(result[0].CentreName).Style(TextStyle.Default.FontSize(10));
+                                  table.Cell().ColumnSpan(2).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10));
+                                  table.Cell().ColumnSpan(6).AlignCenter().Text("").Style(TextStyle.Default.FontSize(10).Bold().Underline());
+                                  table.Cell().ColumnSpan(6).BorderBottom(1.0f, Unit.Point);
+                              });
+                             // Product table header
+
+
+                             page.Content()
+                        .Column(column =>
+                        {
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(1.0f, Unit.Centimetre);
+                                    columns.RelativeColumn();
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                });
+
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Text("Invoice     " + result[0].Invoice).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.5f, Unit.Centimetre).Text("Invoice No").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.5f, Unit.Centimetre).Text("Invoice Date").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Text(result[0].centrecode + "-" + result[0].CentreName).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.5f, Unit.Centimetre).Text(result[0].invoiceNo).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().Height(0.5f, Unit.Centimetre).Text(result[0].InvoiceDate).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(1.0f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("Particulers").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("Amount (Rs.)").Style(TextStyle.Default.FontSize(10));
+
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("Lab Service Charges for the From Date :" + result[0].fromDate + " to " + result[0].todate + " As per the Details Statement ").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("" + result[0].rate).Style(TextStyle.Default.FontSize(10));
+
+
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("Less Discount as per agreed terms ").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text(" 0 ").Style(TextStyle.Default.FontSize(10));
+
+
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("Rupees In Words : " + MyFunction.AmountToWord((decimal)result[0].rate)).Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(2).Height(0.5f, Unit.Centimetre).Border(0.5f, Unit.Centimetre).Text("" + result[0].rate).Style(TextStyle.Default.FontSize(10));
+
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).BorderTop(0.5f, Unit.Centimetre).Text("Disclamers:").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("This is an electronically generated invoice, kindly acknowledge the invoce at the time of delivery. any discrepancies in the invoice should be notified to accounts department within 7 Days of the receipt of this invoice.").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("Contact Number: 011 - 44744388 ").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("Email: reddropdiagnostics@gmail.com ").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("Current A/C No.: 9971505728").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+                                table.Cell().ColumnSpan(4).Height(0.5f, Unit.Centimetre).BorderLeft(0.5f, Unit.Centimetre).BorderRight(0.5f, Unit.Centimetre).BorderBottom(0.5f, Unit.Centimetre).Text("").Style(TextStyle.Default.FontSize(10));
+
+                            });
+                        });
+
+                             page.Footer().Height(1.5f, Unit.Centimetre)
+                                .Column(column =>
+                                {
+                                    column.Item().Table(table =>
+                                    {
+                                        table.ColumnsDefinition(columns =>
+                                        {
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                            columns.RelativeColumn();
+                                        });
+                                        table.Cell().AlignLeft().Text("");
+                                        table.Cell().AlignLeft().Text("");
+                                        table.Cell().AlignRight().AlignBottom().Text(text =>
+                                        {
+                                            text.DefaultTextStyle(x => x.FontSize(8));
+                                            text.CurrentPageNumber();
+                                            text.Span(" of ");
+                                            text.TotalPages();
+                                        });
+                                    });
+                                });
+                         });
+
+                    });
+                    
+
+                });
+                byte[] pdfBytes = document.GeneratePdf();
+                return pdfBytes;
+            }
+            else
+            {
+                byte[] pdfbyte = [];
+                return pdfbyte;
+            }
+
+        }
+
+        public byte[] PrintInvoiceData(string InvoiceNo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] PrintInvoiceDataExcel(string InvoiceNo)
+        {
+            var result = (from tb in db.tnx_Booking
+                          join tbi in db.tnx_BookingItem on tb.workOrderId equals tbi.workOrderId
+                          join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
+                          where tb.invoiceNo == InvoiceNo
+                          select new
+                          {
+                              BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd"),
+                              tb.workOrderId,
+                              PatientName = tb.name,
+                              ReferBy = dr.doctorName,
+                              tbi.barcodeNo,
+                              ItemName = tbi.investigationName,
+                              rate = tbi.rate
+                          }).ToList();
+            var excelByte = MyFunction.ExportToExcel(result, "InvoiceDetail");
+            return excelByte;
         }
     }
 }

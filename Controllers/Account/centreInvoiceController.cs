@@ -77,6 +77,58 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
+        [HttpGet("PrintInvoice")]
+        public IActionResult PrintInvoice(string InvoiceNo)
+        {
+            try
+            {
+                var result = _centreInvoiceServices.PrintInvoice(InvoiceNo);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "Invoice.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+               return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("PrintInvoiceData")]
+        public IActionResult PrintInvoiceData(string InvoiceNo)
+        {
+            try
+            {
+                var result = _centreInvoiceServices.PrintInvoiceData(InvoiceNo);
+                MemoryStream ms = new MemoryStream(result);
+
+                return new FileStreamResult(ms, "application/pdf")
+                {
+                    FileDownloadName = "InvoiceData.pdf"
+                };
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("PrintInvoiceDataExcel")]
+        public IActionResult PrintInvoiceDataExcel(string InvoiceNo)
+        {
+            try
+            {
+                var result = _centreInvoiceServices.PrintInvoiceDataExcel(InvoiceNo);
+                return File(result, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "InvoiceDetail.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create-order")]
         public IActionResult CreateOrder([FromBody] OrderRequest orderRequest)
         {

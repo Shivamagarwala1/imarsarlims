@@ -8,8 +8,8 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> SubmitPayment(CentrePaymentRequestModel centrePayments);
         Task<ServiceStatusResponseModel> paymentRecieptUpload(IFormFile paymentReciept);
         Task<ServiceStatusResponseModel> PaymentApproveReject(CentrePaymetVerificationRequestModel CentrePaymetVerificationRequest);
-        Task<ServiceStatusResponseModel> LedgerStatus(List<int> CentreId);
-        Task<ServiceStatusResponseModel> ClientLedgerStatus(int CentreId, DateTime FromDate, DateTime ToDate);
+        Task<ServiceStatusResponseModel> LedgerStatus(string CentreId);
+        Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate);
         Task<ServiceStatusResponseModel> GetPatientBillDetail(string Workorderid);
         Task<ServiceStatusResponseModel> CancelPatientReciept(string Workorderid,int Userid);
         Task<ServiceStatusResponseModel> GetPatientpaymentDetail(string Workorderid);

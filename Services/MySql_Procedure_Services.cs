@@ -59,6 +59,23 @@ namespace iMARSARLIMS.Services
                 return new List<WorkSheetResposeModel> { };
             }
         }
+        public List<LedgerStatusModel> LedgerStatus(string Centreid)
+        {
+
+            string sql = "CALL LedgerStatus({0});";
+            string param1 = Centreid;
+            var result = db.Set<LedgerStatusModel>()
+           .FromSqlRaw(sql, param1)
+           .AsEnumerable().ToList();
+            if (result.Count > 0)
+            {
+                return result;
+            }
+            else
+            {
+                return new List<LedgerStatusModel> { };
+            }
+        }
 
         public List<TatReportData> TatReportexcel(DateTime FromDate, DateTime ToDate, int centreId, int departmentId, int itemid, string TatType)
         {

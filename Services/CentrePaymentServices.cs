@@ -11,14 +11,17 @@ using QuestPDF.Helpers;
 using MySqlX.XDevAPI.Common;
 using iMARSARLIMS.Model.Master;
 using OfficeOpenXml;
+using static Google.Cloud.Dialogflow.V2.Intent.Types.Message.Types.CarouselSelect.Types;
 namespace iMARSARLIMS.Services
 {
     public class CentrePaymentServices : ICentrePaymentServices
     {
         private readonly ContextClass db;
-        public CentrePaymentServices(ContextClass context, ILogger<BaseController<CentrePayment>> logger)
+        private readonly MySql_Procedure_Services _MySql_Procedure_Services;
+        public CentrePaymentServices(ContextClass context, ILogger<BaseController<CentrePayment>> logger, MySql_Procedure_Services mySql_Procedure_Services)
         {
             db = context;
+            this._MySql_Procedure_Services = mySql_Procedure_Services;
         }
         async Task<ServiceStatusResponseModel> ICentrePaymentServices.SubmitPayment(CentrePaymentRequestModel centrePayments)
         {
@@ -175,109 +178,42 @@ namespace iMARSARLIMS.Services
             paymentdata.updateByID = verificationRequestModel.updateByID;
         }
 
-        async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(List<int> CentreId)
+async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(string CentreId)
         {
             try
-            {
-                var result = (from cm in db.centreMaster
-                              join tbi in db.tnx_BookingItem on cm.centreId equals tbi.centreId
-                              join tb in db.tnx_Booking on tbi.transactionId equals tb.transactionId
-                              where tbi.isRemoveItem == 0 &&
-                                    (tbi.isPackage == 1 || tbi.isSampleCollected == "Y") &&
-                                    CentreId.Contains(cm.centreId)
-                              group new { cm, tbi } by cm.parentCentreID into g
-                              select new
-                              {
-                                  IsLock = g.FirstOrDefault().cm.isLock,
-                                  CcreditLimt = g.FirstOrDefault().cm.creditLimt,
-                                  CentreType = g.FirstOrDefault().cm.centretype,
-                                  LCentreId = g.FirstOrDefault().cm.centreId,
-                                  centercode = g.FirstOrDefault().cm.centrecode,
-                                  CompanyName = g.FirstOrDefault().cm.companyName,
-                                  Centreadd = g.FirstOrDefault().cm.address,
-                                  Centremobile = g.FirstOrDefault().cm.mobileNo,
-                                  CreditPeridos = g.FirstOrDefault().cm.creditPeridos,
-                                  Cactive = g.FirstOrDefault().cm.isActive,
-                                  UnlockBy = g.FirstOrDefault().cm.unlockBy ?? "",
-                                  LockDate = g.FirstOrDefault().cm.LockDate.HasValue ? g.FirstOrDefault().cm.LockDate.Value.ToString("dd-MMM-yyyy HH:mm") : "",
-                                  UnlockDate = g.FirstOrDefault().cm.unlockDate.HasValue ? g.FirstOrDefault().cm.unlockDate.Value.ToString("dd-MMM-yyyy HH:mm") : "",
-                                  InvoiceNo = (from ip in db.centreInvoice
-                                               where ip.centreid == g.FirstOrDefault().cm.centreId
-                                               orderby ip.id descending
-                                               select ip.invoiceNo).FirstOrDefault() ?? "",
-                                  Remarks = (from em in db.centreLedgerRemarks
-                                             where em.centreId == g.FirstOrDefault().cm.centreId
-                                             orderby em.id descending
-                                             select em.remarks).Take(3).ToList(),
-                                  CreatedDate = (from ip in db.CentrePayment
-                                                 where ip.centreId == g.FirstOrDefault().cm.centreId
-                                                 orderby ip.id descending
-                                                 select ip.createdDate)
-                                                 .FirstOrDefault().ToString("dd-MMM-yyyy") ?? "",
-                                  InvoiceAmt = (from ip in db.CentrePayment
-                                                where ip.centreId == g.FirstOrDefault().cm.centreId
-                                                orderby ip.id descending
-                                                select ip.advancePaymentAmt).FirstOrDefault() ?? 0,
-                                  CreationPayment = 0,
-                                  ApprovedPayment = (from tpp in db.CentrePayment
-                                                     where tpp.centreId == g.FirstOrDefault().cm.centreId && tpp.approved == 1
-                                                     select tpp.advancePaymentAmt).Sum() ?? 0,
-                                  CurrentMPayment = (from tpp in db.CentrePayment
-                                                     where tpp.centreId == g.FirstOrDefault().cm.centreId && tpp.paymentType == 1 &&
-                                                           tpp.paymentDate.Month == DateTime.Now.Month &&
-                                                           tpp.paymentDate.Year == DateTime.Now.Year &&
-                                                           tpp.approved == 1
-                                                     select tpp.advancePaymentAmt).Sum() ?? 0,
-                                  UnPaid = g.Sum(x => x.tbi.mrp),
-                                  RemainingPayment = (from tpp in db.CentrePayment
-                                                      where tpp.centreId == g.FirstOrDefault().cm.centreId && tpp.approved == 1
-                                                      select tpp.advancePaymentAmt).Sum() ?? 0 - g.Sum(x => x.tbi.mrp),
-                                  CurrentBuss = (from tbbi in db.tnx_BookingItem
-                                                 join tbb in db.tnx_Booking on tbbi.transactionId equals tbb.transactionId
-                                                 where tbb.createdDateTime.Month == DateTime.Now.Month &&
-                                                       tbb.createdDateTime.Year == DateTime.Now.Year &&
-                                                       tbbi.isPackage == 1 && tbbi.isSampleCollected == "Y" &&
-                                                       tbb.centreId == g.FirstOrDefault().cm.centreId
-                                                 select tbbi.rate).Sum(),
-                                  AvailableBalance = (from ip in db.CentrePayment
-                                                      where ip.centreId == g.FirstOrDefault().cm.centreId && ip.approved == 1
-                                                      select ip.advancePaymentAmt).Sum() ?? 0 -
-                                                     (from tbi in db.tnx_BookingItem
-                                                      where tbi.centreId == g.FirstOrDefault().cm.centreId
-                                                      select tbi.netAmount).Sum()
-                              }).ToList();
+        {
+                var result = _MySql_Procedure_Services.LedgerStatus(CentreId);
 
                 return new ServiceStatusResponseModel
-                {
-                    Success = true,
-                    Data = result
-                };
-            }
-            catch (Exception ex)
             {
-                return new ServiceStatusResponseModel
-                {
-                    Success = false,
-                    Message = ex.Message
-                };
-            }
+                Success = true,
+                Data = result
+            };
         }
-
-        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(int CentreId, DateTime FromDate, DateTime ToDate)
+        catch (Exception ex)
+        {
+            return new ServiceStatusResponseModel
+            {
+                Success = false,
+                Message = ex.Message
+            };
+        }
+    }
+    public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
         {
             try
             {
                 var centres = await db.centreMaster
-                    .Where(cm => cm.centreId== CentreId)
-                    .ToListAsync(); // Fetch centres first
+                    .Where(cm => CentreId.Contains(cm.centreId))
+                    .ToListAsync(); 
 
                 var bookings = await db.tnx_Booking
-                    .Where(ip => ip.centreId== CentreId)
-                    .ToListAsync(); // Fetch bookings separately
+                    .Where(ip => CentreId.Contains(ip.centreId))
+                    .ToListAsync(); 
 
                 var payments = await db.CentrePayment
-                    .Where(ip => ip.centreId == CentreId)
-                    .ToListAsync(); // Fetch payments separately
+                    .Where(ip => CentreId.Contains(ip.centreId))
+                    .ToListAsync(); 
 
                 var result = centres.Select(cm => new
                 {
