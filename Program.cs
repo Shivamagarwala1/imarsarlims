@@ -209,6 +209,7 @@ builder.Services.AddScoped<IdoctorShareMasterServices, doctorShareMasterServices
 builder.Services.AddScoped<IsupportTicketServices, supportTicketServices>();
 builder.Services.AddScoped<ISalesEmployeeTaggingService, SalesEmployeeTaggingService>();
 builder.Services.AddHttpClient();
+builder.Services.AddTransient<RazorpayService>();
 var app = builder.Build();
 
 app.Use(async (context, next) =>
