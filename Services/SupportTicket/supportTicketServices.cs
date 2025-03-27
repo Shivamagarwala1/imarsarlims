@@ -483,7 +483,7 @@ namespace iMARSARLIMS.Services.SupportTicket
                         return new ServiceStatusResponseModel
                         {
                             Success = true,
-                            Message = "Rejected Successful"
+                            Message = "Completed Successful"
                         };
                     }
                     else

@@ -156,7 +156,7 @@ namespace iMARSARLIMS.Services
                     if (patientdata.status == "Credit")
                         query = query.Where(q => q.paymentMode == "Credit");
                     else if (patientdata.status == "PartialPaid")
-                        query = query.Where(q => q.netAmount != q.paidAmount);
+                        query = query.Where(q => q.netAmount != q.paidAmount && q.paidAmount>0 );
                     else if (patientdata.status == "Paid")
                         query = query.Where(q => q.netAmount == q.paidAmount);
                     else
@@ -557,7 +557,7 @@ namespace iMARSARLIMS.Services
                             Whatsapp = tbi.isWhatsApp,
                             isremark = db.tnx_InvestigationRemarks.Where(s => s.itemId == tbi.itemId && s.transactionId == tbi.transactionId).Count(),
                             status= tbi.Isprint==1? "Report Print" : tbi.hold==1? "Report Hold" : tbi.isrerun==1? "Sample Rerun" : tbi.isApproved==1? "Approved Report" : (tbi.isApproved==0 && tbi.isResultDone==1)? "Report Save" :
-                            (tbi.isApproved==0 && tbi.isResultDone==0 && tbi.isSampleCollected=="Y")?"Sample Rec.":
+                            (tbi.isApproved==0 && tbi.isResultDone==0 && tbi.isSampleCollected=="Y")?"Sample Rcv.":
                             (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "S") ? "Sample Collected" :
                             (tbi.isApproved == 0 && tbi.isResultDone == 0 && tbi.isSampleCollected == "N") ? "Not Coll." :
                             (tbi.isSampleCollected == "R") ? "Reject-Sample" :
