@@ -243,10 +243,10 @@ namespace iMARSARLIMS.Services
         {
             var excelData = (from im in db.itemMaster
                              join ld in db.labDepartment on im.deptId equals ld.id
-                             join rtt in db.rateTypeWiseRateList on im.itemId equals rtt.itemid into rttGroup
-                             from rtt in rttGroup.DefaultIfEmpty()
-                             join rt in db.rateTypeMaster on rtt.rateTypeId equals rt.id
-                             where rtt == null || rtt.rateTypeId == 1
+                             join rttGroup in db.rateTypeWiseRateList
+                                 on im.itemId equals rttGroup.itemid into rttGroupJoin
+                             from rtt in rttGroupJoin.DefaultIfEmpty() // Left Join
+                             where rtt == null || rtt.rateTypeId == 1  // Ensure null records remain
                              select new
                              {
                                  DepartMentId = im.deptId,
@@ -254,8 +254,8 @@ namespace iMARSARLIMS.Services
                                  ItemId = im.itemId,
                                  ItemCode = im.code,
                                  InvestigationName = im.itemName,
-                                 MRP = rtt.mrp,
-                                 Rate = rtt.rate
+                                 MRP = (rtt != null) ? rtt.mrp : (double?)null,
+                                 Rate = (rtt != null) ? rtt.rate : (double?)null
                              }).ToList();
             var excelByte = MyFunction.ExportToExcel(excelData, "LedgerReportExcel");
             return excelByte;

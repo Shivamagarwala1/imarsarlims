@@ -343,26 +343,59 @@ namespace iMARSARLIMS.Controllers.Account
                 };
             }
         }
+        [HttpPost("LockCentre")]
+        public async Task<ServiceStatusResponseModel> LockCentre(int CentreId, int UserId)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.LockCentre(CentreId, UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        [HttpPost("UnlockCentre")]
+        public async Task<ServiceStatusResponseModel> UnlockCentre(int CentreId, int UserId, DateTime unlocktime)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.UnlockCentre(CentreId, UserId, unlocktime);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
 
-
-        //[HttpPost("ChangeBillingCentre")]
-        //public async Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
-        //{
-        //    try
-        //    {
-        //        var result = await _CentrePaymentServices.ChangeBillingCentre(WorkOrderId,Centre, RateType);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ServiceStatusResponseModel
-        //        {
-        //            Success = false,
-        //            Message = ex.Message
-        //        };
-        //    }
-        //}
+        [HttpPost("ChangeBillingCentre")]
+        public async Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.ChangeBillingCentre(WorkOrderId,Centre, RateType);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         //[HttpGet("GetPatientForSettelmet")]
         //public async Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)

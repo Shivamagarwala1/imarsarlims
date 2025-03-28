@@ -21,12 +21,12 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> ClientDeposit(int centreid,  string Paymenttype, int status);
         byte[] ClientDepositReportExcel(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status);
         byte[] ClientDepositReportPdf(List<int> centreid, DateTime FromDate, DateTime ToDate, string Paymenttype, int status);
+        Task<ServiceStatusResponseModel> UnlockCentre(int CentreId, int UserId, DateTime unlocktime);
+        Task<ServiceStatusResponseModel> LockCentre(int CentreId, int UserId);
         Task<ServiceStatusResponseModel> GetWorkOrderdetailCentreChange(string WorkOrderid);
         Task<ServiceStatusResponseModel> GetWorkOrderNewRate(string WorkOrderid, int RatetypeId);
+        Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType);
 
-
-
-        //Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType);
         //Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate);
         //Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData);
         //Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate);

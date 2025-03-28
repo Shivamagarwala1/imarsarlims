@@ -44,11 +44,12 @@ namespace iMARSARLIMS.Services.SupportTicket
                                 st.ActionTaken,
                                 st.task,
                                 st.assignedTo,
-                                st.isHold,
-                                st.isRejected,
+                                isHold = Convert.ToInt32(st.isHold ?? 0),
+                                isRejected = Convert.ToInt32(st.isRejected ?? 0),
+                                isClosed = Convert.ToInt32(st.isClosed ?? 0),
                                 st.Document,st.roleId,
                                 ticketstatus = st.isClosed == 1 ? "closed" : st.isCompleted == 1 ? "Completed":st.isHold==1?"Hold":st.isRejected==1?"Rejected":st.isAssigned==1?"Assigned":"New",
-                                st.isClosed, CreateDateFilter= st.CreateDate,AssignedDatefilter= st.AssignedDate,DeliveryDatefilter= st.Deliverydate,
+                                 CreateDateFilter= st.CreateDate,AssignedDatefilter= st.AssignedDate,DeliveryDatefilter= st.Deliverydate,
                                 completeRemarks = db.SupportTicketRemarks
                             .Where(e => e.ticketId == st.id && e.status == "Complete")
                             .Select(e => new { e.Remarks, AddedDate = e.AddedDate.ToString("yyyy-MMM-dd hh:mm tt") })

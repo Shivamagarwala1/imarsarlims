@@ -365,8 +365,10 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                                            {
                                                rd.id,
                                                rd.workOrderId,
-                                               rd.receivedAmt,
-                                               rd.paymentModeId
+                                               rd.paymentModeId,
+                                               rd.cashAmt,
+                                               rd.creditCardAmt,
+                                               rd.chequeAmt,
                                            }).ToListAsync();
 
                 var result = new { patientdetail, Paymentdetail };
@@ -831,10 +833,50 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
         }
 
-        //public Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var itemdata = db.tnx_BookingItem.Where(bi => bi.workOrderId == WorkOrderId).ToList();
+                    var grossAmount = 0.00;
+
+                    foreach (var item in itemdata)
+                    {
+                        var mrp = db.rateTypeWiseRateList.Where(r => r.itemid == item.itemId && r.rateTypeId == RateType).Select(r => r.mrp).First();
+                        var rate = db.rateTypeWiseRateList.Where(r => r.itemid == item.itemId && r.rateTypeId == RateType).Select(r => r.rate).First();
+                        item.mrp = mrp;
+                        item.rate = rate;
+                        item.netAmount = rate - item.discount;
+                        grossAmount = grossAmount + rate;
+                        
+                    }
+                    db.tnx_BookingItem.UpdateRange(itemdata);
+                    await db.SaveChangesAsync();
+                    var booking = db.tnx_Booking.Where(b => b.workOrderId == WorkOrderId).FirstOrDefault();
+                    booking.grossAmount = grossAmount;
+                    booking.netAmount = grossAmount - booking.discount;
+                    db.tnx_Booking.Update(booking);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Centre change Successful"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+
+                }
+            }
+        }
 
         //public Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
         //{
@@ -1074,5 +1116,96 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
 
 }
+
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.UnlockCentre(int CentreId, int UserId, DateTime unlocktime)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var centredata = db.centreMaster.Where(c => c.centreId == CentreId).FirstOrDefault();
+                    if (centredata != null)
+                    {
+
+                        centredata.isLock = 0;
+                        centredata.unlockBy = UserId.ToString();
+                        centredata.unlockDate = DateTime.UtcNow;
+                        centredata.unlockTime= unlocktime;
+
+                        db.centreMaster.Update(centredata);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Message = "unlocked Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Centre Not Found"
+                        };
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.LockCentre(int CentreId, int UserId)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var centredata = db.centreMaster.Where(c => c.centreId == CentreId).FirstOrDefault();
+                    if (centredata != null)
+                    {
+                        centredata.isLock = 1;
+                        centredata.lockedBy = UserId;
+                        centredata.LockDate= DateTime.UtcNow;
+                        db.centreMaster.Update(centredata);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return new ServiceStatusResponseModel
+                        {
+                            Success= true,
+                            Message="Locked Successful"
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Message = "Centre Not Found"
+                        };
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
     }
 }

@@ -42,7 +42,7 @@ namespace iMARSARLIMS.Controllers.Account
                 };
             }
         }
-        [HttpGet("SearchInvoiceData")]
+        [HttpPost("SearchInvoiceData")]
         public Task<ServiceStatusResponseModel> SearchInvoiceData(DateTime FromDate, DateTime Todate, List<int> CentreId)
         {
             try
@@ -59,12 +59,32 @@ namespace iMARSARLIMS.Controllers.Account
                 });
             }
         }
-        [HttpGet("GetLastInvoiceData")]
+
+
+        [HttpPost("GetLastInvoiceData")]
         public Task<ServiceStatusResponseModel> GetLastInvoiceData(List<int> CentreId)
         {
             try
             {
                 var result = _centreInvoiceServices.GetLastInvoiceData(CentreId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("GetInvoices")]
+        public Task<ServiceStatusResponseModel> GetInvoices(DateTime FromDate, DateTime Todate, List<int> CentreId)
+        {
+            try
+            {
+                var result = _centreInvoiceServices.GetInvoices(FromDate, Todate, CentreId);
                 return result;
             }
             catch (Exception ex)
@@ -92,7 +112,7 @@ namespace iMARSARLIMS.Controllers.Account
             }
             catch (Exception ex)
             {
-               return BadRequest(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -130,27 +150,65 @@ namespace iMARSARLIMS.Controllers.Account
         }
 
         [HttpPost("create-order")]
-        public IActionResult CreateOrder([FromBody] OrderRequest orderRequest)
+        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest orderRequest)
         {
+            if (orderRequest == null)
+            {
+                return BadRequest("Invalid order request");
+            }
+
             var client = _razorpayService.CreateRazorpayClient();
             var options = new Dictionary<string, object>
+    {
+        { "amount", orderRequest.Amount * 100 }, // Amount in paise
+        { "currency", "INR" },
+        { "receipt", orderRequest.Receipt },
+        { "payment_capture", 1 }
+    };
+
+            var order = client.Order.Create(options);
+
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            try
             {
-                { "amount", orderRequest.Amount * 100 }, // Amount in paise
-                { "currency", "INR" },
-                { "receipt", orderRequest.Receipt },
-                { "payment_capture", 1 }
-            };
-              var order = client.Order.Create(options);
-              return Ok(new { orderId = order["id"] });
+                var data = new razorPayOrderRequest
+                {
+                    Amount = orderRequest.Amount,
+                    Receipt = orderRequest.Receipt,
+                    workorderId = orderRequest.workorderId,
+                    centreID = orderRequest.centreID,
+                    payType = orderRequest.payType,
+                    status = 0,
+                    paymentId= "",
+                    Requestdate = DateTime.UtcNow,
+                    Orderid = order["id"].ToString() // Save Razorpay Order ID
+                };
+
+                db.razorPayOrderRequest.Add(data);
+                await db.SaveChangesAsync(); // Save changes before committing the transaction
+
+                await transaction.CommitAsync();
+
+                return Ok(new { orderId = order["id"] });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(new { error = ex.Message });
+            }
         }
         public class OrderRequest
         {
             public decimal Amount { get; set; }
             public string Receipt { get; set; }
+            public string workorderId { get; set; }
+            public int centreID { get; set; }
+            public string payType { get; set; }
+
         }
 
         [HttpPost("verify-payment")]
-        public IActionResult VerifyPayment([FromBody] PaymentVerificationRequest verificationRequest)
+        public async Task<IActionResult> VerifyPayment([FromBody] PaymentVerificationRequest verificationRequest)
         {
             var client = _razorpayService.CreateRazorpayClient();
             var attributes = new Dictionary<string, string>
@@ -159,8 +217,27 @@ namespace iMARSARLIMS.Controllers.Account
                 { "razorpay_order_id", verificationRequest.OrderId }, //order_Q4G7ISJSZgYykF
                 { "razorpay_signature", verificationRequest.Signature } //26224dfda977e4e48353a7899878ea10d78c1715b5a4010401200499a8e27378
             };
-            Razorpay.Api.Utils.verifyPaymentSignature(attributes);
-            return Ok(new { status = "success" });
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            try
+            {
+               
+                Razorpay.Api.Utils.verifyPaymentSignature(attributes);
+                var data = db.razorPayOrderRequest.Where(r=>r.Orderid== verificationRequest.OrderId).FirstOrDefault();
+                if (data != null)
+                {
+                    data.status = 1;
+                    data.paymentId = verificationRequest.PaymentId;
+                    db.razorPayOrderRequest.Update(data);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                return Ok(new { status = "success" });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(ex.Message);
+            }
         }
 
         public class PaymentVerificationRequest

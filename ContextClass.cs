@@ -104,6 +104,7 @@ namespace iMARSARLIMS
         public DbSet<itemInterpretationLog> itemInterpretationLog { get; set; }
         public DbSet<formulaMaster> formulaMaster { get; set; }
         public DbSet<tnx_BookingPatient> tnx_BookingPatient { get; set; }
+        public DbSet<razorPayOrderRequest> razorPayOrderRequest { get; set; }
         public DbSet<machineMaster> machineMaster { get; set; }
         public DbSet<organismAntibioticMaster> organismAntibioticMaster { get; set; }
         public DbSet<organismAntibioticTagMaster> organismAntibioticTagMaster { get; set; }
@@ -182,7 +183,10 @@ namespace iMARSARLIMS
             modelBuilder.Entity<Indent>().Property(x => x.indentId).ValueGeneratedOnAdd();
             
             modelBuilder.Entity<indentDetail>().HasKey(x => x.id);
-            modelBuilder.Entity<indentDetail>().Property(x => x.id).ValueGeneratedOnAdd();// ReportHeader
+            modelBuilder.Entity<indentDetail>().Property(x => x.id).ValueGeneratedOnAdd();// razorPayOrderRequest
+
+            modelBuilder.Entity<razorPayOrderRequest>().HasKey(x => x.id);
+            modelBuilder.Entity<razorPayOrderRequest>().Property(x => x.id).ValueGeneratedOnAdd();
 
             modelBuilder.Entity<SalesEmployeeTagging>().HasKey(x => x.id);
             modelBuilder.Entity<SalesEmployeeTagging>().Property(x => x.id).ValueGeneratedOnAdd();
