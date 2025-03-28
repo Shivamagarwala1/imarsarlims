@@ -153,9 +153,9 @@ namespace iMARSARLIMS.Services
                 observationWiseInterpretation = "",
                 resultRequired = 1,
                 collectionRequire = 1,
-                isActive= itemmaster.isActive,
-                createdById= itemmaster.createdById,
-                createdDateTime= itemmaster.createdDateTime,
+                isActive = itemmaster.isActive,
+                createdById = itemmaster.createdById,
+                createdDateTime = itemmaster.createdDateTime,
                 displaySequence = itemmaster.displaySequence,
             };
         }
@@ -317,7 +317,7 @@ namespace iMARSARLIMS.Services
                                       select new
                                       {
                                           im.itemId,
-                                          itemCode= im.code,
+                                          itemCode = im.code,
                                           itemType = im.itemType == 1 ? "Test" : im.itemType == 2 ? "Profile" : "Package",
                                           im.itemName,
                                           dm.deptName,
@@ -400,7 +400,7 @@ namespace iMARSARLIMS.Services
                              select new
                              {
                                  iom.id,
-                                 observationID=lom.id,
+                                 observationID = lom.id,
                                  lom.labObservationName,
                                  iom.dlcCheck,
                                  iom.isBold,
@@ -410,11 +410,22 @@ namespace iMARSARLIMS.Services
                                  iom.printSeparate,
                                  iom.printOrder
                              }).ToListAsync();
-                    return new ServiceStatusResponseModel
+                    if (ObservationData.Any())
                     {
-                        Success = true,
-                        Data = ObservationData
-                    };
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Data = ObservationData
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Data = "Test Not Mapped"
+                        };
+                    }
                 }
                 else
                 {
@@ -426,8 +437,8 @@ namespace iMARSARLIMS.Services
                             select new
                             {
                                 iom.id,
-                                observationID= im.itemId,
-                                labObservationName= im.itemName,
+                                observationID = im.itemId,
+                                labObservationName = im.itemName,
                                 iom.dlcCheck,
                                 iom.isBold,
                                 iom.isHeader,
@@ -436,11 +447,22 @@ namespace iMARSARLIMS.Services
                                 iom.printSeparate,
                                 iom.printOrder
                             }).ToListAsync();
-                    return new ServiceStatusResponseModel
+                    if (ObservationData.Any())
                     {
-                        Success = true,
-                        Data = ObservationData
-                    };
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = true,
+                            Data = ObservationData
+                        };
+                    }
+                    else
+                    {
+                        return new ServiceStatusResponseModel
+                        {
+                            Success = false,
+                            Data = "Test Not Mapped"
+                        };
+                    }
                 }
             }
             catch (Exception ex)
@@ -493,7 +515,7 @@ namespace iMARSARLIMS.Services
 
         async Task<ServiceStatusResponseModel> IitemMasterServices.GetItemForTemplate()
         {
-            var reporttype = new List<int> { 2, 3,4,5 };
+            var reporttype = new List<int> { 2, 3, 4, 5 };
             try
             {
                 var itemdata = await (from im in db.itemMaster
@@ -523,28 +545,28 @@ namespace iMARSARLIMS.Services
         async Task<ServiceStatusResponseModel> IitemMasterServices.EvaluateTest(int itemid1, int itemid2, int itemid3)
         {
             var data1 = (from iom in db.ItemObservationMapping
-                        join im in db.itemMaster on iom.observationID equals im.itemId
-                        where iom.itemId== itemid1
-                        select new
-                        {
-                            ItemId = iom.itemId,
-                            TestName = im.itemName,
-                            Rate = (from rt in db.rateTypeWiseRateList
-                                    where rt.itemid == itemid1 && rt.rateTypeId == 1
-                                    select rt.rate).FirstOrDefault()
-                        }).ToList();
+                         join im in db.itemMaster on iom.observationID equals im.itemId
+                         where iom.itemId == itemid1
+                         select new
+                         {
+                             ItemId = iom.itemId,
+                             TestName = im.itemName,
+                             Rate = (from rt in db.rateTypeWiseRateList
+                                     where rt.itemid == itemid1 && rt.rateTypeId == 1
+                                     select rt.rate).FirstOrDefault()
+                         }).ToList();
 
             var data2 = (from iom in db.ItemObservationMapping
-                        join im in db.itemMaster on iom.observationID equals im.itemId
-                        where iom.itemId == itemid2
-                        select new
-                        {
-                            ItemId = iom.itemId,
-                            TestName = im.itemName,
-                            Rate = (from rt in db.rateTypeWiseRateList
-                                    where rt.itemid == itemid2 && rt.rateTypeId == 1
-                                    select rt.rate).FirstOrDefault()
-                        }).ToList();
+                         join im in db.itemMaster on iom.observationID equals im.itemId
+                         where iom.itemId == itemid2
+                         select new
+                         {
+                             ItemId = iom.itemId,
+                             TestName = im.itemName,
+                             Rate = (from rt in db.rateTypeWiseRateList
+                                     where rt.itemid == itemid2 && rt.rateTypeId == 1
+                                     select rt.rate).FirstOrDefault()
+                         }).ToList();
 
             var data3 = (from iom in db.ItemObservationMapping
                          join im in db.itemMaster on iom.observationID equals im.itemId
@@ -578,15 +600,16 @@ namespace iMARSARLIMS.Services
             try
             {
                 var query = from im in db.itemMaster
-                join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
-                where  rt.rateTypeId==1
-            select new
-            {
-                im.itemName,
-                rt.mrp, rt.rate
-            };
+                            join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
+                            where rt.rateTypeId == 1
+                            select new
+                            {
+                                im.itemName,
+                                rt.mrp,
+                                rt.rate
+                            };
 
-                
+
 
                 var result = query.ToList();
 
@@ -599,7 +622,7 @@ namespace iMARSARLIMS.Services
 
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                
+
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
@@ -623,7 +646,7 @@ namespace iMARSARLIMS.Services
                                 columns.ConstantColumn(1f, Unit.Centimetre); // # column
                                 columns.RelativeColumn();// Patient Name
                                 columns.RelativeColumn();  // Booking Date
-                                
+
                             });
 
                             // Add table header
@@ -638,8 +661,8 @@ namespace iMARSARLIMS.Services
                             var itemname = "";
                             foreach (var item in result)
                             {
-                                
-                                table.Cell().Text(""+ rowNumber).Style(TextStyle.Default.FontSize(10));
+
+                                table.Cell().Text("" + rowNumber).Style(TextStyle.Default.FontSize(10));
                                 table.Cell().Text(item.itemName.ToString()).Style(TextStyle.Default.FontSize(10));
                                 table.Cell().Text(item.mrp.ToString()).Style(TextStyle.Default.FontSize(10));
                                 table.Cell().Text(item.rate.ToString()).Style(TextStyle.Default.FontSize(10));
@@ -685,22 +708,22 @@ namespace iMARSARLIMS.Services
         {
             try
             {
-                var query = await ( from im in db.itemMaster
-                            join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
-                            where rt.rateTypeId == 1
-                            select new
-                            {
-                                im.itemName,
-                                rt.mrp,
-                                rt.rate
-                            }).ToListAsync();
+                var query = await (from im in db.itemMaster
+                                   join rt in db.rateTypeWiseRateList on im.itemId equals rt.itemid
+                                   where rt.rateTypeId == 1
+                                   select new
+                                   {
+                                       im.itemName,
+                                       rt.mrp,
+                                       rt.rate
+                                   }).ToListAsync();
                 return new ServiceStatusResponseModel
                 {
                     Success = true,
                     Data = query
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ServiceStatusResponseModel
                 {

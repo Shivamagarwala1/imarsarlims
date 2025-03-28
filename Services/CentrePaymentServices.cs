@@ -106,7 +106,7 @@ namespace iMARSARLIMS.Services
                 paymentType = centerpaymentmodel.paymentType,
                 documentName = centerpaymentmodel.fileName,
                 ChequeNo = centerpaymentmodel.ChequeNo,
-                ChequeDate= centerpaymentmodel.ChequeDate
+                ChequeDate = centerpaymentmodel.ChequeDate
 
             };
 
@@ -178,42 +178,42 @@ namespace iMARSARLIMS.Services
             paymentdata.updateByID = verificationRequestModel.updateByID;
         }
 
-async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(string CentreId)
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(string CentreId)
         {
             try
-        {
+            {
                 var result = _MySql_Procedure_Services.LedgerStatus(CentreId);
 
                 return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = result
+                };
+            }
+            catch (Exception ex)
             {
-                Success = true,
-                Data = result
-            };
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
         }
-        catch (Exception ex)
-        {
-            return new ServiceStatusResponseModel
-            {
-                Success = false,
-                Message = ex.Message
-            };
-        }
-    }
-    public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
+        public async Task<ServiceStatusResponseModel> ClientLedgerStatus(List<int> CentreId, DateTime FromDate, DateTime ToDate)
         {
             try
             {
                 var centres = await db.centreMaster
                     .Where(cm => CentreId.Contains(cm.centreId))
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 var bookings = await db.tnx_Booking
                     .Where(ip => CentreId.Contains(ip.centreId))
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 var payments = await db.CentrePayment
                     .Where(ip => CentreId.Contains(ip.centreId))
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 var result = centres.Select(cm => new
                 {
@@ -244,7 +244,7 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                                          .Sum(ip => (decimal?)ip.netAmount) ?? 0,
                     CreditDays = cm.creditPeridos,
                     Status = cm.isLock == 1 ? "Locked" : "UnLocked",
-                    OpenBy = cm.unlockBy!="0"? db.empMaster.Where(e=>e.empId.ToString()== cm.unlockBy).Select(e=> string.Concat(e.fName," ",e.lName)).FirstOrDefault():"",
+                    OpenBy = cm.unlockBy != "0" ? db.empMaster.Where(e => e.empId.ToString() == cm.unlockBy).Select(e => string.Concat(e.fName, " ", e.lName)).FirstOrDefault() : "",
                     OpenDate = cm.unlockDate.HasValue ? cm.unlockDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : "",
                     LockDate = cm.LockDate.HasValue ? cm.LockDate.Value.ToString("yyyy-MMM-dd hh:mm tt") : ""
                 }).ToList();
@@ -353,10 +353,13 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                                                tm.title,
                                                tb.name,
                                                tb.gender,
+                                               tb.transactionId,
+                                               tb.patientId,
                                                Age = string.Concat(tb.ageYear, " Y ", tb.ageMonth, " M ", tb.ageDay, " D"),
                                                tb.mobileNo,
                                                tb.workOrderId,
-                                               Centrename = cm.companyName
+                                               Centrename = cm.companyName,
+                                               tb.centreId,
                                            }).ToListAsync();
 
                 var Paymentdetail = await (from rd in db.tnx_ReceiptDetails
@@ -364,11 +367,11 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                                            select new
                                            {
                                                rd.id,
+                                               rd.transactionId,
                                                rd.workOrderId,
                                                rd.paymentModeId,
-                                               rd.cashAmt,
-                                               rd.creditCardAmt,
-                                               rd.chequeAmt,
+                                               Amount = rd.cashAmt != 0 ? rd.cashAmt : rd.creditCardAmt != 0 ? rd.creditCardAmt :  rd.onlinewalletAmt,
+                                               Paymentmode = rd.cashAmt != 0 ? "Cash" : rd.creditCardAmt != 0 ? "creditCard" :  rd.onlinewalletAmt !=0? "UPI" : ""
                                            }).ToListAsync();
 
                 var result = new { patientdetail, Paymentdetail };
@@ -397,13 +400,10 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                 {
                     foreach (var changePaymentMode in PaymentMode)
                     {
-                        if (changePaymentMode.id == 0)
+                        if (changePaymentMode.id != 0)
                         {
                             var data = db.tnx_ReceiptDetails.Where(r => r.id == changePaymentMode.id).FirstOrDefault();
-                            data.isCancel = changePaymentMode.isCancel;
-                            data.canceledBy = changePaymentMode.canceledBy;
-                            data.cancelReason = changePaymentMode.cancelReason;
-                            data.cancelDate = changePaymentMode.cancelDate;
+                            updatePaymentMode(data, changePaymentMode);
                             db.tnx_ReceiptDetails.Update(data);
                             await db.SaveChangesAsync();
                             await transaction.CommitAsync();
@@ -464,7 +464,32 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                 receivedID = changePaymentMode.receivedID,
             };
         }
-
+        private void updatePaymentMode(tnx_ReceiptDetails olddata, ChangePaymentMode changePaymentMode)
+        {
+            olddata.transactionId = changePaymentMode.transactionId;
+            olddata.transactionType = changePaymentMode.transactionType;
+            olddata.workOrderId = changePaymentMode.workOrderId;
+            olddata.receiptNo = changePaymentMode.receiptNo;
+            olddata.receivedAmt = changePaymentMode.receivedAmt;
+            olddata.cashAmt = changePaymentMode.cashAmt;
+            olddata.creditCardAmt = changePaymentMode.creditCardAmt;
+            olddata.creditCardNo = changePaymentMode.creditCardNo;
+            olddata.chequeAmt = changePaymentMode.chequeAmt;
+            olddata.chequeNo = changePaymentMode.chequeNo;
+            olddata.onlinewalletAmt = changePaymentMode.onlinewalletAmt;
+            olddata.walletno = changePaymentMode.walletno;
+            olddata.NEFTamt = changePaymentMode.NEFTamt;
+            olddata.BankName = changePaymentMode.BankName;
+            olddata.paymentModeId = changePaymentMode.paymentModeId;
+            olddata.isCancel = changePaymentMode.isCancel;
+            olddata.cancelDate = changePaymentMode.cancelDate;
+            olddata.canceledBy = changePaymentMode.canceledBy;
+            olddata.cancelReason = changePaymentMode.cancelReason;
+            olddata.bookingCentreId = changePaymentMode.bookingCentreId;
+            olddata.settlementCentreID = changePaymentMode.settlementCentreID;
+            olddata.receivedBy = changePaymentMode.receivedBy;
+            olddata.receivedID = changePaymentMode.receivedID;
+        }
         async Task<ServiceStatusResponseModel> ICentrePaymentServices.GetRateList(int ratetypeID)
         {
             try
@@ -511,8 +536,8 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                               ItemName = im.itemName,
                               MRP = rtrl.mrp,
                               Rate = rtrl.rate,
-                             rtm.rateName
-                            
+                              rtm.rateName
+
                           }).ToList();
 
             if (result.Count > 0)
@@ -552,20 +577,20 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                                     columns.ConstantColumn(2.0f, Unit.Centimetre);
                                     columns.ConstantColumn(2.0f, Unit.Centimetre);
                                 });
-                               table.Header(header =>
-                                {
-                                    string[] headers = { "#", "Test Name", "Mrp", "Rate" };
-                                    foreach (var title in headers)
-                                    {
-                                        header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
-                                            .Text(title)
-                                            .Style(TextStyle.Default.FontSize(10).Bold());
-                                    }
-                                });
+                                table.Header(header =>
+                                 {
+                                     string[] headers = { "#", "Test Name", "Mrp", "Rate" };
+                                     foreach (var title in headers)
+                                     {
+                                         header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                             .Text(title)
+                                             .Style(TextStyle.Default.FontSize(10).Bold());
+                                     }
+                                 });
                                 int rowNumber = 1;
                                 foreach (var item in result)
                                 {
-                                    table.Cell().Height(0.5f, Unit.Centimetre).Text(""+ rowNumber).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Height(0.5f, Unit.Centimetre).Text("" + rowNumber).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Height(0.5f, Unit.Centimetre).Text(item.ItemName).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Height(0.5f, Unit.Centimetre).Text(item.MRP.ToString()).Style(TextStyle.Default.FontSize(10));
                                     table.Cell().Height(0.5f, Unit.Centimetre).Text(item.Rate.ToString()).Style(TextStyle.Default.FontSize(10));
@@ -609,30 +634,30 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
         }
 
-        async Task<ServiceStatusResponseModel> ICentrePaymentServices.TransferRateToRate(int FromRatetypeid, int ToRatetypeid , string type, double Percentage)
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.TransferRateToRate(int FromRatetypeid, int ToRatetypeid, string type, double Percentage)
         {
             using (var transaction = await db.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var itemids= db.rateTypeWiseRateList.Where(r => r.rateTypeId == FromRatetypeid).Select(r=>r.itemid).ToList();
+                    var itemids = db.rateTypeWiseRateList.Where(r => r.rateTypeId == FromRatetypeid).Select(r => r.itemid).ToList();
                     var data = db.rateTypeWiseRateList.Where(r => r.rateTypeId == ToRatetypeid && itemids.Contains(r.itemid)).ToList();
                     db.rateTypeWiseRateList.RemoveRange(data);
                     await db.SaveChangesAsync();
                     var torateList = db.rateTypeWiseRateList.Where(r => r.rateTypeId == FromRatetypeid).ToList();
                     torateList.ForEach(rate => rate.id = 0);
                     torateList.ForEach(rate => rate.rateTypeId = ToRatetypeid);
-                   
-                    if (type=="Plus")
+
+                    if (type == "Plus")
                     {
-                        torateList.ForEach(rate => rate.rate = Math.Round(rate.rate+ rate.rate*Percentage/100));
+                        torateList.ForEach(rate => rate.rate = Math.Round(rate.rate + rate.rate * Percentage / 100));
                     }
                     else
                     {
                         torateList.ForEach(rate => rate.rate = Math.Round(rate.rate + rate.rate * Percentage / 100));
                     }
 
-                    
+
                     db.rateTypeWiseRateList.AddRange(torateList);
                     await db.SaveChangesAsync();
                     await transaction.CommitAsync();
@@ -655,36 +680,36 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
         }
 
-        async Task<ServiceStatusResponseModel> ICentrePaymentServices.ClientDepositReport(List<int> Centreids, DateTime FromDate, DateTime ToDate, string Paymenttype,int status)
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.ClientDepositReport(List<int> Centreids, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
         {
             try
             {
                 var Query = from cm in db.centreMaster
-                              join cp in db.CentrePayment on cm.centreId equals cp.centreId
-                              where Centreids.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
-                              orderby cm.centreId
-                              select new
-                              {
-                                  cp.id,
-                                  CentreName = cm.companyName,
-                                  cp.paymentDate,
-                                  cp.advancePaymentAmt,
-                                  cp.paymentType,
-                                  cp.approved,
-                                  remarks= string.IsNullOrEmpty(cp.remarks)?"": cp.remarks,
-                                  cp.paymentMode,
-                                  documentName = string.IsNullOrEmpty(cp.documentName) ? "" : cp.documentName,
-                                  bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
-                                  ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
-                                  status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
-                                  ConfirmedBy = cp.apprvoedByID != null
-                                      ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
-                                          .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
-                                  rejectRemarks= string.IsNullOrEmpty(cp.rejectRemarks)?"": cp.rejectRemarks
-                              };
-                if(Paymenttype!="0")
+                            join cp in db.CentrePayment on cm.centreId equals cp.centreId
+                            where Centreids.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
+                            orderby cm.centreId
+                            select new
+                            {
+                                cp.id,
+                                CentreName = cm.companyName,
+                                cp.paymentDate,
+                                cp.advancePaymentAmt,
+                                cp.paymentType,
+                                cp.approved,
+                                remarks = string.IsNullOrEmpty(cp.remarks) ? "" : cp.remarks,
+                                cp.paymentMode,
+                                documentName = string.IsNullOrEmpty(cp.documentName) ? "" : cp.documentName,
+                                bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
+                                ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
+                                status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
+                                ConfirmedBy = cp.apprvoedByID != null
+                                    ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
+                                        .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
+                                rejectRemarks = string.IsNullOrEmpty(cp.rejectRemarks) ? "" : cp.rejectRemarks
+                            };
+                if (Paymenttype != "0")
                 {
-                    Query= Query.Where(q=>q.paymentType.ToString()==Paymenttype);
+                    Query = Query.Where(q => q.paymentType.ToString() == Paymenttype);
                 }
                 if (status != 2)
                 {
@@ -709,13 +734,13 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
         }
 
-        async Task<ServiceStatusResponseModel> ICentrePaymentServices.ClientDeposit(int Centreid,  string Paymenttype, int status)
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.ClientDeposit(int Centreid, string Paymenttype, int status)
         {
             try
             {
                 var Query = from cm in db.centreMaster
                             join cp in db.CentrePayment on cm.centreId equals cp.centreId
-                            where cm.centreId== Centreid
+                            where cm.centreId == Centreid
                             orderby cm.centreId
                             select new
                             {
@@ -850,7 +875,7 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                         item.rate = rate;
                         item.netAmount = rate - item.discount;
                         grossAmount = grossAmount + rate;
-                        
+
                     }
                     db.tnx_BookingItem.UpdateRange(itemdata);
                     await db.SaveChangesAsync();
@@ -868,6 +893,7 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                 }
                 catch (Exception ex)
                 {
+                    await transaction.RollbackAsync();
                     return new ServiceStatusResponseModel
                     {
                         Success = false,
@@ -878,20 +904,95 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             }
         }
 
-        //public Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
-        //{
-        //    throw new NotImplementedException();
-        //}
+       async Task<ServiceStatusResponseModel> ICentrePaymentServices.GetPatientForRateChange(int CentreId, DateTime FromDate, DateTime ToDate)
+       {
+            try
+            {
+                var pateintdata = await (from tb in db.tnx_Booking
+                                         join cm in db.centreMaster on tb.centreId equals cm.centreId
+                                         where tb.centreId == CentreId && tb.bookingDate >= FromDate && tb.bookingDate <= ToDate
+                                         select new
+                                         {
+                                             centreName = cm.companyName,
+                                             pateintName = tb.name,
+                                             tb.mobileNo,
+                                             tb.netAmount,
+                                             Age = string.Concat(tb.ageYear, "Y", "/", tb.gender),
+                                             tb.workOrderId,
+                                             BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt")
+                                         }).ToListAsync();
+                return new ServiceStatusResponseModel
+                {
+                    Success = true,
+                    Data = pateintdata
+                };
+            }
+            catch(Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+       }
 
         //public Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
         //{
         //    throw new NotImplementedException();
         //}
 
-        //public Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        async Task<ServiceStatusResponseModel> ICentrePaymentServices.CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+
+                    var itemdata = db.tnx_Booking.Where(bi => bi.centreId == Centre && bi.bookingDate >= FromDate && bi.bookingDate <= ToDate).ToList();
+
+
+                    foreach (var Booking in itemdata)
+                    {
+                        var grossAmount = 0.00;
+                        var bookingitem = db.tnx_BookingItem.Where(bi => bi.workOrderId == Booking.workOrderId).ToList();
+                        foreach (var item in bookingitem)
+                        {
+                            var mrp = db.rateTypeWiseRateList.Where(r => r.itemid == item.itemId && r.rateTypeId == Booking.rateId).Select(r => r.mrp).First();
+                            var rate = db.rateTypeWiseRateList.Where(r => r.itemid == item.itemId && r.rateTypeId == Booking.rateId).Select(r => r.rate).First();
+                            item.mrp = mrp;
+                            item.rate = rate;
+                            item.netAmount = rate - item.discount;
+                            grossAmount = grossAmount + rate;
+                        }
+                        db.tnx_BookingItem.UpdateRange(bookingitem);
+                        await db.SaveChangesAsync();
+                        Booking.grossAmount = grossAmount;
+                        Booking.netAmount = grossAmount - Booking.discount;
+
+
+                    }
+                    db.tnx_Booking.UpdateRange(itemdata);
+                    await db.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = "Centre change Successful"
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
+
+                }
+            }
+        }
 
         //public Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type)
         //{
@@ -937,8 +1038,8 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
             {
                 return new ServiceStatusResponseModel
                 {
-                    Success= true,
-                    Message= ex.Message
+                    Success = true,
+                    Message = ex.Message
                 };
             }
 
@@ -946,176 +1047,177 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
 
         public byte[] ClientDepositReportExcel(List<int> centreIds, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
         {
-                var Query = from cm in db.centreMaster
-                            join cp in db.CentrePayment on cm.centreId equals cp.centreId
-                            where centreIds.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
-                            orderby cm.centreId
-                            select new
-                            {
-                                cp.id,
-                                CentreName = cm.companyName,
-                                cp.paymentDate,
-                                cp.advancePaymentAmt,
-                                paymentType = cp.paymentType == 1 ? "Deposit" : cp.paymentType == 1 ? "Credit Note" : "Debit Note",
-                                remarks = string.IsNullOrEmpty(cp.remarks) ? "" : cp.remarks,
-                                cp.paymentMode,
-                                 bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
-                                ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
-                                status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
-                                ConfirmedBy = cp.apprvoedByID != null
-                                    ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
-                                        .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
-                                rejectRemarks = string.IsNullOrEmpty(cp.rejectRemarks) ? "" : cp.rejectRemarks
-                            };
-                if (Paymenttype != "0")
-                {
-                    Query = Query.Where(q => q.paymentType.ToString() == Paymenttype);
-                }
+            var Query = from cm in db.centreMaster
+                        join cp in db.CentrePayment on cm.centreId equals cp.centreId
+                        where centreIds.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
+                        orderby cm.centreId
+                        select new
+                        {
+                            cp.id,
+                            CentreName = cm.companyName,
+                            cp.paymentDate,
+                            cp.advancePaymentAmt,
+                            paymentType = cp.paymentType == 1 ? "Deposit" : cp.paymentType == 1 ? "Credit Note" : "Debit Note",
+                            remarks = string.IsNullOrEmpty(cp.remarks) ? "" : cp.remarks,
+                            cp.paymentMode,
+                            bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
+                            ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
+                            status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
+                            ConfirmedBy = cp.apprvoedByID != null
+                                ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
+                                    .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
+                            rejectRemarks = string.IsNullOrEmpty(cp.rejectRemarks) ? "" : cp.rejectRemarks
+                        };
+            if (Paymenttype != "0")
+            {
+                Query = Query.Where(q => q.paymentType.ToString() == Paymenttype);
+            }
             if (status != 2)
             {
                 Query = Query.Where(q => q.status == (status == 1 ? "Payment Rcv." : status == -1 ? "Payment Reject" : "Payment Pending"));
             }
 
             var result = Query.ToList();
-                var excelByte = MyFunction.ExportToExcel(result, "CollectionReport");
-                return excelByte;
-            
+            var excelByte = MyFunction.ExportToExcel(result, "CollectionReport");
+            return excelByte;
+
         }
 
         public byte[] ClientDepositReportPdf(List<int> centreIds, DateTime FromDate, DateTime ToDate, string Paymenttype, int status)
         {
             var Query = from cm in db.centreMaster
-                            join cp in db.CentrePayment on cm.centreId equals cp.centreId
-                            where centreIds.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
-                            orderby cm.centreId
-                            select new
-                            {
-                                cp.id,
-                                CentreName = cm.companyName,
-                                paymentDate= cp.paymentDate.ToString("yyyy-MMM-dd"),
-                                cp.advancePaymentAmt,
-                                paymentType= cp.paymentType==1? "Deposit" : cp.paymentType == 1 ?"Credit Note":"Debit Note",
-                                cp.approved,
-                                remarks = string.IsNullOrEmpty(cp.remarks) ? "" : cp.remarks,
-                                cp.paymentMode,
-                                documentName = string.IsNullOrEmpty(cp.documentName) ? "" : cp.documentName,
-                                bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
-                                ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
-                                status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
-                                ConfirmedBy = cp.apprvoedByID != null
-                                    ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
-                                        .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
-                                rejectRemarks = string.IsNullOrEmpty(cp.rejectRemarks) ? "" : cp.rejectRemarks
-                            };
-                if (Paymenttype != "0")
-                {
-                    Query = Query.Where(q => q.paymentType.ToString() == Paymenttype);
-                }
-                if (status != 2)
-                {
-                    Query = Query.Where(q => q.approved == status);
-                }
-
-                var result = Query.ToList();
-            if(result.Count > 0) {
-            QuestPDF.Settings.License = LicenseType.Community;
-
-            var document = Document.Create(container =>
-            {
-
-                container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-
-                    page.MarginTop(2.5f, Unit.Centimetre);
-                    page.MarginLeft(0.5f, Unit.Centimetre);
-                    page.MarginRight(0.5f, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.Foreground();
-                    page.DefaultTextStyle(x => x.FontFamily("TimesNewRoman"));
-                    page.DefaultTextStyle(x => x.FontSize(10));
-                    page.Header()
-                    .Column(column =>
-                    {
-                        column.Item().Text("Client Depasit Report").AlignCenter().Bold();
-
-                    });
-
-                    page.Content()
-                    .Column(column =>
-                    {
-                        column.Item().Table(table =>
+                        join cp in db.CentrePayment on cm.centreId equals cp.centreId
+                        where centreIds.Contains(cm.centreId) && cp.createdDate >= FromDate && cp.createdDate <= ToDate
+                        orderby cm.centreId
+                        select new
                         {
-                            table.ColumnsDefinition(columns =>
+                            cp.id,
+                            CentreName = cm.companyName,
+                            paymentDate = cp.paymentDate.ToString("yyyy-MMM-dd"),
+                            cp.advancePaymentAmt,
+                            paymentType = cp.paymentType == 1 ? "Deposit" : cp.paymentType == 1 ? "Credit Note" : "Debit Note",
+                            cp.approved,
+                            remarks = string.IsNullOrEmpty(cp.remarks) ? "" : cp.remarks,
+                            cp.paymentMode,
+                            documentName = string.IsNullOrEmpty(cp.documentName) ? "" : cp.documentName,
+                            bank = string.IsNullOrEmpty(cp.bank) ? "" : cp.bank,
+                            ChequeNo = string.IsNullOrEmpty(cp.ChequeNo) ? "" : cp.ChequeNo,
+                            status = cp.approved == 1 ? "Payment Rcv." : cp.approved == -1 ? "Payment Reject" : "Payment Pending",
+                            ConfirmedBy = cp.apprvoedByID != null
+                                ? db.empMaster.Where(e => e.empId == cp.apprvoedByID)
+                                    .Select(e => string.Concat(e.fName ?? "", " ", e.lName ?? "")).FirstOrDefault() : "",
+                            rejectRemarks = string.IsNullOrEmpty(cp.rejectRemarks) ? "" : cp.rejectRemarks
+                        };
+            if (Paymenttype != "0")
+            {
+                Query = Query.Where(q => q.paymentType.ToString() == Paymenttype);
+            }
+            if (status != 2)
+            {
+                Query = Query.Where(q => q.approved == status);
+            }
+
+            var result = Query.ToList();
+            if (result.Count > 0)
+            {
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                var document = Document.Create(container =>
+                {
+
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+
+                        page.MarginTop(2.5f, Unit.Centimetre);
+                        page.MarginLeft(0.5f, Unit.Centimetre);
+                        page.MarginRight(0.5f, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.Foreground();
+                        page.DefaultTextStyle(x => x.FontFamily("TimesNewRoman"));
+                        page.DefaultTextStyle(x => x.FontSize(10));
+                        page.Header()
+                        .Column(column =>
+                        {
+                            column.Item().Text("Client Depasit Report").AlignCenter().Bold();
+
+                        });
+
+                        page.Content()
+                        .Column(column =>
+                        {
+                            column.Item().Table(table =>
                             {
-                                columns.ConstantColumn(1.0f, Unit.Centimetre);
-                                columns.RelativeColumn();
-                                columns.ConstantColumn(3.0f, Unit.Centimetre);
-                                columns.ConstantColumn(2.0f, Unit.Centimetre);
-                                columns.ConstantColumn(2.0f, Unit.Centimetre);
-                                columns.ConstantColumn(3.0f, Unit.Centimetre);
-                                columns.ConstantColumn(3.0f, Unit.Centimetre);
-                            });
-                            table.Header(header =>
-                            {
-                                string[] headers = { "#", "ClientName", "PaymentDate", "AdvanceAmount", "Pay Type", "Status", "Remark" };
-                                foreach (var title in headers)
+                                table.ColumnsDefinition(columns =>
                                 {
-                                    header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
-                                        .Text(title)
-                                        .Style(TextStyle.Default.FontSize(10).Bold());
+                                    columns.ConstantColumn(1.0f, Unit.Centimetre);
+                                    columns.RelativeColumn();
+                                    columns.ConstantColumn(3.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(2.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(3.0f, Unit.Centimetre);
+                                    columns.ConstantColumn(3.0f, Unit.Centimetre);
+                                });
+                                table.Header(header =>
+                                {
+                                    string[] headers = { "#", "ClientName", "PaymentDate", "AdvanceAmount", "Pay Type", "Status", "Remark" };
+                                    foreach (var title in headers)
+                                    {
+                                        header.Cell().BorderBottom(0.5f, Unit.Point).BorderTop(0.5f, Unit.Point)
+                                            .Text(title)
+                                            .Style(TextStyle.Default.FontSize(10).Bold());
+                                    }
+                                });
+                                int rowNumber = 1;
+                                foreach (var item in result)
+                                {
+                                    table.Cell().Text("" + rowNumber).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.CentreName).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.paymentDate).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.advancePaymentAmt.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.paymentType).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.status.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    table.Cell().Text(item.rejectRemarks.ToString()).Style(TextStyle.Default.FontSize(10));
+                                    rowNumber++;
                                 }
                             });
-                            int rowNumber = 1;
-                            foreach (var item in result)
-                            {
-                                table.Cell().Text("" + rowNumber).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.CentreName).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.paymentDate).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.advancePaymentAmt.ToString()).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.paymentType).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.status.ToString()).Style(TextStyle.Default.FontSize(10));
-                                table.Cell().Text(item.rejectRemarks.ToString()).Style(TextStyle.Default.FontSize(10));
-                                rowNumber++;
-                            }
                         });
-                    });
 
-                    page.Footer().Height(1.5f, Unit.Centimetre)
-                       .Column(column =>
-                       {
-                           column.Item().Table(table =>
+                        page.Footer().Height(1.5f, Unit.Centimetre)
+                           .Column(column =>
                            {
-                               table.ColumnsDefinition(columns =>
+                               column.Item().Table(table =>
                                {
-                                   columns.RelativeColumn();
-                                   columns.RelativeColumn();
-                                   columns.RelativeColumn();
-                               });
-                               table.Cell().AlignLeft().Text("");
-                               table.Cell().AlignLeft().Text("");
-                               table.Cell().AlignRight().AlignBottom().Text(text =>
-                               {
-                                   text.DefaultTextStyle(x => x.FontSize(8));
-                                   text.CurrentPageNumber();
-                                   text.Span(" of ");
-                                   text.TotalPages();
+                                   table.ColumnsDefinition(columns =>
+                                   {
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                       columns.RelativeColumn();
+                                   });
+                                   table.Cell().AlignLeft().Text("");
+                                   table.Cell().AlignLeft().Text("");
+                                   table.Cell().AlignRight().AlignBottom().Text(text =>
+                                   {
+                                       text.DefaultTextStyle(x => x.FontSize(8));
+                                       text.CurrentPageNumber();
+                                       text.Span(" of ");
+                                       text.TotalPages();
+                                   });
                                });
                            });
-                       });
-                });
+                    });
 
-            });
-            byte[] pdfBytes = document.GeneratePdf();
-            return pdfBytes;
-        }
+                });
+                byte[] pdfBytes = document.GeneratePdf();
+                return pdfBytes;
+            }
             else
             {
                 byte[] pdfbyte = [];
                 return pdfbyte;
             }
 
-}
+        }
 
         async Task<ServiceStatusResponseModel> ICentrePaymentServices.UnlockCentre(int CentreId, int UserId, DateTime unlocktime)
         {
@@ -1130,7 +1232,7 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                         centredata.isLock = 0;
                         centredata.unlockBy = UserId.ToString();
                         centredata.unlockDate = DateTime.UtcNow;
-                        centredata.unlockTime= unlocktime;
+                        centredata.unlockTime = unlocktime;
 
                         db.centreMaster.Update(centredata);
                         await db.SaveChangesAsync();
@@ -1175,14 +1277,14 @@ async Task<ServiceStatusResponseModel> ICentrePaymentServices.LedgerStatus(strin
                     {
                         centredata.isLock = 1;
                         centredata.lockedBy = UserId;
-                        centredata.LockDate= DateTime.UtcNow;
+                        centredata.LockDate = DateTime.UtcNow;
                         db.centreMaster.Update(centredata);
                         await db.SaveChangesAsync();
                         await transaction.CommitAsync();
                         return new ServiceStatusResponseModel
                         {
-                            Success= true,
-                            Message="Locked Successful"
+                            Success = true,
+                            Message = "Locked Successful"
                         };
                     }
                     else

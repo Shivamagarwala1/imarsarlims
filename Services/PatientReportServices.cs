@@ -270,11 +270,12 @@ namespace iMARSARLIMS.Services
         }
 
 
+
         public byte[] GetPatientReportType2(string TestId)
         {
             var testIds = TestId.Split(',').Select(int.Parse).ToList(); // Split TestId into a list of integers
 
-            // Query to fetch report data from multiple tables
+            
             var Reportdata = (from tb in db.tnx_Booking
                               join tbp in db.tnx_BookingPatient on tb.patientId equals tbp.patientId
 
@@ -283,17 +284,20 @@ namespace iMARSARLIMS.Services
                               join tos in db.tnx_Observations on tbi.id equals tos.testId
                               join tm in db.titleMaster on tb.title_id equals tm.id
                               join cm in db.centreMaster on tb.centreId equals cm.centreId
-                             // join da in db.doctorApprovalMaster on tbi.approvalDoctor equals da.doctorId
+                              join dr in db.doctorReferalMaster on tb.refID1 equals dr.doctorId
+                              join da in db.doctorApprovalMaster on tbi.approvalDoctor equals da.doctorId
                               where testIds.Contains(tbi.id) && tos.showInReport == 1
                               select new
                               {
-                                 // da.signature,
+                                  da.signature,
                                   tb.workOrderId,
                                   BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"), // Date formatting
                                   tm.title,
                                   tb.name,
                                   Age = tb.ageYear + "Y " + tb.ageMonth + "M " + tb.ageDay + "D",
                                   cm.companyName,
+                                  tb.patientId,
+                                  dr.doctorName,
                                   CentreAddress = cm.address,
                                   cm.centrecode,
                                   CentreMobile = cm.mobileNo,
@@ -321,13 +325,15 @@ namespace iMARSARLIMS.Services
                                   ResultDate = tbi.resultDate
                               }).ToList();
 
-            // If no report data found, return empty byte array
             if (Reportdata.Count > 0)
             {
                 HiQPdf.HtmlToPdf htmlToPdfConverter = new HiQPdf.HtmlToPdf();
                 var headerSpace = 200;
                 var left = 30;
                 var right = 30;
+                int top = 20; int bottom = 20; 
+
+                htmlToPdfConverter.Document.Margins = new PdfMargins(left, top, right, bottom);
                 PdfDocument pdfDocument = new PdfDocument();
                 PdfDocument tempDocument = new PdfDocument();
                 StringBuilder htmlContent = new StringBuilder();
@@ -348,18 +354,20 @@ namespace iMARSARLIMS.Services
                 sbCss.Append(".tbData th{font-weight:bold;padding-bottom:5px;}");
                 sbCss.Append("table.tbOrganism { border-collapse: collapse;}");
                 sbCss.Append("table.tbOrganism, td.tbOrganism, th.tbOrganism{  border: 1px solid black;}");
+                sbCss.Append(".InvastigationName { border: 1px solid black;}");
+                sbCss.Append(".DeptName { border: 1px solid black;}");
 
                 foreach (var dr in dtTemp)
                 {
                     sbCss.Append("." + dr.Name + "{font-family:" + dr.Fname + ";font-size:" + dr.Fsize.ToString() + "px;text-align:" + dr.Alignment.ToString() + ";");
 
-                    if (dr.Bold.ToString() == "Y")
+                    if (dr.Bold == 1)
                         sbCss.Append("font-weight:bold;");
 
-                    if (dr.Under.ToString() == "1")
+                    if (dr.Under == 1)
                         sbCss.Append("text-decoration:underline;");
 
-                    if (dr.Italic.ToString() == "1")
+                    if (dr.Italic == 1)
                         sbCss.Append("font-style:italic;");
 
                     sbCss.Append("width:" + dr.Width + "px;height:" + dr.Height + "px; }");
@@ -369,41 +377,58 @@ namespace iMARSARLIMS.Services
 
                 StringBuilder sb = new StringBuilder();
 
-                for (int i = 0; i <= Reportdata.Count(); i++)
+                string currentTestId = null;
+               
+                for (int i = 0; i < Reportdata.Count(); i++)
                 {
-                    if (_FirstRow)
+                    if (currentTestId != Reportdata[i].testId.ToString())
                     {
-                        sb.Append(sbCss.ToString());
-                        sb.Append("<div class='" + (Reportdata[i].reportType != 1 ? "" : "divContent") + "'><table class='tbData' >");
-                    }
+                        if (!string.IsNullOrEmpty(currentTestId))
+                        {
+                            sb.Append("</table></div>"); // Close previous table
+                        }
+                        if (currentTestId != null)
+                        {
+                            sb.Append("<div class='divContent' style='page-break-before: always;'>");
+                        }
+                        sb.Append("<div style='Height:200px;'></div>");
+                        sb.AppendFormat(Header, Reportdata[i].workOrderId, Reportdata[i].patientId, Reportdata[i].name, Reportdata[i].Age, Reportdata[i].doctorName, Reportdata[i].companyName, Reportdata[i].BookingDate, Reportdata[i].SampleCollectionDate, Reportdata[i].ResultDate, Reportdata[i].centrecode, Reportdata[i].centrecode);
 
-                    if (i == Reportdata.Count() - 1)
-                        _LastRow = true;
-
-                    if ((_FirstRow) ? (Reportdata.Count() == 1) : (Reportdata[i - 1].testId.ToString() != Reportdata[i].ToString()))
-                        sb.Append("</table></div>");
-
-                    if ((_FirstRow) ? (Reportdata.Count() == 1) : (Reportdata[i - 1].testId.ToString() != Reportdata[i].testId.ToString()))
-                    {
-                        sb.Append(sbCss.ToString());
-                        sb.Append("<div class='" + (Reportdata[i].reportType != 1 ? "" : "divContent") + "'><table class='tbData' >");
-                    }
-
-                    if ((_FirstRow) ? true : (Reportdata[i - 1].testId.ToString() != Reportdata[i].testId.ToString()))
-                    {
-                        sb.Append("<tr valign='top'>");
-                        sb.Append("<th colSpan=2 class='InvName'>" + Reportdata[i].investigationName.ToString() + "</th>");
+                        sb.Append("<div ><table style='width:100%'> ");
+                        sb.Append("<tr >");
+                        sb.Append("<th class='LabObservationName'>Test Name </th>");
+                        sb.Append("<th class='Value'>Value</th>");
+                        sb.Append("<th class='DisplayReading'>Dispaly Reading</th>");
+                        sb.Append("<th class='MethodName'>Method</th>");
                         sb.Append("</tr>");
+                        sb.Append("<tr style='Border:1px solid Black; !important'>");
+                        sb.Append("<th colspan='4' class='InvastigationName'>" + Reportdata[i].departmentName.ToString() + "</th>");
+                        sb.Append("</tr>");
+                        sb.Append("<tr >");
+                        sb.Append("<th colspan='4' class='DeptName'>" + Reportdata[i].investigationName.ToString() + "</th>");
+                        sb.Append("</tr>");
+
+                        currentTestId = Reportdata[i].testId.ToString(); // Update currentTestId
                     }
                     if (Reportdata[i].value.ToString() == "HEAD")
                     {
-                        sb.Append("<tr valign='top'>");
-                        sb.Append("<th class='SubHeader' colspan=2>" + Reportdata[i].observationName.ToString() + "</th>");
+                        sb.Append("<tr >");
+                        sb.Append("<td class='SubHeader' colspan=4>" + Reportdata[i].observationName.ToString() + "</td>");
                         sb.Append("</tr>");
-
+                    }
+                    else
+                    {
+                        sb.Append("<tr >");
+                        sb.Append("<td class='LabObservationName' >" + Reportdata[i].observationName.ToString() + "</td>");
+                        sb.Append("<td class='Value' >" + Reportdata[i].value.ToString() + "</td>");
+                        sb.Append("<td class='DisplayReading'>" + Reportdata[i].displayReading.ToString() + "</td>");
+                        sb.Append("<td class='MethodName'>" + Reportdata[i].testMethod.ToString() + "</td>");
+                        sb.Append("</tr>");
                     }
                 }
+
                 htmlContent.Append(sb.ToString());
+
                 byte[] pdfBytes = htmlToPdfConverter.ConvertHtmlToMemory(htmlContent.ToString(), null);
                 return pdfBytes;
             }
@@ -412,6 +437,8 @@ namespace iMARSARLIMS.Services
                 return new byte[0];
             }
         }
+
+
 
         public static byte[] GenerateQrCode(string text)
         {

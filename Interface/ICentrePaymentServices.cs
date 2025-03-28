@@ -27,9 +27,9 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> GetWorkOrderNewRate(string WorkOrderid, int RatetypeId);
         Task<ServiceStatusResponseModel> ChangeBillingCentre(string WorkOrderId, int Centre, int RateType);
 
-        //Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate);
+        Task<ServiceStatusResponseModel> GetPatientForRateChange(int CentreId, DateTime FromDate, DateTime ToDate);
         //Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData);
-        //Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate);
+        Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate);
         //Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate, string type);
        
     }

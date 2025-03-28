@@ -167,6 +167,7 @@ namespace iMARSARLIMS.Services.Appointment
                                 tb.grossAmount,
                                 tb.discount,
                                 tb.netAmount,
+                                tb.paidAmount, dueAmount= tb.netAmount-tb.paidAmount,
                                 tb.rateId,
                                 SceduleDate = ap.AppointmentScheduledOn.ToString("yyyy-MMM-dd hh:mm tt"),
                                 BookingDate = tb.bookingDate.ToString("yyyy-MMM-dd hh:mm tt"),

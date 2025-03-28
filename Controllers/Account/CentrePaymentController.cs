@@ -397,23 +397,23 @@ namespace iMARSARLIMS.Controllers.Account
             }
         }
 
-        //[HttpGet("GetPatientForSettelmet")]
-        //public async Task<ServiceStatusResponseModel> GetPatientForSettelmet(int CentreId, DateTime FromDate, DateTime ToDate)
-        //{
-        //    try
-        //    {
-        //        var result = await _CentrePaymentServices.GetPatientForSettelmet(CentreId,FromDate,ToDate);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ServiceStatusResponseModel
-        //        {
-        //            Success = false,
-        //            Message = ex.Message
-        //        };
-        //    }
-        //}
+        [HttpGet("GetPatientForRateChange")]
+        public async Task<ServiceStatusResponseModel> GetPatientForRateChange(int CentreId, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.GetPatientForRateChange(CentreId,FromDate,ToDate);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         //[HttpPost("UpdatePatientSettelment")]
         //public async Task<ServiceStatusResponseModel> UpdatePatientSettelment(List<BulkSettelmentRequest> SettelmentData)
@@ -433,23 +433,23 @@ namespace iMARSARLIMS.Controllers.Account
         //    }
         //}
 
-        //[HttpPost("CentreRateChange")]
-        //public async Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
-        //{
-        //    try
-        //    {
-        //        var result = await _CentrePaymentServices.CentreRateChange(Centre,FromDate,ToDate);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new ServiceStatusResponseModel
-        //        {
-        //            Success = false,
-        //            Message = ex.Message
-        //        };
-        //    }
-        //}
+        [HttpPost("CentreRateChange")]
+        public async Task<ServiceStatusResponseModel> CentreRateChange(int Centre, DateTime FromDate, DateTime ToDate)
+        {
+            try
+            {
+                var result = await _CentrePaymentServices.CentreRateChange(Centre,FromDate,ToDate);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
 
         //[HttpGet("LedgerStatement")]
         //public async Task<ServiceStatusResponseModel> LedgerStatement(int CentreId, DateTime FromDate, DateTime ToDate,string type)
