@@ -37,6 +37,23 @@ namespace iMARSARLIMS.Controllers.MasterController
                 };
             }
         }
+        [HttpGet("GetCentreCode")]
+        public async Task<ServiceStatusResponseModel> GetCentreCode(string Type)
+        {
+            try
+            {
+                var result = await _centreMasterServices.GetCentreCode(Type);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceStatusResponseModel
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? "An error occurred."
+                };
+            }
+        }
 
         [HttpPost("UpdateCentreStatus")]
         public async Task<ServiceStatusResponseModel> UpdateCentreStatus(int CentreId, byte status, int UserId)

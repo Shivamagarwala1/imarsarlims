@@ -55,6 +55,25 @@ namespace iMARSARLIMS.Services
                                 };
                             }
                         }
+                        var count = 0;
+                        count = db.centreMaster.Where(c => c.mobileNo == centremaster.mobileNo).Count();
+                        if (count > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Duplicate Mobile NO"
+                            };
+                        }
+                        count = db.empMaster.Where(c => c.mobileNo == centremaster.mobileNo).Count();
+                        if (count > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Duplicate Mobile NO"
+                            };
+                        }
                         var CentreMasterData = CreateCentreDetails(centremaster);
                         var CentreData = await db.centreMaster.AddAsync(CentreMasterData);
                         await db.SaveChangesAsync();
@@ -85,6 +104,7 @@ namespace iMARSARLIMS.Services
                             db.rateTypeTagging.Add(ratetypeTagging);
                             await db.SaveChangesAsync();
                         }
+                        var TempPassword = "";
                         if (centremaster.centretype == "Franchisee" || centremaster.centretype == "Sub-Franchisee")
                         {
                             var roleId = 0;
@@ -95,7 +115,12 @@ namespace iMARSARLIMS.Services
 
                             var maxempid = db.empMaster.Select(empMaster => empMaster.empId).Max() + 1;
                             var empcode = string.Concat("IMS", maxempid.ToString("D2"));
-                            var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId, empcode);
+                            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+                            var random = new Random();
+                            TempPassword = new string(Enumerable.Repeat(chars, 10).Select(s => s[random.Next(s.Length)]).ToArray());
+
+                            var EmployeeRegData = CreateEmployee(centremaster, centreId, roleId, empcode, TempPassword);
+
                             var EmployeeData = db.empMaster.Add(EmployeeRegData);
                             await db.SaveChangesAsync();
                             var employeeId = EmployeeData.Entity.empId;
@@ -109,6 +134,19 @@ namespace iMARSARLIMS.Services
                         await SaveEmpCentreAccessData(centremaster.addEmpCenterAccess, centreId);
                         await SendWellcomeMail(centremaster.companyName, centremaster.centrecode, centreId, centremaster.mobileNo, centremaster.email);
 
+                        var SmsText = _configuration["SMSText:UserPassword"].Replace("{User}", centremaster.companyName).Replace("{UserName}", centremaster.email).Replace("{TempPassword}", TempPassword);
+                        var apiUrl = _configuration["SMSText:ApiUrl"];
+                        var finalUrl = apiUrl.Replace("{MobileNo}", centremaster.mobileNo);
+                        finalUrl = finalUrl.Replace("{Msg}", SmsText);
+                        finalUrl = finalUrl.Replace("{Sender}", "Wellness Diagnostic");
+                        try
+                        {
+                            var response = await _httpClient.GetAsync(finalUrl);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
                         message1 = "Saved Successful";
                     }
 
@@ -243,13 +281,14 @@ namespace iMARSARLIMS.Services
                 Document = centremaster.Document,
                 receptionarea = centremaster.receptionarea,
                 waitingarea = centremaster.waitingarea,
-                watercooler = centremaster.waitingarea
+                watercooler = centremaster.waitingarea,
+                barcodeType= centremaster.barcodeType
             };
         }
 
-        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId, string EmpCode)
+        private empMaster CreateEmployee(centreMaster centremaster, int centreId, int roleId, string EmpCode,string TempPassword)
         {
-
+            
             return new empMaster
             {
                 title = "Mr.",
@@ -260,8 +299,9 @@ namespace iMARSARLIMS.Services
                 pinCode = centremaster.pinCode,
                 email = centremaster.email,
                 mobileNo = centremaster.mobileNo,
-                userName = centremaster.centrecode,
-                password = centremaster.mobileNo,
+                userName = centremaster.email,
+                password = TempPassword,
+                tempPassword= TempPassword,
                 createdById = centremaster.createdById,
                 bloodGroup = "b+",
                 createdDateTime = centremaster.createdDateTime,
@@ -398,6 +438,7 @@ namespace iMARSARLIMS.Services
             CentreMaster.receptionarea = centremaster.receptionarea;
             CentreMaster.waitingarea = centremaster.waitingarea;
             CentreMaster.watercooler = centremaster.waitingarea;
+            CentreMaster.barcodeType = centremaster.barcodeType;
             CentreMaster.updateById = centremaster.updateById;
             CentreMaster.updateDateTime = centremaster.updateDateTime;
 
@@ -1108,6 +1149,63 @@ WDPL Family";
                         Message = ex.Message,
                     };
 
+                }
+            }
+        }
+
+        async Task<ServiceStatusResponseModel> IcentreMasterServices.GetCentreCode(string Type)
+        {
+            using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var Centrecode = "";
+                    var Prefix = "";
+                    var data = db.CentreCodeMaster.Where(c => c.type == Type).FirstOrDefault();
+                    if (data!=null)
+                    {
+                        Centrecode = string.Concat(data.Prefix, data.maxId + 1);
+                         data.maxId= data.maxId+1;
+                        db.CentreCodeMaster.Update(data);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                    }
+                    else
+                    {
+                        if(Type=="LIMS")
+                        {
+                            Prefix = "WDPL";
+                        }
+                        else
+                        {
+                            Prefix = "OLC";
+                        }
+                        Centrecode = string.Concat(Prefix,  1);
+                        var data1 = new CentreCodeMaster
+                        {
+                            id=0,
+                            Prefix= Prefix,
+                            maxId=1,
+                            type=Type
+                        };
+                        db.CentreCodeMaster.Add(data1);
+                        await db.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                    }
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = true,
+                        Message = Centrecode
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ServiceStatusResponseModel
+                    {
+                        Success = false,
+                        Message = ex.Message
+                    };
                 }
             }
         }

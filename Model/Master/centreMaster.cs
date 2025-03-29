@@ -109,6 +109,7 @@ namespace iMARSARLIMS.Model.Master
         public string? NablImage { get; set; }
         public string? CertificateImage { get; set; }
         public string? Aggreement { get; set; }
+        public int barcodeType { get; set; }
 
         [ForeignKey(nameof(centreId))]
         public List<empCenterAccess> addEmpCenterAccess { get; set; }

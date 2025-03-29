@@ -1,13 +1,14 @@
-﻿using iMARSARLIMS.Interface;
-using iMARSARLIMS.Interface.Sales;
+﻿using iMARSARLIMS.Interface.Sales;
 using iMARSARLIMS.Model.Sales;
-using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace iMARSARLIMS.Controllers.Sales
+
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class SalesEmployeeTaggingController : BaseController<SalesEmployeeTagging>
     {
         private readonly ContextClass db;

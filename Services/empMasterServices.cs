@@ -5,6 +5,7 @@ using iMARSARLIMS.Request_Model;
 using iMARSARLIMS.Response_Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Ocsp;
 using static QuestPDF.Helpers.Colors;
 
 namespace iMARSARLIMS.Services
@@ -98,6 +99,25 @@ namespace iMARSARLIMS.Services
                                 Message = "User Name Already Exist, Please Enter Unique Name"
                             };
                         }
+                        var count1 = 0;
+                        count1 = db.centreMaster.Where(c => c.mobileNo == empmaster.mobileNo).Count();
+                        if (count1 > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Duplicate Mobile NO"
+                            };
+                        }
+                        count1 = db.empMaster.Where(c => c.mobileNo == empmaster.mobileNo).Count();
+                        if (count1 > 0)
+                        {
+                            return new ServiceStatusResponseModel
+                            {
+                                Success = false,
+                                Message = "Duplicate Mobile NO"
+                            };
+                        }
                         var EmployeeRegData = CreateEmployee(empmaster);
                         var EmployeeData = db.empMaster.Add(EmployeeRegData);
                         await db.SaveChangesAsync();
@@ -109,6 +129,22 @@ namespace iMARSARLIMS.Services
                         var menuAcccessdata = db.RolePageAccess.Where(r => roleids.Contains(r.roleid)).ToList();
                         await saveRolemenuAccess(menuAcccessdata, employeeId);
                         await transaction.CommitAsync();
+
+
+                        var SmsText = _configuration["SMSText:UserPassword"].Replace("{User}", empmaster.fName).Replace("{UserName}", empmaster.userName).Replace("{TempPassword}", empmaster.password);
+                        var apiUrl = _configuration["SMSText:ApiUrl"];
+                        var finalUrl = apiUrl.Replace("{MobileNo}", empmaster.mobileNo);
+                        finalUrl = finalUrl.Replace("{Msg}", SmsText);
+                        finalUrl = finalUrl.Replace("{Sender}", "Wellness Diagnostic");
+                        try
+                        {
+                            var response = await _httpClient.GetAsync(finalUrl);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+
                         var result = db.empMaster.Where(e => e.empId == employeeId).ToList();
                         return new ServiceStatusResponseModel
                         {
@@ -155,6 +191,7 @@ namespace iMARSARLIMS.Services
 
         private empMaster CreateEmployee(empMaster empmaster)
         {
+
             return new empMaster
             {
                 empId = empmaster.empId,
@@ -830,7 +867,7 @@ namespace iMARSARLIMS.Services
                                         CentreId = cm.centreId,
                                         CentreName = cm.companyName,
                                         cm.paymentMode,
-                                        cm.paymentModeId,cm.isPrePrintedBarcode
+                                        cm.paymentModeId,cm.isPrePrintedBarcode,cm.barcodeType
                                     }).ToListAsync();
 
                 return new ServiceStatusResponseModel

@@ -15,6 +15,7 @@ namespace iMARSARLIMS
     public class ContextClass : DbContext
     {
         public DbSet<TestMethodMaster> TestMethodMaster {  get; set; }
+        public DbSet<CentreCodeMaster> CentreCodeMaster { get; set; }
         public DbSet<SupportTicketRemarks> SupportTicketRemarks { get; set; }
         public DbSet<supportTicket> supportTicket { get; set; }
         public DbSet<SupportTicketType> SupportTicketType { get; set; }
@@ -159,7 +160,10 @@ namespace iMARSARLIMS
             modelBuilder.Entity<SupportTicketRemarks>().Property(x => x.id).ValueGeneratedOnAdd();
             
             modelBuilder.Entity<supportTicket>().HasKey(x => x.id);
-            modelBuilder.Entity<supportTicket>().Property(x => x.id).ValueGeneratedOnAdd(); 
+            modelBuilder.Entity<supportTicket>().Property(x => x.id).ValueGeneratedOnAdd(); //CentreCodeMaster
+
+            modelBuilder.Entity<CentreCodeMaster>().HasKey(x => x.id);
+            modelBuilder.Entity<CentreCodeMaster>().Property(x => x.id).ValueGeneratedOnAdd(); //CentreCodeMaster
 
             modelBuilder.Entity<RolePageAccess>().HasKey(x => x.id);
             modelBuilder.Entity<RolePageAccess>().Property(x => x.id).ValueGeneratedOnAdd();
