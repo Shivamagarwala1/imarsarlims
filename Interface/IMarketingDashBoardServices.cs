@@ -10,6 +10,6 @@ namespace iMARSARLIMS.Interface
         Task<ServiceStatusResponseModel> DeactiveDashboardImage(int id, int userid, byte status);
         Task<ServiceStatusResponseModel> UploadDocument(IFormFile Document);
         Task<ServiceStatusResponseModel> GetDashBoardData(string type);
-        Task<ServiceStatusResponseModel> ViewMarketingDashboard();
+        Task<ServiceStatusResponseModel> ViewMarketingDashboard(string type);
     }
 }

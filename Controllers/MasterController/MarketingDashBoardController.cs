@@ -90,11 +90,11 @@ namespace iMARSARLIMS.Controllers.MasterController
 
         [HttpGet("ViewMarketingDashboard")]
 
-        public async Task<ActionResult<ServiceStatusResponseModel>> ViewMarketingDashboard()
+        public async Task<ActionResult<ServiceStatusResponseModel>> ViewMarketingDashboard(string type)
         {
             try
             {
-                var result = await _MarketingDashBoardServices.ViewMarketingDashboard();
+                var result = await _MarketingDashBoardServices.ViewMarketingDashboard(type);
                 return result;
             }
             catch (Exception ex)

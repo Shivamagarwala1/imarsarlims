@@ -51,13 +51,13 @@ namespace iMARSARLIMS.Services
             }
         }
 
-        async Task<ServiceStatusResponseModel> IMarketingDashBoardServices.ViewMarketingDashboard()
+        async Task<ServiceStatusResponseModel> IMarketingDashBoardServices.ViewMarketingDashboard(string type)
         {
             try
             {
                 var data = (from dm in db.MarketingDashBoard
-                                  where dm.isActive == 1 
-                                  select new
+                                  where dm.isActive == 1 &&  dm.type == type
+                                select new
                                   {
                                       dm.id,
                                       dm.type,
